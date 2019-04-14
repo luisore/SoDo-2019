@@ -19,9 +19,10 @@
 #include "util/utils.h"
 
 
+void recibir_conexion();
 
+int FileSystem_fd;
 
-
-
+int  LFS_FD;
 
 #endif /* FILE_SYSTEM_H_ */

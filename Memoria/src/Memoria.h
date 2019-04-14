@@ -18,7 +18,7 @@
 t_log* log_Memoria;
 t_config * file_system;
 
-
+char *dir_actual;
 
 typedef struct{
  	int puerto;
@@ -38,7 +38,7 @@ typedef struct{
 
 int FileSystem_fd;
 
-
+void directorio_actual();
 t_config_fileSystem config_fileSystem;
 
 void cargar_configuracion(char *archivo);

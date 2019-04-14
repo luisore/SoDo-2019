@@ -17,10 +17,20 @@ int main(void) {
 //	log_inicio();
 	imprimir_configuracion();
 
-//	recibir_conexion();
+	recibir_conexion();
 //	log_fin();
+
+
 	puts("algo");
 	return EXIT_SUCCESS;
+}
+
+
+void recibir_conexion(){
+
+	crearSocket(&FileSystem_fd);
+	setearParaEscuchar(&FileSystem_fd, lfs.puertoEscucha);
+	LFS_FD=aceptarConexion(FileSystem_fd);
 }
 //int main(void) {
 //	void iterator(char* value)

@@ -9,7 +9,7 @@
  */
 
 #include "Memoria.h"
-
+#include <dirent.h>
 
 int main(void) {
 
@@ -18,20 +18,23 @@ int main(void) {
 	char *archivo;
 	archivo="src/config_memoria.cfg";
 
+	directorio_actual();
 	if(validarArchivoConfig(archivo)<0)
-	  	return -1;
-
+	  	puts("hola");
+		return -1;
+	puts("0");
 	cargar_configuracion(archivo);
-
+    puts("1");
+	//Me conecto al file system
 	crearSocket(&FileSystem_fd);
 
 	//Se conecta al file system
 	if(conectar(&FileSystem_fd,config_fileSystem.puerto_fs,config_fileSystem.ip_fs)!=0){
-		//	log_error(log_DAM,"Error al conectarse con MDJ");
+		  puts( "error");
 			exit(1);
 	}
 	else{
-		//log_info(log_DAM,"Conexion con MDJ establecida");
+		puts("estableci conexion");
 	}
 
 
@@ -56,3 +59,19 @@ void cargar_configuracion(char *archivo){
 	config_destroy(file_system);
 
 }
+
+void directorio_actual(){
+	char cwd[PATH_MAX];
+	if (getcwd(cwd, sizeof(cwd)) != NULL) {
+
+			dir_actual= malloc(strlen(cwd)+1);
+		    memcpy(dir_actual,cwd,strlen(cwd));
+		    dir_actual[strlen(cwd)]='\0';
+	}
+	else
+	{
+	       perror("getcwd() error");
+	}
+	puts(dir_actual);
+}
+

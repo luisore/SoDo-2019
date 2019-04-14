@@ -22,7 +22,7 @@ t_config * file_system;
 
 typedef struct{
  	int puerto;
- 	int ip_fs;
+ 	char* ip_fs;
  	int puerto_fs;
 	char **ip_seeds;
 	char **puerto_seeds;
@@ -36,7 +36,7 @@ typedef struct{
  }t_config_fileSystem;
 
 
-
+int FileSystem_fd;
 
 
 t_config_fileSystem config_fileSystem;

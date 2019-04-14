@@ -23,6 +23,18 @@ int main(void) {
 
 	cargar_configuracion(archivo);
 
+	crearSocket(&FileSystem_fd);
+
+	//Se conecta al file system
+	if(conectar(&FileSystem_fd,config_fileSystem.puerto_fs,config_fileSystem.ip_fs)!=0){
+		//	log_error(log_DAM,"Error al conectarse con MDJ");
+			exit(1);
+	}
+	else{
+		//log_info(log_DAM,"Conexion con MDJ establecida");
+	}
+
+
 	return EXIT_SUCCESS;
 }
 
@@ -30,7 +42,7 @@ void cargar_configuracion(char *archivo){
 
 	file_system=config_create(archivo);
 	config_fileSystem.puerto=config_get_int_value(file_system,"PUERTO");
-	config_fileSystem.ip_fs=config_get_int_value(file_system,"IP_FS");
+	config_fileSystem.ip_fs=string_duplicate(config_get_string_value(file_system,"IP_FS"));
 	config_fileSystem.puerto_fs=config_get_int_value(file_system,"PUERTO_FS");
 	config_fileSystem.ip_seeds=config_get_array_value(file_system,"IP_SEEDS");
 	config_fileSystem.puerto_seeds=config_get_array_value(file_system,"PUERTO_SEEDS");

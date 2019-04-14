@@ -29,7 +29,7 @@ all: File-System
 File-System: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "File-System" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L../../biblioteca/biblioteca/Debug -o "File-System" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

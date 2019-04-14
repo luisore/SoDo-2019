@@ -1,13 +1,13 @@
-/*
- * parser.c
- *
- *  Created on: 9 abr. 2019
- *      Author: cypher
- */
-
 #include "parser.h"
 
-
+static bool _esSELECT(char* linea);
+static bool _esINSERT(char* linea);
+static bool _esCREATE(char* linea);
+static bool _esDESCRIBE(char* linea);
+static bool _esDROP(char* linea);
+static bool _esJOURNAL(char* linea);
+static bool _esRUN(char* linea);
+static bool _esADD(char* linea);
 
 struct_operacion parsear_linea(char linea[]){
 	struct_operacion operacion;

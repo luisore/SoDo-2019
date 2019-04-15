@@ -21,7 +21,6 @@ int main(void) {
 	directorio_actual();
 	if(validarArchivoConfig(archivo)<0)
 	  	puts("hola");
-		return -1;
 	puts("0");
 	cargar_configuracion(archivo);
     puts("1");

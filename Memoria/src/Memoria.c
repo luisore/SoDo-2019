@@ -36,10 +36,66 @@ int main(void) {
 		puts("estableci conexion");
 	}
 
+	pthread_t hilo_consola;
+	pthread_t hilo_kernel;
+	pthread_t hilo_pool;
+	pthread_t hilo_inotify;
 
+
+	pthread_create(&hilo_consola,NULL,(void*)consola_memoria,NULL);
+	pthread_create(&hilo_pool,NULL,(void*)pool,NULL);
+	pthread_create(&hilo_kernel,NULL,(void*)kernel,NULL);
+	pthread_create(&hilo_inotify,NULL,(void*)inotify,NULL);
+
+	for(;;);
+	pthread_join(hilo_consola,NULL);
+	pthread_detach(hilo_pool);
+	pthread_detach(hilo_kernel);
+	pthread_detach(hilo_inotify);
 	return EXIT_SUCCESS;
 }
 
+
+void inotify(){
+	//Detectar cambios en el archivo configuracion
+}
+
+void consola_memoria(){
+	log_info(log_Memoria,"Consola en linea");
+	char * linea;
+	while(1) {
+		linea = readline("API_MEMORIA>");
+		if(!strncmp(linea, "SELECT ", 7)) {
+			//parsear comando select
+
+		}
+		if(!strncmp(linea, "INSERT ", 7)){
+			//parsear comando insert
+		}
+		if(!strncmp(linea, "CREATE ", 7)){
+			//parsear comando create
+		}
+		if (!strncmp(linea, "DROP ", 5)){
+			//parsear comando drop
+		}
+		if (!strncmp(linea, "DESCRIBE ", 9)){
+			//parsear comando describe
+		}
+		if (!strncmp(linea, "JOURNAL ", 8)){
+			//parsear comando journal
+		}
+		if (!strncmp(linea, "EXIT", 4)){
+			break;
+		}
+	}
+}
+void kernel(){
+	//Conexion del kernel a memoria
+}
+void pool(){
+ //logica para lo de grooping
+
+}
 void cargar_configuracion(char *archivo){
 
 	file_system=config_create(archivo);

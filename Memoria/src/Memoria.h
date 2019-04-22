@@ -14,11 +14,19 @@
 #include <commons/collections/list.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <pthread.h>
 
 t_log* log_Memoria;
 t_config * file_system;
 
 char *dir_actual;
+
+void consola_memoria();
+void kernel();
+void pool();
+void inotify();
 
 typedef struct{
  	int puerto;

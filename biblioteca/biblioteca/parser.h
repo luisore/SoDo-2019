@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <commons/string.h> //Commons string
+#include <commons/string.h>
+#include <commons/collections/list.h>
 
 typedef enum {
 	API_SELECT = 1,
@@ -16,6 +17,7 @@ typedef enum {
 	API_JOURNAL = 6,
 	API_RUN = 7,
 	API_ADD = 8,
+	API_METRICS = 9,
 } api_operacion;
 
 
@@ -27,10 +29,10 @@ typedef struct {
 
 
 
-struct_operacion parsear_linea(char[]);
+struct_operacion* parsear_linea(char[]);
 
 //otras
-void liberarListaDeStrings(char** parametros); //sirve para liberar la memoria de una lista de strings con todas sus boludeces
+void free_char_x2(char** parametros); //sirve para liberar la memoria de una lista de strings con todas sus boludeces
 
 
 

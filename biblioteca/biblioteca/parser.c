@@ -10,7 +10,17 @@ static bool _esRUN(char* linea);
 static bool _esADD(char* linea);
 static bool _esMETRICS(char* linea);
 
-
+/*struct_operacion* operacion = parsear_linea("INSERT TABLA1 3 “Mi nombre es Lissandra” 1548421507");
+ *
+ * RESULTADO:
+ * operacion->nombre_operacion = API INSERT;
+ * (operacion->parametros)[0] = "TABLA1";
+ * (operacion->parametros)[1] = "3";
+ * (operacion->parametros)[2] = "Mi nombre es Lissandra";
+ * (operacion->parametros)[3] = "154821507";
+ * (operacion->parametros)[4] = NULL;
+ *
+ */
 struct_operacion* parsear_linea(char linea[]){
 	struct_operacion* operacion = (struct_operacion *)malloc(sizeof(struct_operacion));
 

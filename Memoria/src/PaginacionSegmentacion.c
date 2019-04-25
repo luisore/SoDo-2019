@@ -13,8 +13,55 @@ char *crearMemoria(int cantidadBytes){
 	return memoria;
 }
 
+t_list * crearTablaDePaginas(){
+	return list_create();
+}
+
+t_list * crearTablaDeSegmentos(){
+	return list_create();
+}
+
+int listaLFSvacia(t_list *listaLFS){
+	return list_is_empty(listaLFS);
+}
+
+void liberarPaginacionSementacion(t_list *tablaSegmentos){
+	int cantidadSegmentos=list_size(tablaSegmentos);
+	segmentacion *segmento;
+	int cantPaginas;
+	for(int i=0;i<cantidadSegmentos;i++){
+		segmento =list_get(tablaSegmentos,i);
+		cantPaginas=list_size(segmento->direccionTablaDePaginas);
+		for(int k=0;k<cantPaginas;k++){
+			list_remove(segmento->direccionTablaDePaginas,k);
+		}
+		list_clean(tablaSegmentos);
+	}
+}
+
+void agregar_tabla(t_list *tablaPaginas,paginacion *unaPagina){
+	list_add(tablaPaginas,&unaPagina);
+}
+
+void crear_TablaDePaginaParaSegmento(segmentacion *segmento){
+	segmento->direccionTablaDePaginas=crearTablaDePaginas();
+}
 void liberarMemoria(char **memoria){
 	free(memoria);
+}
+
+void limpiarBitMap(t_bitarray *bitmap){
+	int cantDepaginas=cantidadDePaginas(bitmap);
+	for (int i=0;i<cantDepaginas;i++){
+		bitarray_clean_bit(bitmap,i);
+	}
+}
+void destruirBitmap(t_bitarray *bitmap){
+	bitarray_destroy(bitmap);
+}
+
+int cantidadDePaginas(t_bitarray *bitmap){
+	return	bitarray_get_max_bit(bitmap);
 }
 
 //Para crear una X cantidad de paginas en la memoria

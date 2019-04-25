@@ -10,5 +10,5 @@
 
 #include <time.h>
 
-long funcionEpoc();
+unsigned long funcionEpoc();
 #endif /* FUNCIONESAUXILIARES_H_ */

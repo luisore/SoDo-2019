@@ -46,6 +46,35 @@ void agregar_tabla(t_list *tablaPaginas,paginacion *unaPagina){
 void crear_TablaDePaginaParaSegmento(segmentacion *segmento){
 	segmento->direccionTablaDePaginas=crearTablaDePaginas();
 }
+
+registroTabla *buscarPagina(t_list *tablaPaginas,uint16_t keyDeBusqueda,int *numeroDeNodo,int tam,char *nombreTabla, void *memoria){
+	int cantPaginasDeLaTabla=list_size(tablaPaginas);
+	paginacion *paginaDelNodo;
+	registroTabla *registroDeLaTabla;
+	registroDeLaTabla = malloc(sizeof(registroTabla));
+	registroDeLaTabla->nombreTabla = nombreTabla;
+	registroDeLaTabla->value = malloc(sizeof(char)*tam);
+	int noEncontro = -1;
+	numeroDeNodo=&noEncontro;
+	paginaDelNodo=malloc(sizeof(paginacion));
+	int tamanioDePagina;
+	tamanioDePagina= tam + sizeof(unsigned long) + sizeof(uint16_t);
+	char *value;
+	uint16_t key;
+	for(int i=0;i<cantPaginasDeLaTabla;i++){
+		int dirkey=i*(tamanioDePagina)+ sizeof(unsigned long);
+		memcpy(memoria+dirkey,&key,sizeof(uint16_t));
+		if(key == keyDeBusqueda){
+			registroDeLaTabla->key=key;
+			numeroDeNodo = &i;
+			memcpy(memoria+i*(tamanioDePagina),&registroDeLaTabla->epoc,sizeof(unsigned long));
+			memcpy(memoria+i*(tamanioDePagina)+sizeof(unsigned long)+sizeof(uint16_t),&registroDeLaTabla->value,tam);
+			break;
+		}
+	}
+	return registroDeLaTabla;
+}
+
 void liberarMemoria(char **memoria){
 	free(memoria);
 }

@@ -8,6 +8,9 @@
 #ifndef PAGINACIONSEGMENTACION_H_
 #define PAGINACIONSEGMENTACION_H_
 
+
+#include <stdint.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/bitarray.h>
@@ -30,6 +33,14 @@ typedef struct {
 	t_list * direccionTablaDePaginas;
 } segmentacion;
 
+typedef struct{
+	char* nombreTabla;
+	char* value;
+	uint16_t key;
+	unsigned long epoc;
+} registroTabla;
+
+registroTabla *buscarPagina(t_list *tablaPaginas,uint16_t keyDeBusqueda,int *numeroDeNodo,int tam,char *nombreTabla,void *memoria);
 void destruirBitmap(t_bitarray *bitmap);
 void limpiarBitMap(t_bitarray *bitmap);
 void liberarPaginacionSementacion(t_list *tablaSegmentos);

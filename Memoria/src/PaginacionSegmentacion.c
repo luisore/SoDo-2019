@@ -35,7 +35,8 @@ void liberarPaginacionSementacion(t_list *tablaSegmentos){
 		for(int k=0;k<cantPaginas;k++){
 			list_remove(segmento->direccionTablaDePaginas,k);
 		}
-		list_clean(tablaSegmentos);
+		list_clean(segmento->direccionTablaDePaginas);
+		list_remove(tablaSegmentos,i);
 	}
 }
 

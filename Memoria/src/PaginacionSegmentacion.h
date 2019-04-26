@@ -24,7 +24,7 @@
 
 typedef struct {
 	int numeroPagina;
-	char* direccionFisica;
+	int direccionFisica;
 } paginacion;
 
 

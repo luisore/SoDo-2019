@@ -30,6 +30,7 @@ typedef struct {
 
 typedef struct {
 	char* nombreTabla;
+	int  tamanioNombreTabla;
 	t_list * direccionTablaDePaginas;
 } segmentacion;
 
@@ -40,7 +41,10 @@ typedef struct{
 	unsigned long epoc;
 } registroTabla;
 
+void crear_NodoDePaginaYagregaTabla(int numeroPagina,int tamanioValue,t_list *tablaPaginas);
+void agregar_tabla(t_list *tablaPaginas,paginacion *unaPagina);
 registroTabla *buscarPagina(t_list *tablaPaginas,uint16_t keyDeBusqueda,int *numeroDeNodo,int tam,char *nombreTabla,void *memoria);
+segmentacion *nuevoSegmento(char *nombreTabla,int tamanioDeNombreTabla,t_list *tablaDeSegmentos );
 void destruirBitmap(t_bitarray *bitmap);
 void limpiarBitMap(t_bitarray *bitmap);
 void liberarPaginacionSementacion(t_list *tablaSegmentos);

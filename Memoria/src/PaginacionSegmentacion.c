@@ -40,6 +40,24 @@ void liberarPaginacionSementacion(t_list *tablaSegmentos){
 	}
 }
 
+void crear_NodoDePaginaYagregaTabla(int numeroPagina,int tamanioValue,t_list *tablaPaginas){
+	paginacion *unaPagina;
+	unaPagina = malloc(sizeof(paginacion));
+	unaPagina->numeroPagina = numeroPagina;
+	unaPagina->direccionFisica = numeroPagina *(tamanioValue+sizeof(uint16_t)+sizeof(unsigned long));
+	agregar_tabla(tablaPaginas,unaPagina);
+}
+
+segmentacion *nuevoSegmento(char *nombreTabla,int tamanioDeNombreTabla,t_list *tablaDeSegmentos ){
+	segmentacion *nuevoSegmento;
+	nuevoSegmento = malloc (sizeof (segmentacion));
+	nuevoSegmento->nombreTabla = malloc(sizeof(char)*tamanioDeNombreTabla);
+	memcpy(nombreTabla,nuevoSegmento->nombreTabla,tamanioDeNombreTabla);
+	nuevoSegmento->tamanioNombreTabla =  tamanioDeNombreTabla;
+	nuevoSegmento->direccionTablaDePaginas  = crearTablaDePaginas();
+	return  nuevoSegmento;
+}
+
 void agregar_tabla(t_list *tablaPaginas,paginacion *unaPagina){
 	list_add(tablaPaginas,&unaPagina);
 }

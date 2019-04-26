@@ -40,6 +40,38 @@ void liberarPaginacionSementacion(t_list *tablaSegmentos){
 	}
 }
 
+int existeTablaEnTablaDeSegmento(char *nombreTabla,int tamanioNombreTabla,t_list *tablaDeSegmentos){
+	int encontrado = -1;
+	int cantidadSegmentos=list_size(tablaDeSegmentos);
+	segmentacion *segmento;
+	for(int nodo=0;nodo <cantidadSegmentos ;nodo ++){
+		segmento =list_get(tablaDeSegmentos,nodo);
+		if(!strncmp(segmento->nombreTabla,nombreTabla, tamanioNombreTabla)){
+			return nodo;
+		}
+	}
+	return encontrado;
+}
+
+int agregarDatOaMemoria(char *nombreTabla,int tamanioNombreTabla,int tamanioValue,t_list *tablaDeSegmentos,void *memoria){
+	int hayPaginaLibre = paginaLibre();
+	//no hay espacio en memoria
+	//Falta buscar en algoritmo de reemplazo
+	if (hayPaginaLibre <0){
+		return -1;
+	}
+	segmentacion *unNuevoSegmento;
+	int numeroNodoEnTablaDeSegmentos =existeTablaEnTablaDeSegmento(nombreTabla,tamanioNombreTabla,tablaDeSegmentos);
+	if(numeroNodoEnTablaDeSegmentos>=0){
+		unNuevoSegmento=list_get(tablaDeSegmentos,numeroNodoEnTablaDeSegmentos);
+	}
+	else{
+		unNuevoSegmento=nuevoSegmento(nombreTabla,tamanioNombreTabla,tablaDeSegmentos );
+	}
+	crear_NodoDePaginaYagregaTabla(hayPaginaLibre,tamanioValue,unNuevoSegmento->direccionTablaDePaginas);
+	return 0;
+}
+
 void crear_NodoDePaginaYagregaTabla(int numeroPagina,int tamanioValue,t_list *tablaPaginas){
 	paginacion *unaPagina;
 	unaPagina = malloc(sizeof(paginacion));
@@ -55,6 +87,7 @@ segmentacion *nuevoSegmento(char *nombreTabla,int tamanioDeNombreTabla,t_list *t
 	memcpy(nombreTabla,nuevoSegmento->nombreTabla,tamanioDeNombreTabla);
 	nuevoSegmento->tamanioNombreTabla =  tamanioDeNombreTabla;
 	nuevoSegmento->direccionTablaDePaginas  = crearTablaDePaginas();
+	list_add(tablaDeSegmentos,&nuevoSegmento);
 	return  nuevoSegmento;
 }
 
@@ -143,11 +176,15 @@ t_bitarray *crearBitmap(int cantidadDepagina,char *direccionArchivoBitmap){
 
 }
 
+int hayPaginaLibre(){
+	return paginaLibre() >=0;
+}
+
 //Buscar Pagina libre
 int paginaLibre(){
 	size_t	cantidadDebits= bitarray_get_max_bit (bitarray);
 	int i;
-	int libre=0;
+	int libre=-1;
 	for (i=0;i<cantidadDebits;i++){
 		if(bitarray_test_bit(bitarray,i)==0){
 			libre=i;

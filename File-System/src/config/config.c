@@ -16,7 +16,7 @@ void config_cargar(const char* dir_config){
 	t_config*configuracion=config_create(dir_config);
 		 	if(configuracion==NULL){
 		 		perror("No se encuentra archivo LFS.CONFIG \n");
-//		 		log_error(mdj_log, "No se encuentra archivo MDJ.cfg \n");
+//		 		log_error(lfs_log, "No se encuentra archivo LFS.config \n");
 		 	}
 		 	else{
 		 			lfs.puertoEscucha=config_get_int_value(configuracion,"PUERTO_ESCUCHA");

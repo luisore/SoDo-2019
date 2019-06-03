@@ -1,0 +1,84 @@
+[INFO] 18:52:35:804 LISSANDRA - LFS/(15123:15123): se cargo LFS.log
+[INFO] 18:54:12:175 LISSANDRA - LFS/(15443:15443): se cargo LFS.log
+[INFO] 14:03:59:957 LISSANDRA - LFS/(12288:12288): se cargo LFS.log
+[INFO] 14:43:20:110 LISSANDRA - LFS/(12848:12848): se cargo LFS.log
+[INFO] 14:44:35:62 LISSANDRA - LFS/(12889:12889): se cargo LFS.log
+[INFO] 14:45:30:983 LISSANDRA - LFS/(12982:12982): se cargo LFS.log
+[INFO] 14:48:57:238 LISSANDRA - LFS/(13059:13059): se cargo LFS.log
+[INFO] 14:52:28:334 LISSANDRA - LFS/(13226:13226): se cargo LFS.log
+[ERROR] 14:52:28:334 LISSANDRA - LFS/(13226:13226): No se pudo crear directorio para tabla  tablaEjemplo
+[INFO] 14:57:33:261 LISSANDRA - LFS/(13475:13475): se cargo LFS.log
+[ERROR] 14:57:33:261 LISSANDRA - LFS/(13475:13475): No se pudo crear directorio para tabla  tablaEjemplo
+[INFO] 14:58:00:152 LISSANDRA - LFS/(13506:13506): se cargo LFS.log
+[ERROR] 14:58:00:152 LISSANDRA - LFS/(13506:13506): No se pudo crear directorio para tabla  tablaEjemplo
+[INFO] 14:58:44:936 LISSANDRA - LFS/(13565:13565): se cargo LFS.log
+[ERROR] 14:58:44:936 LISSANDRA - LFS/(13565:13565): No se pudo crear directorio para tabla  "tablaEjemplo" 
+
+[INFO] 15:01:08:776 LISSANDRA - LFS/(13638:13638): se cargo LFS.log 
+
+[ERROR] 15:01:08:776 LISSANDRA - LFS/(13638:13638): No se pudo crear directorio para tabla  "tablaEjemplo" 
+
+[INFO] 15:02:02:878 LISSANDRA - LFS/(13672:13672): se cargo LFS.log 
+
+[ERROR] 15:02:02:878 LISSANDRA - LFS/(13672:13672): No se pudo crear directorio para tabla  "tablaEjemplo" 
+
+[INFO] 15:05:38:469 LISSANDRA - LFS/(13729:13729): se cargo LFS.log 
+
+[INFO] 15:58:20:155 LISSANDRA - LFS/(15253:15253): se cargo LFS.log 
+
+[ERROR] 15:58:20:155 LISSANDRA - LFS/(15253:15253): No se pudo crear directorio para tabla  "tablaEjemplo" 
+
+[INFO] 16:01:03:416 LISSANDRA - LFS/(15330:15330): se cargo LFS.log 
+
+[ERROR] 16:01:03:416 LISSANDRA - LFS/(15330:15330): No se pudo crear directorio para tabla  "tablaEjemplo" 
+
+[INFO] 16:01:22:325 LISSANDRA - LFS/(15343:15343): se cargo LFS.log 
+
+[ERROR] 16:01:22:325 LISSANDRA - LFS/(15343:15343): No se pudo crear directorio para tabla  "tablaEjemplo" 
+
+[INFO] 17:03:27:825 LISSANDRA - LFS/(16731:16731): se cargo LFS.log 
+
+[ERROR] 17:03:27:834 LISSANDRA - LFS/(16731:16731): No se pudo crear directorio para tabla  "tablaEjemplo" 
+
+[INFO] 17:29:59:960 LISSANDRA - LFS/(18817:18817): se cargo LFS.log 
+
+[INFO] 17:31:59:434 LISSANDRA - LFS/(18922:18922): se cargo LFS.log 
+
+[INFO] 17:33:19:236 LISSANDRA - LFS/(18983:18983): se cargo LFS.log 
+
+[INFO] 17:38:20:745 LISSANDRA - LFS/(19116:19116): se cargo LFS.log 
+
+[INFO] 17:38:46:642 LISSANDRA - LFS/(19176:19176): se cargo LFS.log 
+
+[ERROR] 17:38:46:643 LISSANDRA - LFS/(19176:19176): No se pudo crear directorio para tabla  "EEEE" 
+
+[INFO] 17:39:07:299 LISSANDRA - LFS/(19205:19205): se cargo LFS.log 
+
+[INFO] 17:39:35:767 LISSANDRA - LFS/(19268:19268): se cargo LFS.log 
+
+[INFO] 17:39:47:6 LISSANDRA - LFS/(19314:19314): se cargo LFS.log 
+
+[ERROR] 17:39:47:6 LISSANDRA - LFS/(19314:19314): No se pudo crear directorio para tabla  "EEEE" 
+
+[INFO] 17:51:25:144 LISSANDRA - LFS/(20003:20003): se cargo LFS.log 
+
+[INFO] 18:36:17:416 LISSANDRA - LFS/(21426:21426): se cargo LFS.log 
+
+[INFO] 18:40:03:628 LISSANDRA - LFS/(21583:21583): se cargo LFS.log 
+
+[INFO] 23:31:49:184 LISSANDRA - LFS/(30455:30455): se cargo LFS.log 
+
+[INFO] 23:34:59:113 LISSANDRA - LFS/(30602:30602): se cargo LFS.log 
+
+[INFO] 23:35:51:576 LISSANDRA - LFS/(30669:30669): se cargo LFS.log 
+
+[INFO] 23:36:56:877 LISSANDRA - LFS/(30743:30743): se cargo LFS.log 
+
+[INFO] 23:50:23:878 LISSANDRA - LFS/(31737:31737): se cargo LFS.log 
+
+[INFO] 23:51:41:158 LISSANDRA - LFS/(31795:31795): se cargo LFS.log 
+
+[INFO] 23:52:23:745 LISSANDRA - LFS/(31852:31852): se cargo LFS.log 
+
+[INFO] 23:54:23:814 LISSANDRA - LFS/(31947:31947): se cargo LFS.log 
+

@@ -10,20 +10,44 @@
 
 #include "File-System.h"
 #include "config/config.h"
-#include "log/log.h"
+
+#include <commons/string.h>
 int main(void) {
-	probando();
+	puts("... INICIA LFS ...");
+
+	//inicio log
+	logger = log_create("LFS.log", "LISSANDRA - LFS", true, LOG_LEVEL_TRACE);
+
 	config_cargar("LFS.config");
-//	log_inicio();
+	log_info(logger,"se cargo LFS.log \n");
+
+
+
 	imprimir_configuracion();
 
-	recibir_conexion();
-//	log_fin();
+	create("unaTablaEtc2","SC",16,7000);//ok
+
+//	recibir_conexion();//recibe conexion de memoria
+	//insert_1("EEEE",1,"Holassss");//falta
 
 
-	puts("algo");
+	log_destroy(logger);
+
+
+	puts("... FIN LFS ...");
 	return EXIT_SUCCESS;
 }
+//int main() {//ok
+//	puts("comenzando");
+////	crearTabla("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/TablaDeEjemplo");
+////	crearMetadata_v2("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/TablaDeEjemplo/metadata.met","C",4,1000);
+////	crearMetadata_v2("unaMetadata2.met","C",4,1000);
+//	crearTabla("tablaEjemplo");
+//	mostrarMetadata("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/TablaDeEjemplo/metadata.met");
+//	puts("fin");
+//	return EXIT_SUCCESS;
+//}
+
 
 
 void recibir_conexion(){

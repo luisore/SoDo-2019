@@ -31,10 +31,16 @@ void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, 
 
 void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion ){
 	puts("crear tabla");
-//	if(yaExisteTabla(nombre_de_tabla))return;sigue rompiendo en ya existe tabla , jorge tiene pendiente resolver esto
-	crearTabla(nombre_de_tabla);
-	crearMetadata_v2(nombre_de_tabla,tipo_consistencia,numero_de_particiones,tiempo_de_compactacion);
-	crearParticiones(nombre_de_tabla,numero_de_particiones);
+	if(yaExisteTabla(nombre_de_tabla)){
+
+		puts("tabla existente");
+	}
+	else{
+		crearTabla(nombre_de_tabla);
+		crearMetadata_v2(nombre_de_tabla,tipo_consistencia,numero_de_particiones,tiempo_de_compactacion);
+	    crearParticiones(nombre_de_tabla,numero_de_particiones);
+	}
+
 	puts("fin crear tabla");
 }
 void crearTabla(const char* nombreDeTabla){//ok
@@ -156,16 +162,17 @@ void validarTipoConsitenciaExistente(const char* tipoConsistencia){
 }
 //
 bool yaExisteCarpeta(const char* path_tabla){
-//	bool existe=false;
+	bool existe=false;
 	DIR *directorio = opendir(path_tabla);
-	if(directorio == NULL){
-//		return EXITSUCCESS;
+	if(directorio != NULL){
+
+		existe = true;
 		closedir(directorio);
 		return true;
 //	}
 	closedir(directorio);
-//	return EXITFAILURE;
-	return false;
+	existe = false;
+	return existe;
 }
 ////--------------------------VALIDACIONES FIN
 //

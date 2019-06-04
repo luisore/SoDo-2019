@@ -25,7 +25,7 @@ int main(void) {
 
 	imprimir_configuracion();
 
-	create("unaTablaEtc2","SC",16,7000);//ok
+	create("unaTablalalalEtc2","SC",16,7000);//ok
 
 //	recibir_conexion();//recibe conexion de memoria
 	//insert_1("EEEE",1,"Holassss");//falta

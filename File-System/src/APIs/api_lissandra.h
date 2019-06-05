@@ -32,6 +32,9 @@ void describe1();
 void describe2(const char* nombre_de_tabla);
 void drop(const char* nombre_de_tabla);
 
+//misma funcion de antes pero que solo reciben strings
+void lfs_create(const char* nombre_de_tabla,const char* tipo_consistencia,const char*  numero_de_particiones,const char* tiempo_de_compactacion );
+
 
 bool yaExisteTabla(const char* nombre_de_tabla);
 

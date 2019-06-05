@@ -28,7 +28,6 @@ void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value){
 void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, const char * timestamp){
 	return ;
 }
-
 void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion ){
 	puts("crear tabla");
 	if(yaExisteTabla(nombre_de_tabla)){
@@ -43,6 +42,11 @@ void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned i
 
 	puts("fin crear tabla");
 }
+
+void lfs_create(const char* nombre_de_tabla,const char* tipo_consistencia,const char*  numero_de_particiones,const char* tiempo_de_compactacion ){
+	create(nombre_de_tabla,tipo_consistencia,atoi(numero_de_particiones),atoi(tiempo_de_compactacion));
+}
+
 void crearTabla(const char* nombreDeTabla){//ok
 
 	char* aux_path_de_la_tabla = malloc(strlen(nombreDeTabla)+strlen("Tables/")+strlen(lfs.puntoDeMontaje));

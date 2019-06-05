@@ -25,10 +25,10 @@ int main(void) {
 
 	imprimir_configuracion();
 
-	create("unaTablalalalEtc2","SC",16,7000);//ok
+	lfs_consola();//por el momento funciona con el CREATE
 
-//	recibir_conexion();//recibe conexion de memoria
-	//insert_1("EEEE",1,"Holassss");//falta
+//	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
+//	system("")
 
 
 	log_destroy(logger);
@@ -37,19 +37,51 @@ int main(void) {
 	puts("... FIN LFS ...");
 	return EXIT_SUCCESS;
 }
-//int main() {//ok
-//	puts("comenzando");
-////	crearTabla("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/TablaDeEjemplo");
-////	crearMetadata_v2("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/TablaDeEjemplo/metadata.met","C",4,1000);
-////	crearMetadata_v2("unaMetadata2.met","C",4,1000);
-//	crearTabla("tablaEjemplo");
-//	mostrarMetadata("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/TablaDeEjemplo/metadata.met");
-//	puts("fin");
-//	return EXIT_SUCCESS;
-//}
 
 
+void lfs_consola(){
+	while(1){
+		char* linea = readline("LFS@ consola -> ");
 
+		struct_operacion* parametros_lql_leidos = parsear_linea(linea);
+		ejecutar_linea_lql(parametros_lql_leidos);
+//
+		printf(" se leyo la  la sentencia \"%s\" LQL\n", linea);
+		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
+//		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
+//		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
+//		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
+
+//		struct_operacion_destroy(parametros_lql_leidos);
+		free(linea);
+	}
+}
+void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
+	switch (parametros_de_linea_lql->nombre_operacion) {
+		case API_CREATE:
+			lfs_create((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);
+			break;
+		case API_INSERT:
+			//insert();
+			break;
+		case API_SELECT:
+//			select1();
+			break;
+		case API_DESCRIBE:
+//			describe1();
+//			describe2();
+			break;
+		case API_DROP:
+//			drop();
+			break;
+		default:
+			log_error(logger,"linea LQL leida erronea \n");
+			break;
+	}
+}
+void struct_operacion_destroy(struct_operacion* unaLineaLql){
+	free_char_x2(unaLineaLql->parametros);
+}
 void recibir_conexion(){
 
 	crearSocket(&FileSystem_fd);

@@ -27,6 +27,7 @@
 #include <commons/txt.h>
 #include <commons/string.h>
 #include <math.h>
+#include <string.h>
 
 typedef struct {
 	int cantParticionesTemporales;
@@ -42,6 +43,12 @@ typedef struct {
 }RegistroLinea;
 //Insert* memtable_de_inserts;
 t_list * memtable;//lista del tipo Insert , el select chequea esto tambien
+
+
+typedef struct {
+	int SIZE;
+	char** BLOCK;
+}Metadata_BIN;
 
 //char* aux_tabla_para_la_memtable;
 
@@ -93,5 +100,10 @@ int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_partici
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);
 char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal);
 Insert* buscarTablaEnLaMemtable(const char * tabla);
+
+int GetPartition(unsigned int key, unsigned totalPartitions);
+char* GetValueMax(const char* pathTable, unsigned int key, unsigned int partitionKey);
+int* GetBloquesFromKey(const char* pathTable, unsigned int partitionKey);
+void FillRecord(RegistroLinea* record, char* line);
 
 #endif /* APIS_API_LISSANDRA_H_ */

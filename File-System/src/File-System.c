@@ -23,12 +23,16 @@ int main(void) {
 	config_cargar("LFS.config");
 	log_info(logger,"se cargo LFS.log \n");
 
-	memtable=list_create();
+	//memtable=list_create();
+
 
 	imprimir_configuracion();
 
-	pthread_create(&consola,NULL,lfs_consola,NULL);
-	pthread_join(consola,NULL);
+	//create("tablaselect", "SC", 3, 300);
+	select1("jorge", 3);
+
+//	pthread_create(&consola,NULL,lfs_consola,NULL);
+//	pthread_join(consola,NULL);
 //	lfs_consola();//por el momento funciona con el CREATE
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");

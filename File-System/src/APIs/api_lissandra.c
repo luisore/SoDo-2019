@@ -7,15 +7,120 @@
 #include "api_lissandra.h"
 
 
-void select1(const char * nombre_de_tabla, unsigned int key){
-//	if yaExisteTabla(nombre_de_tabla);
-//	Metadata_Tabla* unaMetadata=obtenerMetadata(nombre_de_tabla);
+void select1(const char* nombre_de_tabla, unsigned int key){
+	if (!yaExisteTabla(nombre_de_tabla)){
+
+		log_error(logger, "No existe tabla %s", nombre_de_tabla);
+		printf("No existe tabla %s", nombre_de_tabla);
+	}
+	else{
+
+		Metadata_Tabla* unMetadata = malloc(sizeof(Metadata_Tabla));
+		unMetadata = obtenerMetadata(nombre_de_tabla);
+		char* pathTable = obtenerPathDeTabla(nombre_de_tabla);
+		int partitionKey = GetPartition(key, unMetadata->PARTITIONS);
+
+		char* valueMax = GetValueMax(pathTable, key, partitionKey);
+		printf("valor maximo: %s", valueMax);
+		free(pathTable);
+		free(unMetadata);
+		printf("total particiones: %i", partitionKey);
+	}
+
 //	if(hayDatosParaDumpear()){
 //
 //	}
 	return ;
 
 }
+
+
+
+int GetPartition(unsigned int key, unsigned totalPartitions){
+
+	return key % totalPartitions;
+}
+
+char* GetValueMax(const char* pathTable, unsigned int key, unsigned int partitionKey){
+
+	char* valueMax = malloc(sizeof(lfs.tamanioValue));
+
+	unsigned long timeStampMax = 0;
+	int enteros[] = {0,37};//char**
+	int* bloques = GetBloquesFromKey(pathTable, partitionKey); //aca obtengo los bloques del .partition
+	int length = sizeof(enteros) / sizeof(int);
+	for(int i = 0; i < length; i++){
+
+		char* nameBlock = string_itoa(enteros[i]);
+		char* pathBloque = malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques.bin")+strlen(nameBlock));
+		sprintf(pathBloque,"%s/Bloques/%s.bin",lfs.puntoDeMontaje, nameBlock);
+
+		FILE *file = fopen(pathBloque, "r");
+		if(file != NULL){
+
+			char* line = malloc(sizeof(1000));
+			while(fgets(line, sizeof line, file) != NULL){
+
+				printf("linea: %s\n", line);
+				RegistroLinea* record = malloc(sizeof(RegistroLinea));
+				FillRecord(record, line);
+
+				puts("fillrecord");
+				if(key == record->key && record->timestamp > timeStampMax){
+
+					timeStampMax = record->timestamp;
+					valueMax = record->value;
+					puts("MMMM");
+				}
+				free(record);
+				puts("record free");
+			}
+			fclose(file);
+			puts("fclosevfile");
+		}
+
+		free(pathBloque);
+
+
+	}
+	return valueMax;
+}
+
+void FillRecord(RegistroLinea* record, char* line){
+
+	char** recordList = string_split(line, ";");
+	record->timestamp = atol(recordList[0]);
+	record->key = atoi(recordList[1]);
+	record->value = recordList[2];
+}
+
+int* GetBloquesFromKey(const char* pathTable, unsigned int partitionKey){
+
+	Metadata_BIN* unMetadata = malloc(sizeof(Metadata_BIN));
+	char* namePartition = string_itoa(partitionKey);
+	char* pathPartition = malloc(strlen(pathTable)+strlen("/.partition")+strlen(namePartition)+1);
+	sprintf(pathPartition,"%s/%s.partition",pathTable, namePartition);
+
+	t_config* unConfig=config_create(pathPartition);
+	if(unConfig == NULL){
+
+		printf("No Existe el archivo binario en ruta \"%s\" \n",pathTable);
+	}
+	else{
+
+		puts("lalal");
+		unMetadata->SIZE = config_get_int_value(unConfig,"SIZE");
+		unMetadata->BLOCK = config_get_array_value(unConfig,"BLOCKS");
+	}
+
+	free(pathPartition);
+	config_destroy(unConfig);
+	int bloques[] = {9,37};
+	return bloques;
+	//return unMetadata->BLOCK;
+}
+
+
 	//el timestamp es opcional
 void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value){
 //	verificar_existencia_de_tabla();

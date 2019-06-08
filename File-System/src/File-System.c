@@ -10,8 +10,10 @@
 
 #include "File-System.h"
 #include "config/config.h"
+#include <pthread.h>
 
-#include <commons/string.h>
+pthread_t consola,dump;//,compactador;
+
 int main(void) {
 	puts("... INICIA LFS ...");
 
@@ -21,38 +23,44 @@ int main(void) {
 	config_cargar("LFS.config");
 	log_info(logger,"se cargo LFS.log \n");
 
-
+	memtable=list_create();
 
 	imprimir_configuracion();
 
-	lfs_consola();//por el momento funciona con el CREATE
+	pthread_create(&consola,NULL,lfs_consola,NULL);
+	pthread_join(consola,NULL);
+//	lfs_consola();//por el momento funciona con el CREATE
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
-//	system("")
+
+
 
 
 	log_destroy(logger);
-
-
+	list_destroy(memtable);
 	puts("... FIN LFS ...");
 	return EXIT_SUCCESS;
 }
-
+//Persona* buscarPersona(t_list* lista, char* nombre){//para probar
+//	bool buscarLaDePersona1(Persona* p){
+//			return strcmp(p->nombre,"Jhon")==0;
+//		}
+//	Persona* encontrada=list_find(lista,buscarLaDePersona1);
+//	return encontrada;
+//}
 
 void lfs_consola(){
 	while(1){
-		char* linea = readline("LFS@ consola -> ");
+		char* linea = readline("LFS@_consola -> ");
 
 		struct_operacion* parametros_lql_leidos = parsear_linea(linea);
 		ejecutar_linea_lql(parametros_lql_leidos);
 //
 		printf(" se leyo la  la sentencia \"%s\" LQL\n", linea);
-		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
+//		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
 //		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
 //		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
 //		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
-
-//		struct_operacion_destroy(parametros_lql_leidos);
 		free(linea);
 	}
 }
@@ -66,6 +74,7 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 			break;
 		case API_SELECT:
 //			select1();
+//			lfs_select()
 			break;
 		case API_DESCRIBE:
 //			describe1();
@@ -79,9 +88,9 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 			break;
 	}
 }
-void struct_operacion_destroy(struct_operacion* unaLineaLql){
-	free_char_x2(unaLineaLql->parametros);
-}
+//void struct_operacion_destroy(struct_operacion* unaLineaLql){
+//	free_char_x2(unaLineaLql->parametros);
+//}
 void recibir_conexion(){
 
 	crearSocket(&FileSystem_fd);

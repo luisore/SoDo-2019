@@ -6,8 +6,6 @@
  */
 #include "api_lissandra.h"
 
-#include <commons/config.h>
-#include <commons/txt.h>
 
 void select1(const char * nombre_de_tabla, unsigned int key){
 //	if yaExisteTabla(nombre_de_tabla);
@@ -25,8 +23,146 @@ void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value){
 //
 //	return ;
 }
-void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, const char * timestamp){
-	return ;
+void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, unsigned long timestamp){
+	if(!yaExisteTabla(nombre_de_tabla)){
+		fprintf(stderr,"no exixte la tabla \"%s\" \n",nombre_de_tabla);
+	}
+	else {
+		if(hay_datos_a_dumpear())dumpear();//aca en lugar de if , se reemplaza con un semaforo , pues dumpear() es una seccion critica, con un mutex, solo hay un proceso dumpeo
+		insertarEnMemtable( nombre_de_tabla, key , value,timestamp);
+	}
+}
+void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long timestamp){//la logica  es esta, ok
+	Insert* unInsert = buscarTablaEnLaMemtable(nombre_de_tabla);
+	RegistroLinea* unRegistro=malloc(sizeof(RegistroLinea));
+			unRegistro->key=key;
+			unRegistro->value=strdup(value);
+			unRegistro->timestamp;
+	if(unInsert==NULL){//si es igual a NULL no esta en la memtable
+		unInsert =malloc(sizeof(Insert));
+		unInsert->nombreDeLaTabla=strdup(nombre_de_tabla);
+		unInsert->cantParticionesTemporales=0;
+		unInsert->registros=list_create();
+		list_add((unInsert->registros),unRegistro);
+	}
+	else {
+		list_add((unInsert->registros),unRegistro);
+	}
+}
+Insert* buscarTablaEnLaMemtable(const char * tabla){
+//	Insert* insertConTabla;
+	bool existeTablaEnLaMemtable(Insert *unInsert) {//simulo aplicacion parcial
+	            			return strcmp(unInsert->nombreDeLaTabla,tabla)==0;//string_equals_ignore_case(unInsert->nombreDeLaTabla, tabla);
+	            		}
+//	aux_tabla_para_la_memtable=tabla;
+	return list_find(memtable,existeTablaEnLaMemtable);// // le puse (void*) por que en los tests lo manejan asi
+//	return insertConTabla;
+}
+//bool existeTablaEnLaMemtable(Insert* unInsert){
+//	return strcmp( unInsert->nombreDeLaTabla,aux_tabla_para_la_memtable)==0;//si es =0 son iguales
+//}
+bool hay_datos_a_dumpear(){
+//	bool hay_datos_en_memoria_para_dump=false;
+//	hay_datos_en_memoria_para_dump=laMemtableTieneContenido();
+//	return laMemtableTieneContenido();
+	return list_size(memtable)>0;//hay datos en la memtable
+}
+//bool laMemtableTieneContenido(){
+////	return memtable->elements_count=0;
+//	return list_size(memtable)>0;
+//}
+void dumpear(){
+	Insert* unInsert;
+	for(int tabla_iesima =0;tabla_iesima<list_size(memtable);tabla_iesima++){
+		unInsert = list_get(memtable,tabla_iesima);
+		for(int fila_iesima =0;fila_iesima<list_size(unInsert->registros);fila_iesima++){
+			insertarRegistrosEnParticionTemporal(unInsert->nombreDeLaTabla,(RegistroLinea*)list_get((unInsert->registros),fila_iesima), unInsert->cantParticionesTemporales);
+			unInsert->cantParticionesTemporales++;
+		}
+	}
+}
+void insertarRegistrosEnParticionTemporal(const char* tabla,  RegistroLinea* unRegistro,int cantidadDeParticionesTemporales){
+//	Metadata_Tabla* metadataDeTabla = obtenerMetadata(tabla);
+//	unsigned int particionCorrespondiente = particionSegunKey(unRegistro,metadataDeTabla->PARTITIONS);
+	char* path_de_particion_temporal=obtenerPathDeParticionTemporal(cantidadDeParticionesTemporales+1);
+	escribirAParticion(path_de_particion_temporal,unRegistro);
+	int bloqueGrabado=grabarRegistroABloques(unRegistro);
+//	free(metadataDeTabla);
+}
+void escribirAParticion(const char* path_particion,RegistroLinea* registro){
+	size_t longitud_usada=longitudDeRegistroAlFileSystem(registro);
+
+
+	t_config* config_particion = config_create(path_particion);
+	if(config_particion==NULL){//hay que crear la particion
+		FILE* part=fopen(path_particion,"w+r");
+		fprintf(part,"SIZE=  \n");
+		fprintf(part,"BLOCKS=  \n");
+		fclose(part);
+	}
+	config_set_value(config_particion,"SIZE",string_itoa(longitud_usada));
+//	config_set_value(config_particion,"BLOCKS",string_itoa(longitud_usada));//falta grabar este campo , ejemplo grabar [1,2,3,4] por ejemplo
+
+	config_destroy(config_particion);
+}
+size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro){
+	size_t longitud;
+	char* aux=malloc(sizeof(unRegistro->timestamp)+sizeof(unRegistro->key)+strlen(unRegistro->value)+1000);
+	sprintf(aux,"%d;%d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
+	longitud=strlen(aux);
+	free(aux);
+	return longitud;
+}
+char* registroLineaAString(RegistroLinea* registro){
+	char* registro_string=malloc(longitudDeRegistroAlFileSystem(registro));
+	sprintf(registro_string,"%d;%d;%s\n",registro->timestamp,registro->key,registro->value);
+	return registro_string;
+}
+
+char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal){
+	char* pathDeParticion=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Tables/")+40);
+	sprintf(pathDeParticion,"%sTables/%d.tmp");
+	return pathDeParticion;
+}
+Metadata_Tabla* obtenerMetadata(const char* nombreTabla){
+	Metadata_Tabla *unMetadata=malloc(sizeof(Metadata_Tabla));
+	char* aux = obtenerPathDeTabla(nombreTabla);
+		char* path_metadata=malloc(strlen(aux)+20);
+		sprintf(path_metadata,"%s/Metadata.metadata",aux);
+		free(aux);
+		t_config* unConfig=config_create(path_metadata);
+		free(path_metadata);
+			if(unConfig==NULL){
+				fprintf(stderr,"No Existe metadata para la  tabla  \"%s\" \n",nombreTabla);
+			}
+			else {
+				unMetadata->COMPACTION_TIME=config_get_int_value(unConfig,"COMPACTION_TIME");
+				strcpy(unMetadata->CONSISTENCY,config_get_string_value(unConfig,"CONSISTENCY"));
+				unMetadata->PARTITIONS=config_get_int_value(unConfig,"PARTITIONS");
+			}
+			config_destroy(unConfig);
+	return unMetadata;
+}
+int  grabarRegistroABloques(RegistroLinea* unRegistro){
+	int posicionBloqueLibre = getBloqueLibre_int();
+	char* bloqueLibre_path=obtenerPathDelNumeroDeBloque(posicionBloqueLibre);
+	escribirRegistroABloque(bloqueLibre_path,unRegistro);
+	free(bloqueLibre_path);
+	return posicionBloqueLibre;
+}
+char* obtenerPathDelNumeroDeBloque(int numeroDeBloque){
+	char* path_del_bloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+20);
+	sprintf(path_del_bloque,"%sBloques/%d.bin",lfs.puntoDeMontaje,numeroDeBloque);
+	return path_del_bloque;
+}
+
+void escribirRegistroABloque(const char * bloque_path,RegistroLinea* unRegistro){
+	FILE* unBloque = txt_open_for_append(bloque_path);//fopen(bloque_path,"r+w");
+	fprintf(unBloque,"%d;%d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
+	fclose(unBloque);
+}
+int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones){
+	return unRegistro->key % cantidad_de_particiones;
 }
 void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion ){
 	puts("crear tabla");
@@ -63,10 +199,6 @@ void crearTabla(const char* nombreDeTabla){//ok
 		free(aux_path_de_la_tabla);
 	}
 }
-//
-//
-//}
-//
 void crearMetadata_v2(const char* tabla,const char* tipoConsistencia, unsigned int numeroParticiones,
 		unsigned int tiempoCompactacion){ //ok
 	char* aux_path=obtenerPathDeTabla(tabla);
@@ -150,20 +282,20 @@ void validarCadenaNoVacia(const char cadena, const char mensajeError){
 	}
 }
 //
-void validarNombreTablaNoVacia(const char* nombreTabla){
-	validarCadenaNoVacia(nombreTabla, "El nombre de la tabla no puede ser vacío");
-}
+//void validarNombreTablaNoVacia(const char* nombreTabla){
+//	validarCadenaNoVacia(nombreTabla, "El nombre de la tabla no puede ser vacío");
+//}
+//
+//void validarTipoConsistencia(const char* tipoConsistencia){
+//	validarCadenaNoVacia(tipoConsistencia, "El tipo de consistencia no puede ser vacío");
+//	validarTipoConsitenciaExistente(tipoConsistencia);
+//}
 
-void validarTipoConsistencia(const char* tipoConsistencia){
-	validarCadenaNoVacia(tipoConsistencia, "El tipo de consistencia no puede ser vacío");
-	validarTipoConsitenciaExistente(tipoConsistencia);
-}
-
-void validarTipoConsitenciaExistente(const char* tipoConsistencia){
-	if(tipoConsistencia != STRONGCONSISTENCY || tipoConsistencia != EVENTUALCONSISTENCY){
-		printf("El tipo de consistencia no existe");
-	}
-}
+//void validarTipoConsitenciaExistente(const char* tipoConsistencia){
+//	if(tipoConsistencia != STRONGCONSISTENCY || tipoConsistencia != EVENTUALCONSISTENCY){
+//		printf("El tipo de consistencia no existe");
+//	}
+//}
 //
 bool yaExisteCarpeta(const char* path_tabla){
 	bool existe=false;
@@ -206,25 +338,7 @@ void mostrarMetadata(const char* tabla){ //ok
 	free(unMetadata);
 
 }
-Metadata_Tabla* obtenerMetadata(const char* nombreTabla){
-	Metadata_Tabla *unMetadata=malloc(sizeof(Metadata_Tabla));
-	char* aux = obtenerPathDeTabla(nombreTabla);
-		char* path_metadata=malloc(strlen(aux)+20);
-		sprintf(path_metadata,"%s/Metadata.metadata",aux);
-		free(aux);
-		t_config* unConfig=config_create(path_metadata);
-		free(path_metadata);
-			if(unConfig==NULL){
-				fprintf(stderr,"No Existe metadata para la  tabla  \"%s\" \n",nombreTabla);
-			}
-			else {
-				unMetadata->COMPACTION_TIME=config_get_int_value(unConfig,"COMPACTION_TIME");
-				strcpy(unMetadata->CONSISTENCY,config_get_string_value(unConfig,"CONSISTENCY"));
-				unMetadata->PARTITIONS=config_get_int_value(unConfig,"PARTITIONS");
-			}
-			config_destroy(unConfig);
-	return unMetadata;
-}
+
 
 }
 //void metadata_destroy(Metadata_Tabla* unaMetadata){

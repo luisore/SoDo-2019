@@ -78,7 +78,6 @@ char* bloquesToString(const char* pathFile){//ok
 //	mostrarLista(listaDeBloques);
 	for (int var = 0; var < list_size(listaDeBloques); var++) {
 		sprintf(path_aux,"%s%s%d.bin",lfs.puntoDeMontaje,"Bloques/",list_get(listaDeBloques,var));
-//		puts(path_aux);
 		bloques=str_concat(bloques,fileToString_v2(path_aux));
 	}
 	free(path_aux);

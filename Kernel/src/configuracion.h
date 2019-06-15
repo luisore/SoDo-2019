@@ -19,14 +19,14 @@ typedef struct {
 	int sleep_ejecucion;
 } kernel_config;
 
-kernel_config kernel;
-t_log *kernel_log;
+kernel_config* kernel;
+t_log* kernel_log;
 
 
-int cargar_config(char* path);
-int cargar_logger(char* nombre);
-void imprimir_config();
-void config_struct_destroy();
+int configuracion_cargar(char* path);
+int configuracion_crear_logger(char* nombre);
+void configuracion_imprimir();
+void configuracion_destruir();
 
 
 

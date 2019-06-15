@@ -1,18 +1,30 @@
 #ifndef KERNEL_H_
 #define KERNEL_H_
 
-#include "../../biblioteca/biblioteca/bibliotecaDeSockets.h"
-#include "../../biblioteca/biblioteca/parser.h"
-#include <commons/collections/list.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
-#include "config.h"//Configuracion y Logger
+#include <commons/collections/list.h>
+#include "../../biblioteca/biblioteca/bibliotecaDeSockets.h"
+#include "../../biblioteca/biblioteca/parser.h"
+#include "configuracion.h"//Configuracion y Logger
 
-int inicializar();
+#include "planificador.h"
+#include "request.h"
+
+
+int kernel_inicializar();
 void kernel_exit();
-void abrir_script(char* path);
 void kernel_ejecutar(struct_operacion* operacion);
+/*retorna true si ejecuto la ultima linea del script*/
+bool kernel_ejecutar_script(script_struct* script);
 
 
 #endif /* KERNEL_H_ */

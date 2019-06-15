@@ -42,6 +42,11 @@
 *.idb
 *.pdb
 
+#Eclipse
+*.xml
+*.cproject
+.log
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
@@ -50,6 +55,3 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-/File-System/
-/Kernel/
-/Memoria/

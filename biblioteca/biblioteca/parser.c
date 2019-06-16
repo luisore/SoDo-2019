@@ -76,9 +76,8 @@ struct_operacion* parsear_linea(char linea[]){
 
 		//retorna ["[NÚMERO]", "TO", "[CRITERIO]", NULL]
 		char **aux = string_split(linea + strlen("ADD MEMORY "), " ");
-		puts("SE PUDRE");
-		string_iterate_lines(aux,(void*)puts);
 
+		//borramos "TO"
 		(operacion->parametros)[0]= strdup(aux[0]);
 		(operacion->parametros)[1]= strdup(aux[2]);
 		(operacion->parametros)[2]= NULL;

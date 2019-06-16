@@ -23,6 +23,7 @@ t_list* cola_exit;
 void planificador_agregar_request(request_struct *request_struct);
 void planificador_ejecutar_requests();
 void planificador_iniciar_colas();
+void planificador_iniciar();
 
 
 #endif /* PLANIFICADOR_H_ */

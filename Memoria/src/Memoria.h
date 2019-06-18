@@ -9,6 +9,10 @@
 #define MEMORIA_H_
 
 #include "../../biblioteca/biblioteca/bibliotecaDeSockets.h"
+#include "../../biblioteca/biblioteca/parser.h"
+//include "../../compartido/bibliotecaDeSockets.h"
+//#include "../../compartido/parser.h"
+
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
@@ -17,6 +21,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <pthread.h>
+#include "PaginacionSegmentacion.h"
 
 t_log* log_Memoria;
 t_config * file_system;
@@ -43,9 +48,12 @@ typedef struct{
 
  }t_config_fileSystem;
 
-
+t_list *lista_segmento;
 int FileSystem_fd;
+char* memoria;
 
+t_bitarray *marcos;
+t_bitarray *modificado;
 void directorio_actual();
 t_config_fileSystem config_fileSystem;
 

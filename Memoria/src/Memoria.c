@@ -26,7 +26,7 @@ int main(void) {
     puts("1");
 	//Me conecto al file system
 	crearSocket(&FileSystem_fd);
-
+/*
 	//Se conecta al file system
 	if(conectar(&FileSystem_fd,config_fileSystem.puerto_fs,config_fileSystem.ip_fs)!=0){
 		  puts( "error");
@@ -35,23 +35,34 @@ int main(void) {
 	else{
 		puts("estableci conexion");
 	}
-
+*/
 	pthread_t hilo_consola;
 	pthread_t hilo_kernel;
 	pthread_t hilo_pool;
 	pthread_t hilo_inotify;
 
 
+	int cantidadBytes=64;
+
+	memoria=crearMemoria(cantidadBytes);
+
+	marcos = crearBitmap(cantidadBytes);
+	modificado = crearBitmap(cantidadBytes);
+	lista_segmento = crearTablaDeSegmentos();
+
+
+
 	pthread_create(&hilo_consola,NULL,(void*)consola_memoria,NULL);
-	pthread_create(&hilo_pool,NULL,(void*)pool,NULL);
-	pthread_create(&hilo_kernel,NULL,(void*)kernel,NULL);
-	pthread_create(&hilo_inotify,NULL,(void*)inotify,NULL);
+	pthread_detach(hilo_consola);
+	//pthread_create(&hilo_pool,NULL,(void*)pool,NULL);
+	//pthread_create(&hilo_kernel,NULL,(void*)kernel,NULL);
+	//pthread_create(&hilo_inotify,NULL,(void*)inotify,NULL);
+	//pthread_detach(hilo_pool);
+	//pthread_detach(hilo_kernel);
+	//pthread_detach(hilo_inotify);
 
 	for(;;);
-	pthread_join(hilo_consola,NULL);
-	pthread_detach(hilo_pool);
-	pthread_detach(hilo_kernel);
-	pthread_detach(hilo_inotify);
+
 	return EXIT_SUCCESS;
 }
 
@@ -66,22 +77,33 @@ void consola_memoria(){
 	while(1) {
 		linea = readline("API_MEMORIA>");
 		if(!strncmp(linea, "SELECT ", 7)) {
+			struct_operacion* operacion =parsear_linea(linea);
+			//puts("algo");
+			printf("%s tabla:",(operacion->parametros)[0],"\n");
+			printf("%s key: ",(operacion->parametros)[1],"\n");
 			//parsear comando select
 
 		}
 		if(!strncmp(linea, "INSERT ", 7)){
+			struct_operacion* operacion =parsear_linea(linea);
+			//nuevoSegmento(,lista_segmento);
+			agregarDatOaMemoria((operacion->parametros)[0],marcos,modificado,10,lista_segmento,memoria);
 			//parsear comando insert
 		}
 		if(!strncmp(linea, "CREATE ", 7)){
+			struct_operacion* operacion =parsear_linea(linea);
 			//parsear comando create
 		}
 		if (!strncmp(linea, "DROP ", 5)){
+			struct_operacion* operacion =parsear_linea(linea);
 			//parsear comando drop
 		}
 		if (!strncmp(linea, "DESCRIBE ", 9)){
+			struct_operacion* operacion =parsear_linea(linea);
 			//parsear comando describe
 		}
 		if (!strncmp(linea, "JOURNAL ", 8)){
+			struct_operacion* operacion =parsear_linea(linea);
 			//parsear comando journal
 		}
 		if (!strncmp(linea, "EXIT", 4)){

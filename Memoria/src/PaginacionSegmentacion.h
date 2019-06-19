@@ -20,6 +20,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "../../biblioteca/biblioteca/parser.h"
 
 
 typedef struct {
@@ -62,5 +63,6 @@ int existeTablaEnTablaDeSegmento(char *nombreTabla,t_list *tablaDeSegmentos);
 t_bitarray *crearBitmap(int cantidadDepagina);
 void setearPaginaEnOcupada(int numeroDepagina);
 t_bitarray *bitarray;
+void guardarEnMemoria(char *memoria,int marco,int valor,struct_operacion* operacion);
 
 #endif /* PAGINACIONSEGMENTACION_H_ */

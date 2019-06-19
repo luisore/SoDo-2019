@@ -46,9 +46,10 @@ int existeTablaEnTablaDeSegmento(char *nombreTabla,t_list *tablaDeSegmentos){
 	int encontrado = -1;
 	int cantidadSegmentos=list_size(tablaDeSegmentos);
 	segmentacion *segmento;
-	for(int nodo=1;nodo <cantidadSegmentos+1 ;nodo ++){
+	for(int nodo=0;nodo <cantidadSegmentos ;nodo ++){
 		segmento =list_get(tablaDeSegmentos,nodo);
 		if(!strncmp(segmento->nombreTabla,nombreTabla, strlen(nombreTabla))){
+			puts("algo");
 			return nodo;
 		}
 	}
@@ -65,19 +66,17 @@ int agregarDatOaMemoria(char *nombreTabla,t_bitarray *marco,t_bitarray *modifica
 	else{
 		bitarray_set_bit(marco,hayPaginaLibre);
 	}
-
 	segmentacion *unNuevoSegmento;
 	int numeroNodoEnTablaDeSegmentos =existeTablaEnTablaDeSegmento(nombreTabla,tablaDeSegmentos);
-	unNuevoSegmento=nuevoSegmento(nombreTabla,tablaDeSegmentos );
-	/*if(numeroNodoEnTablaDeSegmentos>=0){
+	//unNuevoSegmento=nuevoSegmento(nombreTabla,tablaDeSegmentos );
+	if(numeroNodoEnTablaDeSegmentos>=0){
 		unNuevoSegmento=list_get(tablaDeSegmentos,numeroNodoEnTablaDeSegmentos);
 	}
 	else{
 		unNuevoSegmento=nuevoSegmento(nombreTabla,tablaDeSegmentos );
 	}
-	*/
 	crear_NodoDePaginaYagregaTabla(hayPaginaLibre,tamanioValue,unNuevoSegmento->direccionTablaDePaginas);
-	return 0;
+	return hayPaginaLibre;
 }
 
 void crear_NodoDePaginaYagregaTabla(int numeroPagina,int tamanioValue,t_list *tablaPaginas){
@@ -96,10 +95,6 @@ segmentacion* nuevoSegmento(char *nombreTabla,t_list *tablaDeSegmentos ){
 	nuevoSegmento->direccionTablaDePaginas  = crearTablaDePaginas();
 	list_add(tablaDeSegmentos,nuevoSegmento);
 	segmentacion *segmento =list_get(tablaDeSegmentos,0);
-	if(!strncmp(segmento->nombreTabla,nombreTabla, strlen(nombreTabla))){
-	//		return nodo;
-		puts("algo");
-	}
 	return nuevoSegmento;
 }
 
@@ -163,10 +158,11 @@ int cantidadDePaginas(t_bitarray *bitmap){
 	// 1-para crear el bitmap de paginas en uso
 	// 2-para setear las paginas en estado modificado
 t_bitarray *crearBitmap(int cantidadDepagina){
-
-		char bmap[cantidadDepagina/8];
-		memset(bmap,0,cantidadDepagina/8);
-		bitarray = bitarray_create_with_mode(bmap,cantidadDepagina , MSB_FIRST);
+		size_t tamanio =cantidadDepagina/8;
+		char bmap[tamanio];
+		//memset(bmap,0,tamanio);
+		bzero(bmap,tamanio);
+		bitarray = bitarray_create_with_mode(bmap,tamanio/8, MSB_FIRST);
 		size_t	cantidadDebits= bitarray_get_max_bit (bitarray);
 		for (int i=0;i<cantidadDebits;i++){
 			//printf("posicion %d valor %d:\n",i,bitarray_test_bit(bitarray,i));
@@ -220,3 +216,12 @@ int buscarPaginasContiguas(int cantidadDepaginasContiguas){
 	return primeraPaginaContiguaLibre;
 }
 
+void guardarEnMemoria(char *memoria,int marco,int valor,struct_operacion* operacion){
+	char *registro;
+	int tam_registro = sizeof(unsigned long)+sizeof(int)+valor;
+	//registro = malloc(tam_registro);
+	memcpy(memoria+marco*tam_registro,(operacion->parametros)[3],sizeof(unsigned long));
+	memcpy(memoria+marco*tam_registro+sizeof(unsigned long),(operacion->parametros)[1],sizeof(int));
+	memcpy(memoria+marco*tam_registro+sizeof(unsigned long)+sizeof(int),(operacion->parametros)[3],sizeof(unsigned long));
+
+}

@@ -52,6 +52,7 @@ t_list *lista_segmento;
 int FileSystem_fd;
 char* memoria;
 
+int valor;
 t_bitarray *marcos;
 t_bitarray *modificado;
 void directorio_actual();

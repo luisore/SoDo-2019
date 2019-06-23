@@ -8,9 +8,6 @@ int main(void) {
 
 	configuracion_imprimir();
 
-	//abrir_script("lissandra.txt");
-
-
 	/* Creo el hilo consola */
 	pthread_t thread_consola;
 	if(pthread_create( &thread_consola, NULL, (void*) consola_iniciar, NULL) ){
@@ -31,12 +28,12 @@ int main(void) {
 	log_info(kernel_log, "[KERNEL]  Creo el hilo planificador");
 	pthread_detach(thread_planificador);
 
-	/*
-	char str1[20];
-	while(scanf("%s", str1) == 1){
-		printf("Entered Name: %s\n", str1);
-	}
-*/
+	/*inicio las colas de criterios*/
+	criterio_iniciar_colas();
+	/*inicio la metadata de tablas*/
+	metadata_iniciar();
+
+
 	while(1){}
 
 	kernel_exit();
@@ -44,16 +41,18 @@ int main(void) {
 }
 
 void consola_iniciar() {
-	printf("Bienvenido! Ingrese \"ayuda\" para ver una lista con todos los comandos disponibles \n");
+	printf("Bienvenido! Ingrese \"help\" para ver una lista con todos los comandos disponibles \n");
 	char* linea;
 	while (1) {
 		linea = readline(">");
 		if (linea)
 			add_history(linea);
-
 		if (!strncmp(linea, "exit", 4)) {
 			free(linea);
 			break;
+		}if(!strncmp(linea, "help", 5)){
+			consola_imprimir_comandos();
+			continue;
 		}
 		request_struct* request = request_create(API, linea);
 		planificador_agregar_request(request);
@@ -61,9 +60,24 @@ void consola_iniciar() {
 	}
 }
 
+void consola_imprimir_comandos(){
+	printf("\nSELECT [NOMBRE_TABLA] [KEY] \n\t Permite la obtención del valor de una key dentro de una tabla.\n");
+	printf("\nINSERT [NOMBRE_TABLA] [KEY] “[VALUE]” [Timestamp] \n\t Permite la creación y/o actualización de una key dentro de una tabla.\n");
+	printf("\nCREATE [TABLA] [TIPO_CONSISTENCIA] [NUMERO_PARTICIONES] [COMPACTION_TIME] \n\t Permite la creación de una nueva tabla dentro del file-system.\n");
+	printf("\nDESCRIBE\t \n\t Permite obtener la Metadata de todas las tablas que el file-system tenga.\n");
+	printf("\nDESCRIBE [NOMBRE_TABLA] \n\t Permite obtener la Metadata de una tabla en particular.\n");
+	printf("\nDROP [NOMBRE_TABLA] \n\t Permite la eliminación de una tabla del file system.\n");
+	printf("\nJOURNAL \n\t Baja todos los datos de la memoria al file-system.\n");
+	printf("\nADD MEMORY [NUMERO] TO [CRITERIO] \n\t Permite asignar una memoria a un criterio en concreto: SC,SHC o EC.\n");
+	printf("\nRUN <path> \n\t Permite ejecutar un archivo LQL, siendo <path> la ruta del mismo.\n");
+	printf("\nMETRICS \n\t Informa las metricas actuales por consola.\n");
+	printf("\nexit \n\t Cierra la consola\n\n");
+}
+
 bool kernel_ejecutar_api(api_struct* api){
 	struct_operacion* operacion = parsear_linea(api->lineaLQL);
 	kernel_ejecutar(operacion);
+	//retornar el status de la operacion
 	return true;
 }
 
@@ -88,6 +102,9 @@ bool kernel_ejecutar_script(script_struct* script){
 			struct_operacion* operacion = parsear_linea(linea);
 			//TODO: validar que la operacion se ejecuto correctamente
 			kernel_ejecutar(operacion);
+
+
+			free_operacion(operacion);
 			script->contadorlinea++;
 			quantum_restante--;
 		}
@@ -105,48 +122,89 @@ bool kernel_ejecutar_script(script_struct* script){
 
 void kernel_ejecutar(struct_operacion* operacion) {
 
+	metadata_tabla* metadata;
+	int memoria;
+
 	switch (operacion->nombre_operacion) {
 	case API_SELECT:
 		log_info(kernel_log, "[KERNEL] ejecuta: SELECT, Tabla: %s, Key: %s\n",
 				(operacion->parametros)[0], (operacion->parametros)[1]);
+
+		//obtenemos la metadata de la tabla
+		metadata = metadata_obtener((operacion->parametros)[0]);
+		//obtenemos la memoria a consultar a partir del criterio
+		memoria = criterio_obtener_memoria((operacion->parametros)[1],metadata->CONSISTENCY);
+		//TODO: cada memoria va a tener por archivo de configuracion su numero de memoria
+
+
 		break;
 	case API_INSERT:
 		log_info(kernel_log,
 				"[KERNEL] ejecuta: INSERT, Tabla: %s, Key: %s, Value: %s, Timestamp: %s\n",
 				(operacion->parametros)[0], (operacion->parametros)[1],
 				(operacion->parametros)[2], (operacion->parametros)[3]);
+
+		//obtenemos la metadata de la tabla
+		metadata = metadata_obtener((operacion->parametros)[0]);
+		//obtenemos la memoria a consultar a partir del criterio
+		memoria = criterio_obtener_memoria((operacion->parametros)[1],metadata->CONSISTENCY);
+
+
 		break;
 	case API_CREATE:
 		log_info(kernel_log,
 				"[KERNEL] ejecuta: CREATE, Tabla: %s, Tipo Consistencia: %s, Numero Particiones: %s, Compaction Time: %s\n",
 				(operacion->parametros)[0], (operacion->parametros)[1],
 				(operacion->parametros)[2], (operacion->parametros)[3]);
+
+		metadata = metadata_crear((operacion->parametros)[0],(operacion->parametros)[1],(operacion->parametros)[2],(operacion->parametros)[3]);
+
+		metadata_agregar(metadata);
+
+		metadata_imprimir(metadata);
+
+
 		break;
 	case API_DESCRIBE:
 		log_info(kernel_log, "[KERNEL] ejecuta: DESCRIBE, Tabla: %s\n",
 				(operacion->parametros)[0]);
+
+
+
 		break;
 	case API_DROP:
 		log_info(kernel_log, "[KERNEL] ejecuta: DROP, Tabla: %s\n", (operacion->parametros)[0]);
+
+
+
 		break;
 	case API_JOURNAL:
 		log_info(kernel_log, "[KERNEL] ejecuta: JOURNAL\n");
+
+
+
 		break;
 	case API_ADD:
 		log_info(kernel_log, "[KERNEL] ejecuta: ADD MEMORY , Numero: %s, Criterio: %s\n",
-				(operacion->parametros)[0], (operacion->parametros)[1]);
+				(operacion->parametros)[0],(operacion->parametros)[1]);
+
+		criterio_agregar_memoria((operacion->parametros)[0],(operacion->parametros)[1]);
+
 		break;
 	case API_RUN:
 		log_info(kernel_log, "[KERNEL] ejecuta: RUN, <path>: %s\n", (operacion->parametros)[0]);
-		request_struct * request = request_create(SCRIPT,(operacion->parametros)[0]);
+
+		request_struct* request = request_create(SCRIPT,(operacion->parametros)[0]);
 		planificador_agregar_request(request);
 
 		break;
 	case API_METRICS:
 		log_info(kernel_log, "[KERNEL] ejecuta: METRICS\n");
+
+		break;
+	default:
 		break;
 	}
-
 }
 
 int kernel_inicializar(char* nombre_archivo_log) {

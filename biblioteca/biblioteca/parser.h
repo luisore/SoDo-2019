@@ -27,14 +27,12 @@ typedef struct {
 } struct_operacion;
 
 
-
-
 struct_operacion* parsear_linea(char[]);
+void free_operacion(struct_operacion* operacion);
+
 
 //otras
-void free_char_x2(char** parametros); //sirve para liberar la memoria de una lista de strings con todas sus boludeces
-
-
+void free_list_of_strings(char** list_of_strings);
 
 
 #endif /* PARSER_H_ */

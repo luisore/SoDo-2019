@@ -18,6 +18,8 @@
 
 #include "planificador.h"
 #include "request.h"
+#include "criterio.h"
+#include "metadata.h"
 
 
 int kernel_inicializar();
@@ -28,6 +30,7 @@ bool kernel_ejecutar_script(script_struct* script);
 bool kernel_ejecutar_api(api_struct* api);
 
 void consola_iniciar();
+void consola_imprimir_comandos();
 
 
 #endif /* KERNEL_H_ */

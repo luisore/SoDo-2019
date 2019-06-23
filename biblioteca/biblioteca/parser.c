@@ -46,8 +46,8 @@ struct_operacion* parsear_linea(char linea[]){
 		(operacion->parametros)[3] = strdup(aux2[1]+1);
 		(operacion->parametros)[4] = NULL;
 
-		free_char_x2(aux);
-		free_char_x2(aux2);
+		free_list_of_strings(aux);
+		free_list_of_strings(aux2);
 
 	}else if(_esCREATE(linea)){
 		operacion->nombre_operacion = API_CREATE;
@@ -82,7 +82,7 @@ struct_operacion* parsear_linea(char linea[]){
 		(operacion->parametros)[1]= strdup(aux[2]);
 		(operacion->parametros)[2]= NULL;
 
-		free_char_x2(aux);
+		free_list_of_strings(aux);
 
 	}else if(_esMETRICS(linea)){
 		operacion->nombre_operacion = API_METRICS;
@@ -141,12 +141,14 @@ static bool _esMETRICS(char* linea){
 	return string_starts_with(linea, "METRICS");
 }
 
-
-void free_char_x2(char** operation) {
-	string_iterate_lines(operation, (void*) free);
-	free(operation);
+void free_list_of_strings(char** list_of_strings) {
+	string_iterate_lines(list_of_strings, (void*) free);
+	free(list_of_strings);
 }
 
-
+void free_operacion(struct_operacion* operacion){
+	free_list_of_strings(operacion->parametros);
+	free(operacion);
+}
 
 

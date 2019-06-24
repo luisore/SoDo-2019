@@ -24,6 +24,8 @@ int main(void) {
 	puts("0");
 	cargar_configuracion(archivo);
     puts("1");
+    lista_tabla_gossping = list_create();
+
 	//Me conecto al file system
 	crearSocket(&FileSystem_fd);
 /*
@@ -37,7 +39,7 @@ int main(void) {
 	}
 */
 	pthread_t hilo_consola;
-	pthread_t hilo_kernel;
+	pthread_t hilo_gossiping;
 	pthread_t hilo_pool;
 	pthread_t hilo_inotify;
 
@@ -46,12 +48,7 @@ int main(void) {
 	int valor = 10;
 
 	int tamanio;
-	tamanio=valor;
-	tamanio+= sizeof(unsigned long);
-	tamanio+= sizeof(uint16_t);
-	int k;
-	k=funcionEpoc();
-
+	tamanio=valor +sizeof(unsigned long)+sizeof(uint16_t);
 	cantidad_de_Paginas =  cantidadBytes/ (tamanio);
 	int diferencia= cantidad_de_Paginas % 8;
 	printf("cantidad de paginas %d: \n",cantidad_de_Paginas);
@@ -68,11 +65,17 @@ int main(void) {
 
 	pthread_create(&hilo_consola,NULL,(void*)consola_memoria,NULL);
 	pthread_detach(hilo_consola);
+
+
+	//<Agregar codigo paa lo de gossiping en las funciones gossiping y pool>
+
 	//pthread_create(&hilo_pool,NULL,(void*)pool,NULL);
-	//pthread_create(&hilo_kernel,NULL,(void*)kernel,NULL);
-	//pthread_create(&hilo_inotify,NULL,(void*)inotify,NULL);
+	//pthread_create(&hilo_gossping,NULL,(void*)gossiping,NULL);
 	//pthread_detach(hilo_pool);
-	//pthread_detach(hilo_kernel);
+	//pthread_detach(hilo_gossiping);
+
+
+	//pthread_create(&hilo_inotify,NULL,(void*)inotify,NULL);
 	//pthread_detach(hilo_inotify);
 
 	for(;;);
@@ -129,29 +132,88 @@ void consola_memoria(){
 		}
 	}
 }
-void kernel(){
-	//Conexion del kernel a memoria
+void gossiping(){
+	t_nodo_tabla_gossiping *uno_mismo = malloc(sizeof(t_nodo_tabla_gossiping));
+	uno_mismo->puerto = config_memoria.puerto;
+	//uno_mismo->
+	list_add(lista_tabla_gossping,uno_mismo);
+	//Revisar seeds
+	//Revisar tabla
 }
 void pool(){
+		//log_info(log_MDJ,"Iniciar conexion a DMA");
+		int tipo_operacion,bytesRecibidos;
+		int memoria_fd;
+		crearSocket(&memoria_fd);
+		setearParaEscuchar(&memoria_fd, config_memoria.puerto);
+
+		int conexion_fd=aceptarConexion(memoria_fd);
+
+		if(conexion_fd==-1){
+			exit(0);
+		}
+
+		//Espero a que el kernel o alguna otra memoria me mande una peticion
+
+		while(1){
+			bytesRecibidos=recv(conexion_fd,&tipo_operacion,sizeof(int),0);
+			if(bytesRecibidos<=0){
+				//log_error(log_memoria,"Error al recibir la operacion del DAM");
+				exit(1);
+			}
+			//log_info(log_memoria,"Peticion recibida del Kernel/Memoria, procesando....");
+
+
+			switch (tipo_operacion){
+				case SELECT:
+				{
+					struct_select* select = recibirYDeserializar(conexion_fd,tipo_operacion);
+					break;
+				}
+				case INSERT:
+				{
+					struct_insert* insert = recibirYDeserializar(conexion_fd,tipo_operacion);
+					break;
+				}
+				case DROP:
+				{
+					struct_tabla* drop = recibirYDeserializar(conexion_fd,tipo_operacion);
+					break;
+				}
+				case CREATE:
+				{
+					struct_create* create = recibirYDeserializar(conexion_fd,tipo_operacion);
+					break;
+				}
+				case PEDIR_GOSSIPING:
+				{
+					//Enviar info de gossing
+				}
+
+
+		}
+		close(conexion_fd);
+		}
+}
  //logica para lo de grooping
 
-}
+
 void cargar_configuracion(char *archivo){
 
-	file_system=config_create(archivo);
-	config_fileSystem.puerto=config_get_int_value(file_system,"PUERTO");
-	config_fileSystem.ip_fs=string_duplicate(config_get_string_value(file_system,"IP_FS"));
-	config_fileSystem.puerto_fs=config_get_int_value(file_system,"PUERTO_FS");
-	config_fileSystem.ip_seeds=config_get_array_value(file_system,"IP_SEEDS");
-	config_fileSystem.puerto_seeds=config_get_array_value(file_system,"PUERTO_SEEDS");
-	config_fileSystem.retardo_mem=config_get_int_value(file_system,"RETARDO_MEM");
-	config_fileSystem.retardo_fs=config_get_int_value(file_system,"RETARDO_FS");
-	config_fileSystem.tam_mem=config_get_int_value(file_system,"TAM_MEM");
-	config_fileSystem.retardo_journal=config_get_int_value(file_system,"RETARDO_JOURNAL");
-	config_fileSystem.retardo_gossiping=config_get_int_value(file_system,"RETARDO_GOSSIPING");
-	config_fileSystem.memori_number=config_get_int_value(file_system,"MEMORY_NUMBER");
+	memoria_config_leer=config_create(archivo);
+	config_memoria.puerto=config_get_int_value(memoria_config_leer,"PUERTO");
+	config_memoria.ip_fs=string_duplicate(config_get_string_value(memoria_config_leer,"IP_FS"));
+	config_memoria.puerto_fs=config_get_int_value(memoria_config_leer,"PUERTO_FS");
+	config_memoria.ip_seeds=config_get_array_value(memoria_config_leer,"IP_SEEDS");
+	config_memoria.puerto_seeds=config_get_array_value(memoria_config_leer,"PUERTO_SEEDS");
+	config_memoria.retardo_mem=config_get_int_value(memoria_config_leer,"RETARDO_MEM");
+	config_memoria.retardo_fs=config_get_int_value(memoria_config_leer,"RETARDO_FS");
+	config_memoria.tam_mem=config_get_int_value(memoria_config_leer,"TAM_MEM");
+	config_memoria.retardo_journal=config_get_int_value(memoria_config_leer,"RETARDO_JOURNAL");
+	config_memoria.retardo_gossiping=config_get_int_value(memoria_config_leer,"RETARDO_GOSSIPING");
+	config_memoria.memori_number=config_get_int_value(memoria_config_leer,"MEMORY_NUMBER");
 
-	config_destroy(file_system);
+	config_destroy(memoria_config_leer);
 
 }
 

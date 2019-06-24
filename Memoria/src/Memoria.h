@@ -26,13 +26,13 @@
 #include "FuncionesAuxiliares.h"
 
 t_log* log_Memoria;
-t_config * file_system;
+t_config * memoria_config_leer;
 
 char *dir_actual;
 
 int cantidad_de_Paginas;
 void consola_memoria();
-void kernel();
+void gossiping();
 void pool();
 void inotify();
 
@@ -49,8 +49,9 @@ typedef struct{
 	int retardo_gossiping;
 	int memori_number;
 
- }t_config_fileSystem;
+ }t_config_memoria;
 
+t_list *lista_tabla_gossping;
 t_list *lista_segmento;
 int FileSystem_fd;
 char* memoria;
@@ -59,7 +60,7 @@ int valor;
 t_bitarray *marcos;
 t_bitarray *modificado;
 void directorio_actual();
-t_config_fileSystem config_fileSystem;
+t_config_memoria config_memoria;
 
 void cargar_configuracion(char *archivo);
 #endif /* MEMORIA_H_ */

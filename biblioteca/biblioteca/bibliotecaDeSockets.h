@@ -29,7 +29,8 @@ typedef enum{
 	CREATE,
 	JOURNAL,
 	VERIFICAR_TABLA,
-
+	PEDIR_GOSSIPING,
+	ENVIAR_GOSSIPING,
 }t_protocolo;
 
 
@@ -83,40 +84,14 @@ typedef struct {
 	int valor;
 } valor_tamanio;
 
-typedef struct {
-	int pid;
-	int size_script;
-} iniciar_scriptorio_memoria;
-
-struct mProc {
-	int PID;
-	char* rutaRelativaDeArchivo;
-	int estadoDelProceso;
-	int PC;
-} mProc;
-
-struct peticionLecturaSwap{
-	int idProceso;
-	int numeroPagina;
-};
-
-struct mProcesoSwap{
-	int id;
-	int cantidadTotalPaginas;
-	int framesAsignados[];
-};
-
-typedef enum{
-	FIFO,
-	RR,
-	VRR,
-	IOBF
-}t_algoritmo;
+typedef struct{
+	t_list *lista;
+}t_tabla_gossiping;
 
 typedef struct{
-	char* path;
-	int acceso;
-}t_archivo;
+	char *ip;
+	int puerto;
+}t_nodo_tabla_gossiping;
 
 typedef struct{
 	char* path;

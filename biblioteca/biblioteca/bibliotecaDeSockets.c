@@ -182,6 +182,18 @@ void serializarYEnviar(int socket, int tipoDePaquete, void* package){
 			serializarYEnviarString(socket,((struct_tabla*)package)->nombreTabla);
 			return;
 		}
+		case ENVIAR_GOSSIPING:
+		{
+			t_list *lista_tabla=((t_tabla_gossiping*)package)->lista;
+			int cantidad = list_size(lista_tabla);
+			serializarYEnviarEntero(socket,&cantidad);
+			for(int i=0;i<cantidad;i++){
+				t_nodo_tabla_gossiping *nodo =list_get(lista_tabla,i);
+				serializarYEnviarString(socket,nodo->ip);
+				serializarYEnviarEntero(socket,&nodo->puerto);
+			}
+			return;
+		}
   }
 }
 
@@ -310,6 +322,18 @@ void* recibirYDeserializar(int socket,int tipo){
 	{
 		char *string_archivo=recibirYDeserializarString(socket);
 		return string_archivo;
+	}
+	case ENVIAR_GOSSIPING:
+	{
+		t_list *lista_tabla=list_create();
+		int cantidad = *recibirYDeserializarEntero(socket);
+		for(int i=0;i<cantidad;i++){
+			t_nodo_tabla_gossiping *nodo =malloc(sizeof(t_nodo_tabla_gossiping));
+			nodo->ip= *recibirYDeserializarString(socket);
+			nodo->puerto=*recibirYDeserializarEntero(socket);
+			list_add(lista_tabla,nodo);
+		}
+		return lista_tabla;
 	}
 	default:
 		return NULL;

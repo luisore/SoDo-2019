@@ -21,13 +21,16 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <pthread.h>
+#include <stdint.h>
 #include "PaginacionSegmentacion.h"
+#include "FuncionesAuxiliares.h"
 
 t_log* log_Memoria;
 t_config * file_system;
 
 char *dir_actual;
 
+int cantidad_de_Paginas;
 void consola_memoria();
 void kernel();
 void pool();

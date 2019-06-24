@@ -56,8 +56,8 @@ int existeTablaEnTablaDeSegmento(char *nombreTabla,t_list *tablaDeSegmentos){
 	return encontrado;
 }
 
-int agregarDatOaMemoria(char *nombreTabla,t_bitarray *marco,t_bitarray *modificado,int tamanioValue,t_list *tablaDeSegmentos,void *memoria){
-	int hayPaginaLibre = paginaLibre(marco);
+int agregarDatOaTabla(char *nombreTabla,t_bitarray *marco,t_bitarray *modificado,int tamanioValue,t_list *tablaDeSegmentos,int cantidadDePaginas){
+	int hayPaginaLibre = paginaLibre(marco,cantidadDePaginas);
 	//no hay espacio en memoria
 	//Falta buscar en algoritmo de reemplazo
 	if (hayPaginaLibre<0){
@@ -94,7 +94,6 @@ segmentacion* nuevoSegmento(char *nombreTabla,t_list *tablaDeSegmentos ){
 	strcpy(nuevoSegmento->nombreTabla,nombreTabla);
 	nuevoSegmento->direccionTablaDePaginas  = crearTablaDePaginas();
 	list_add(tablaDeSegmentos,nuevoSegmento);
-	segmentacion *segmento =list_get(tablaDeSegmentos,0);
 	return nuevoSegmento;
 }
 
@@ -157,12 +156,18 @@ int cantidadDePaginas(t_bitarray *bitmap){
 //Esta funcion se va a usar 2 veces
 	// 1-para crear el bitmap de paginas en uso
 	// 2-para setear las paginas en estado modificado
-t_bitarray *crearBitmap(int cantidadDepagina){
+t_bitarray *crearBitmap(int cantidadDepagina,int diferencia){
 		size_t tamanio =cantidadDepagina/8;
+		//printf("tamanio %d: \n",tamanio);
+		if (diferencia >0){
+			tamanio++;
+		//	printf("algo %d: \n",tamanio);
+		}
 		char bmap[tamanio];
 		//memset(bmap,0,tamanio);
 		bzero(bmap,tamanio);
-		bitarray = bitarray_create_with_mode(bmap,tamanio/8, MSB_FIRST);
+		//printf("tamanio %d: \n",tamanio);
+		bitarray = bitarray_create_with_mode(bmap,tamanio, MSB_FIRST);
 		size_t	cantidadDebits= bitarray_get_max_bit (bitarray);
 		for (int i=0;i<cantidadDebits;i++){
 			//printf("posicion %d valor %d:\n",i,bitarray_test_bit(bitarray,i));
@@ -171,13 +176,11 @@ t_bitarray *crearBitmap(int cantidadDepagina){
 
 }
 
-int hayPaginaLibre(){
-	return paginaLibre(bitarray) >=0;
-}
+
 
 //Buscar Pagina libre
-int paginaLibre(t_bitarray *marco){
-	size_t	cantidadDebits= bitarray_get_max_bit (marco);
+int paginaLibre(t_bitarray *marco,int cantidadDePaginas){
+	size_t	cantidadDebits= cantidadDePaginas;
 	int i;
 	int libre=-1;
 	for (i=0;i<cantidadDebits;i++){

@@ -42,14 +42,26 @@ int main(void) {
 	pthread_t hilo_inotify;
 
 
-	int cantidadBytes=128;
+	int cantidadBytes=150;
 	int valor = 10;
 
-	int cantidad_de_Paginas =  cantidadBytes/ (valor+sizeof(int)+sizeof(unsigned long));
+	int tamanio;
+	tamanio=valor;
+	tamanio+= sizeof(unsigned long);
+	tamanio+= sizeof(uint16_t);
+	int k;
+	k=funcionEpoc();
+
+	cantidad_de_Paginas =  cantidadBytes/ (tamanio);
+	int diferencia= cantidad_de_Paginas % 8;
+	printf("cantidad de paginas %d: \n",cantidad_de_Paginas);
+	printf("tamanio %d: \n",tamanio);
+	printf("diferencia %d: \n",diferencia);
+
 	memoria=crearMemoria(cantidadBytes);
 
-	marcos = crearBitmap(cantidad_de_Paginas);
-	modificado = crearBitmap(cantidad_de_Paginas);
+	marcos = crearBitmap(cantidad_de_Paginas,diferencia);
+	modificado = crearBitmap(cantidad_de_Paginas,diferencia);
 	//lista_segmento = crearTablaDeSegmentos();
 	lista_segmento = crearTablaDeSegmentos();
 
@@ -79,8 +91,8 @@ void consola_memoria(){
 	int resultado;
 	while(1) {
 		linea = readline("API_MEMORIA>");
+		struct_operacion* operacion =parsear_linea(linea);
 		if(!strncmp(linea, "SELECT ", 7)) {
-			struct_operacion* operacion =parsear_linea(linea);
 			resultado=existeTablaEnTablaDeSegmento((operacion->parametros)[0],lista_segmento);
 			if(resultado<0){
 				//Mandar msj a file system
@@ -91,9 +103,8 @@ void consola_memoria(){
 
 		}
 		if(!strncmp(linea, "INSERT ", 7)){
-			struct_operacion* operacion =parsear_linea(linea);
 			//nuevoSegmento(,lista_segmento);
-			resultado=agregarDatOaMemoria((operacion->parametros)[0],marcos,modificado,10,lista_segmento,memoria);
+			resultado=agregarDatOaTabla((operacion->parametros)[0],marcos,modificado,10,lista_segmento,cantidad_de_Paginas);
 			if(resultado<0){
 				//iniciar journal
 			}
@@ -102,19 +113,15 @@ void consola_memoria(){
 			}
 		}
 		if(!strncmp(linea, "CREATE ", 7)){
-			struct_operacion* operacion =parsear_linea(linea);
 			//mandar create a file system
 		}
 		if (!strncmp(linea, "DROP ", 5)){
-			struct_operacion* operacion =parsear_linea(linea);
 			//mandar comando a file system
 		}
 		if (!strncmp(linea, "DESCRIBE ", 9)){
-			struct_operacion* operacion =parsear_linea(linea);
 			//mandar a file system
 		}
 		if (!strncmp(linea, "JOURNAL ", 8)){
-			struct_operacion* operacion =parsear_linea(linea);
 			//funcion journal
 		}
 		if (!strncmp(linea, "EXIT", 4)){

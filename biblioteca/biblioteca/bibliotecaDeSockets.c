@@ -140,14 +140,49 @@ void serializarYEnviar(int socket, int tipoDePaquete, void* package){
 	serializarYEnviarEntero(socket, &tipoDePaquete);
 
 	switch(tipoDePaquete){
-	case NOMBRE_PAQUETE:
-		serializarYEnviarEntero(socket,&((cargar_en_memoria*)package)->pid);
-		serializarYEnviarEntero(socket,&((cargar_en_memoria*)package)->id_segmento);
-		serializarYEnviarEntero(socket,&((cargar_en_memoria*)package)->offset);
-		serializarYEnviarString(socket,((cargar_en_memoria*)package)->linea);
-		return;
-	}
-
+		case VALOR_LFS:
+		{
+			serializarYEnviarEntero(socket,&((valor_tamanio*)package)->valor);
+			return;
+		}
+		case SELECT:
+		{
+			serializarYEnviarString(socket,((struct_select*)package)->nombreTabla);
+			serializarYEnviarUint16(socket,&((struct_select*)package)->key);
+			return;
+		}
+		case CREATE:
+		{
+			serializarYEnviarString(socket,((struct_create*)package)->nombreTabla);
+			serializarYEnviarEntero(socket,&((struct_create*)package)->tipo);
+			serializarYEnviarEntero(socket,&((struct_create*)package)->numeroParticiones);
+			serializarYEnviarEntero(socket,&((struct_create*)package)->tiempoCompactacion);
+			return;
+		}
+		case INSERT:
+		{
+			serializarYEnviarString(socket,((struct_insert*)package)->nombreTabla);
+			serializarYEnviarUint16(socket,&((struct_insert*)package)->key);
+			serializarYEnviarString(socket,((struct_insert*)package)->valor);
+			serializarYEnviarUnsignedLong(socket,&((struct_insert*)package)->timestats);
+			return;
+		}
+		case DROP:
+		{
+			serializarYEnviarString(socket,((struct_tabla*)package)->nombreTabla);
+			return;
+		}
+		case JOURNAL:
+		{
+			serializarYEnviarEntero(socket,&((struct_journal_tabla*)package)->cantidad);
+			return;
+		}
+		case VERIFICAR_TABLA:
+		{
+			serializarYEnviarString(socket,((struct_tabla*)package)->nombreTabla);
+			return;
+		}
+  }
 }
 
 void serializarYEnviarString(int socket, char *string){
@@ -189,9 +224,93 @@ void serializarYEnviarEntero(int socket, int* entero){
 	enviarTodo(socket, serializado, &offset);
 }
 
+void serializarYEnviarUint16(int socket, uint16_t* entero){
+	int largo, tam, offset = 0;
+	char * serializado;
+
+	largo = sizeof(entero);
+	serializado = malloc(sizeof(largo)+largo);
+	memset(serializado,0,largo+sizeof(largo));
+
+	tam = sizeof(largo);
+	memcpy(serializado+offset,&largo, tam);
+	offset += tam;
+
+	tam = largo;
+	memcpy(serializado+offset,entero,tam);
+	offset += largo;
+
+	enviarTodo(socket, serializado, &offset);
+}
+
+void serializarYEnviarUnsignedLong(int socket, unsigned long* entero){
+	int largo, tam, offset = 0;
+	char * serializado;
+
+	largo = sizeof(entero);
+	serializado = malloc(sizeof(largo)+largo);
+	memset(serializado,0,largo+sizeof(largo));
+
+	tam = sizeof(largo);
+	memcpy(serializado+offset,&largo, tam);
+	offset += tam;
+
+	tam = largo;
+	memcpy(serializado+offset,entero,tam);
+	offset += largo;
+
+	enviarTodo(socket, serializado, &offset);
+}
+
 void* recibirYDeserializar(int socket,int tipo){
 	switch(tipo){
-	case NOMBRE_PAQUETE:
+	case VALOR_LFS:{
+		valor_tamanio *valor = malloc(sizeof(valor_tamanio));
+		valor->valor = *recibirYDeserializarEntero(socket);
+		return valor;
+	}
+	case SELECT:
+	{
+		struct_select* select = malloc(sizeof(struct_select));
+		select->nombreTabla =*recibirYDeserializarString(socket);
+		select->key =*recibirYDeserializarEntero(socket);
+		return select;
+	}
+	case CREATE:
+	{
+		struct_create* create = malloc(sizeof(struct_create));
+		create->nombreTabla= *recibirYDeserializarString(socket);
+		create->tipo= *recibirYDeserializarEntero(socket);
+		create->numeroParticiones=  *recibirYDeserializarEntero(socket);
+		create->tiempoCompactacion = *recibirYDeserializarEntero(socket);
+		return create;
+	}
+	case INSERT:
+	{
+		struct_insert* insert = malloc (sizeof(struct_insert));
+		insert->nombreTabla =*recibirYDeserializarString(socket);
+		insert->key= *recibirYDeserializarEntero(socket);
+		insert->valor= *recibirYDeserializarString(socket);
+		insert->timestats=*recibirYDeserializarEntero(socket);
+		return insert;
+	}
+	case DROP:
+	{
+		struct_tabla* tabla = malloc(sizeof(struct_tabla));
+		tabla->nombreTabla=*recibirYDeserializarString(socket);
+		return tabla;
+	}
+	case JOURNAL:
+	{
+		struct_journal_tabla* journal = malloc (sizeof(struct_journal_tabla));
+		journal->cantidad = *recibirYDeserializarEntero(socket);
+		return journal ;
+	}
+	case VERIFICAR_TABLA:
+	{
+		char *string_archivo=recibirYDeserializarString(socket);
+		return string_archivo;
+	}
 	default:
 		return NULL;
 	}
@@ -223,6 +342,61 @@ int *recibirYDeserializarEntero(int socket){
 	free(tam);
 	return numero;
 }
+
+uint16_t *recibirYDeserializarUint16(int socket){
+	int offset = 0, n;
+	int* tam = malloc(sizeof(uint16_t));
+
+	if (recv(socket, tam, sizeof(uint16_t), 0) <=0){
+		perror("Conexión falló");
+		free(tam);
+		return NULL;
+	}
+
+	int *numero= malloc(*tam);
+
+	memset(numero,0,*tam);
+
+	while(offset < *tam) {
+		n = recv(socket, numero+offset, *tam, 0);
+		if(n <=0){
+			perror("Conexión falló");
+			free(tam);
+			return NULL;
+		}
+		offset +=n;
+	}
+	free(tam);
+	return numero;
+}
+
+unsigned long *recibirYDeserializarUnsignedLong(int socket){
+	int offset = 0, n;
+	int* tam = malloc(sizeof(unsigned long));
+
+	if (recv(socket, tam, sizeof(unsigned long), 0) <=0){
+		perror("Conexión falló");
+		free(tam);
+		return NULL;
+	}
+
+	int *numero= malloc(*tam);
+
+	memset(numero,0,*tam);
+
+	while(offset < *tam) {
+		n = recv(socket, numero+offset, *tam, 0);
+		if(n <=0){
+			perror("Conexión falló");
+			free(tam);
+			return NULL;
+		}
+		offset +=n;
+	}
+	free(tam);
+	return numero;
+}
+
 
 char *recibirYDeserializarString(int socket){
 

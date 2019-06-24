@@ -9,6 +9,11 @@
 #define FUNCIONESAUXILIARES_H_
 
 #include <time.h>
+#include <stdint.h>
+#include <string.h>
 
 unsigned long funcionEpoc();
+void agregarValor (char *memoria,int marco,int tamanioPagina,char *valor);
+void agregarKey (char *memoria,int marco,int tamanioPagina,uint16_t key);
+void agregarTimeStats (char *memoria,int marco,int tamanioPagina,unsigned long timestats);
 #endif /* FUNCIONESAUXILIARES_H_ */

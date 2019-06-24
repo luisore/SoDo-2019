@@ -21,7 +21,15 @@
 
 //Estructura para manejar el protocolo
 typedef enum{
-	NOMBRE_PAQUETE,
+	HANDSHAKE_LFS,
+	VALOR_LFS,
+	SELECT,
+	INSERT,
+	DROP,
+	CREATE,
+	JOURNAL,
+	VERIFICAR_TABLA,
+
 }t_protocolo;
 
 
@@ -29,13 +37,51 @@ enum resultado{
 	CORRECTO,
 	ERROR,
 };
+enum cosistencia{
+	SH,
+	S1,
+	S2,
+};
+
+
 
 typedef struct {
-	int pid;
-	int id_segmento;
-	int offset;
-	char* linea;
-} cargar_en_memoria;
+	char* nombreTabla;
+	uint16_t key;
+} struct_select;
+
+typedef struct {
+	char*  nombreTabla;
+	int  tipo;
+	int numeroParticiones;
+	int tiempoCompactacion;
+} struct_create;
+
+typedef struct {
+	char*  nombreTabla;
+	uint16_t key;
+	char *valor;
+	unsigned long timestats;
+} struct_insert;
+
+typedef struct {
+	char* nombreTabla;
+} struct_tabla;
+
+
+typedef struct {
+	int cantidad;
+} struct_journal_tabla;
+
+typedef struct {
+	uint16_t key;
+	char *valor;
+	unsigned long timestats;;
+} struct_registro;
+
+typedef struct {
+	int valor;
+} valor_tamanio;
 
 typedef struct {
 	int pid;
@@ -96,10 +142,14 @@ int escuchar(int socket, fd_set *listaDeSockets,
 void* recibirYDeserializar(int socket,int tipo);
 char* recibirYDeserializarString(int socket);
 int* recibirYDeserializarEntero(int socket);
+uint16_t* recibirYDeserializarUint16(int socket);
+unsigned long* recibirYDeserializarUnsignedLong(int socket);
 
 void serializarYEnviar(int socket, int tipoDePaquete, void* package);
 void serializarYEnviarString(int socket, char *string);
 void serializarYEnviarEntero(int socket, int *numero);
+void serializarYEnviarUint16(int socket, uint16_t *numero);
+void serializarYEnviarUnsignedLong(int socket, unsigned long *numero);
 
 int enviarTodo(int socketReceptor, void *buffer, int *cantidadTotal);
 

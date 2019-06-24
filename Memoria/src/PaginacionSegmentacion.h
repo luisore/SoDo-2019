@@ -41,12 +41,12 @@ typedef struct{
 	unsigned long epoc;
 } registroTabla;
 
-int hayPaginaLibre();
+
 void crear_NodoDePaginaYagregaTabla(int numeroPagina,int tamanioValue,t_list *tablaPaginas);
 void agregar_tabla(t_list *tablaPaginas,paginacion *unaPagina);
 registroTabla *buscarPagina(t_list *tablaPaginas,uint16_t keyDeBusqueda,int *numeroDeNodo,int tam,char *nombreTabla,void *memoria);
 segmentacion *nuevoSegmento(char *nombreTabla,t_list *tablaDeSegmentos );
-int agregarDatOaMemoria(char *nombreTabla,t_bitarray *marco,t_bitarray *modificado,int tamanioValue,t_list *tablaDeSegmentos,void *memoria);
+int agregarDatOaTabla(char *nombreTabla,t_bitarray *marco,t_bitarray *modificado,int tamanioValue,t_list *tablaDeSegmentos,int cantidadDePaginas);
 void destruirBitmap(t_bitarray *bitmap);
 void limpiarBitMap(t_bitarray *bitmap);
 void liberarPaginacionSementacion(t_list *tablaSegmentos);
@@ -58,9 +58,9 @@ void agregar_pagina(t_list *tablaPaginas,paginacion *unaPagina);
 t_list *crearTablaDePaginas();
 char *crearMemoria(int cantidadDebytes);
 void liberarMemoria(char **memoria);
-int paginaLibre(t_bitarray* marco);
+int paginaLibre(t_bitarray* marco,int cantidadDePaginas);
 int existeTablaEnTablaDeSegmento(char *nombreTabla,t_list *tablaDeSegmentos);
-t_bitarray *crearBitmap(int cantidadDepagina);
+t_bitarray *crearBitmap(int cantidadDepagina,int diferencia);
 void setearPaginaEnOcupada(int numeroDepagina);
 t_bitarray *bitarray;
 void guardarEnMemoria(char *memoria,int marco,int valor,struct_operacion* operacion);

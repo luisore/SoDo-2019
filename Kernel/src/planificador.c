@@ -4,9 +4,10 @@ void planificador_iniciar(){
 	planificador_iniciar_colas();
 	while(1){
 		if (!list_is_empty(cola_ready)) {
-			printf("Ejecuto quantum %d\n",kernel->quantum);
-			printf("tamanio cola ready: %d \n",list_size(cola_ready));
+			//log_info(kernel_log,"Ejecuto quantum %d\n",kernel->quantum);
+			//log_info(kernel_log,"tamanio cola ready antes: %d \n",list_size(cola_ready));
 			planificador_ejecutar_requests();
+			//log_info(kernel_log,"tamanio cola ready despues: %d \n",list_size(cola_ready));
 		}
 	}
 

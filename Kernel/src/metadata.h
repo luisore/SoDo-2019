@@ -22,7 +22,11 @@ t_list* metadata_tablas;
 void metadata_iniciar();
 metadata_tabla* metadata_crear(char* nombre_tabla,char* consistency,char* partitions,char* compaction_time);
 void metadata_agregar(metadata_tabla* metadata);
+
+/*retorna la metadata de la tabla, y si no la encuentra retorna NULL*/
 metadata_tabla* metadata_obtener(char* nombre_tabla);
+bool metadata_existe(char* nombre_tabla);
+
 void metadata_imprimir(metadata_tabla* metadata);
 
 

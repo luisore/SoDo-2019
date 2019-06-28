@@ -24,7 +24,7 @@
 
 int kernel_inicializar();
 void kernel_exit();
-void kernel_ejecutar(struct_operacion* operacion);
+bool kernel_ejecutar(struct_operacion* operacion);
 /*retorna true si ejecuto la ultima linea del script*/
 bool kernel_ejecutar_script(script_struct* script);
 bool kernel_ejecutar_api(api_struct* api);

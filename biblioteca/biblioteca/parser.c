@@ -57,9 +57,22 @@ struct_operacion* parsear_linea(char linea[]){
 		operacion->nombre_operacion = API_DESCRIBE;
 		operacion->parametros = string_split(linea + strlen("DESCRIBE "), " ");
 
+		//chequea si tiene el nombre de la tabla
+		if((operacion->parametros)[0] != NULL){
+			//elimino el \n al final
+			char *next = NULL;
+			(operacion->parametros)[0] = strtok_r((operacion->parametros)[0],"\n",&next);
+		}
+
+		string_iterate_lines(operacion->parametros, (void*) puts);
+
 	}else if(_esDROP(linea)){
 		operacion->nombre_operacion = API_DROP;
 		operacion->parametros = string_split(linea + strlen("DROP "), " ");
+
+		//elimino el \n al final
+		char *next = NULL;
+		(operacion->parametros)[0] = strtok_r((operacion->parametros)[0],"\n",&next);
 
 	}else if(_esJOURNAL(linea)){
 		operacion->nombre_operacion = API_JOURNAL;
@@ -113,7 +126,7 @@ static bool _esCREATE(char* linea){
 
 static bool _esDESCRIBE(char* linea){
 	//DESCRIBE [NOMBRE_TABLA]
-	return string_starts_with(linea, "DESCRIBE ");
+	return string_starts_with(linea, "DESCRIBE");
 }
 
 static bool _esDROP(char* linea){
@@ -147,7 +160,8 @@ void free_list_of_strings(char** list_of_strings) {
 }
 
 void free_operacion(struct_operacion* operacion){
-	free_list_of_strings(operacion->parametros);
+	if((operacion->parametros) != NULL)
+		free_list_of_strings(operacion->parametros);
 	free(operacion);
 }
 

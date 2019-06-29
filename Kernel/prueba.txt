@@ -1,0 +1,8 @@
+ADD MEMORY 1 TO SC
+CREATE Materias SC 5 2000
+INSERT Materias 3 “Mi nombre es Lissandra” 1548421507
+DROP Materias
+SELECT Materias 3
+DESCRIBE Materias
+JOURNAL
+METRICS

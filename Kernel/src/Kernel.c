@@ -7,6 +7,10 @@ int main(void) {
 	}
 
 	configuracion_imprimir();
+	/*inicio las colas de criterios*/
+	criterio_iniciar_colas();
+	/*inicio la metadata de tablas*/
+	metadata_iniciar();
 
 	/* Creo el hilo consola */
 	pthread_t thread_consola;
@@ -28,10 +32,7 @@ int main(void) {
 	log_info(kernel_log, "[KERNEL]  Creo el hilo planificador");
 	pthread_detach(thread_planificador);
 
-	/*inicio las colas de criterios*/
-	criterio_iniciar_colas();
-	/*inicio la metadata de tablas*/
-	metadata_iniciar();
+
 
 	while (1) {
 	}
@@ -41,8 +42,7 @@ int main(void) {
 }
 
 void consola_iniciar() {
-	printf(
-			"Bienvenido! Ingrese \"help\" para ver una lista con todos los comandos disponibles \n");
+	log_info(kernel_log,"Bienvenido! Ingrese \"help\" para ver una lista con todos los comandos disponibles \n");
 	char* linea;
 	while (1) {
 		linea = readline(">");
@@ -150,6 +150,9 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 			break;
 		}
 
+		log_info(kernel_log,"Metadata Encontrada: ");
+		metadata_imprimir(metadata);
+
 		//obtenemos la memoria a consultar a partir del criterio
 		memoria = criterio_obtener_memoria((operacion->parametros)[1],
 				metadata->CONSISTENCY);
@@ -157,11 +160,13 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 		//TODO: cada memoria va a tener por archivo de configuracion su numero de memoria
 
 		break;
+
 	case API_INSERT:
 		log_info(kernel_log,
 				"[KERNEL] ejecuta: INSERT, Tabla: %s, Key: %s, Value: %s, Timestamp: %s\n",
 				(operacion->parametros)[0], (operacion->parametros)[1],
 				(operacion->parametros)[2], (operacion->parametros)[3]);
+
 
 		//obtenemos la metadata de la tabla, si no existe no hacemos la operacion
 		if ((metadata = metadata_obtener((operacion->parametros)[0])) == NULL) {
@@ -172,11 +177,15 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 			break;
 		}
 
+		log_info(kernel_log,"Metadata Encontrada: ");
+		metadata_imprimir(metadata);
+
 		//obtenemos la memoria a consultar a partir del criterio
 		memoria = criterio_obtener_memoria((operacion->parametros)[1],
 				metadata->CONSISTENCY);
 
 		break;
+
 	case API_CREATE:
 		log_info(kernel_log,
 				"[KERNEL] ejecuta: CREATE, Tabla: %s, Tipo Consistencia: %s, Numero Particiones: %s, Compaction Time: %s\n",
@@ -189,14 +198,17 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 
 		metadata_agregar(metadata);
 
+		log_info(kernel_log,"Se creo la metadata.\n");
 		metadata_imprimir(metadata);
 
 		break;
+
 	case API_DESCRIBE:
 		log_info(kernel_log, "[KERNEL] ejecuta: DESCRIBE, Tabla: %s\n",
 				(operacion->parametros)[0]);
 
 		break;
+
 	case API_DROP:
 		log_info(kernel_log, "[KERNEL] ejecuta: DROP, Tabla: %s\n",
 				(operacion->parametros)[0]);
@@ -210,12 +222,16 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 			break;
 		}
 
+		log_info(kernel_log,"Metadata Encontrada: ");
+		metadata_imprimir(metadata);
 
 		break;
+
 	case API_JOURNAL:
 		log_info(kernel_log, "[KERNEL] ejecuta: JOURNAL\n");
 
 		break;
+
 	case API_ADD:
 		log_info(kernel_log,
 				"[KERNEL] ejecuta: ADD MEMORY , Numero: %s, Criterio: %s\n",
@@ -225,6 +241,7 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 				(operacion->parametros)[1]);
 
 		break;
+
 	case API_RUN:
 		log_info(kernel_log, "[KERNEL] ejecuta: RUN, <path>: %s\n",
 				(operacion->parametros)[0]);
@@ -234,6 +251,7 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 		planificador_agregar_request(request);
 
 		break;
+
 	case API_METRICS:
 		log_info(kernel_log, "[KERNEL] ejecuta: METRICS\n");
 
@@ -241,7 +259,13 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 	default:
 		break;
 	}
+	kernel_retardo_ejecucion();
 	return estado_ejecucion;
+}
+
+void kernel_retardo_ejecucion(){
+	//log_info(kernel_log,"Sleep ejecucion %d",kernel->sleep_ejecucion / 1000);
+	sleep(kernel->sleep_ejecucion / 1000);
 }
 
 int kernel_inicializar(char* nombre_archivo_log) {

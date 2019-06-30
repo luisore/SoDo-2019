@@ -1,8 +1,12 @@
 ADD MEMORY 1 TO SC
 CREATE Materias SC 5 2000
 INSERT Materias 3 “Mi nombre es Lissandra” 1548421507
-DROP Materias
 SELECT Materias 3
+INSERT Materias 4 “Mi nombre es Pablito” 1548423200
+SELECT Materias 4
+INSERT Materias 5 “Mi nombre es Luisito” 1548431120
+SELECT Materias 5
+DROP Materias
 DESCRIBE Materias
 JOURNAL
 METRICS

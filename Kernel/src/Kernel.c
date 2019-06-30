@@ -11,6 +11,8 @@ int main(void) {
 	criterio_iniciar_colas();
 	/*inicio la metadata de tablas*/
 	metadata_iniciar();
+	/*inicio las colas de metricas*/
+	metricas_iniciar_colas();
 
 	/* Creo el hilo consola */
 	pthread_t thread_consola;
@@ -131,6 +133,8 @@ bool kernel_ejecutar_script(script_struct* script) {
 
 bool kernel_ejecutar(struct_operacion* operacion) {
 
+	time_t begin = time(NULL);
+	kernel_retardo_ejecucion();
 	//estado ejecucion es true si la ejecucion fue correcta o false si no lo fue
 	bool estado_ejecucion = true;
 	metadata_tabla* metadata;
@@ -154,10 +158,20 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 		metadata_imprimir(metadata);
 
 		//obtenemos la memoria a consultar a partir del criterio
-		memoria = criterio_obtener_memoria((operacion->parametros)[1],
-				metadata->CONSISTENCY);
+		memoria = criterio_obtener_memoria((operacion->parametros)[1], metadata->CONSISTENCY);
 
 		//TODO: cada memoria va a tener por archivo de configuracion su numero de memoria
+
+
+
+
+
+
+
+
+
+		//agrego la estadistica criterio y operacion
+		metricas_agregar_latency(time(NULL) - begin, operacion->nombre_operacion, metadata->CONSISTENCY);
 
 		break;
 
@@ -181,8 +195,14 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 		metadata_imprimir(metadata);
 
 		//obtenemos la memoria a consultar a partir del criterio
-		memoria = criterio_obtener_memoria((operacion->parametros)[1],
-				metadata->CONSISTENCY);
+		memoria = criterio_obtener_memoria((operacion->parametros)[1],	metadata->CONSISTENCY);
+
+
+
+
+
+		//agrego la estadistica criterio y operacion
+		metricas_agregar_latency(time(NULL) - begin, operacion->nombre_operacion, metadata->CONSISTENCY);
 
 		break;
 
@@ -255,11 +275,15 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 	case API_METRICS:
 		log_info(kernel_log, "[KERNEL] ejecuta: METRICS\n");
 
+		metricas_imprimir("SC");
+		metricas_imprimir("SHC");
+		metricas_imprimir("EC");
+
 		break;
 	default:
 		break;
 	}
-	kernel_retardo_ejecucion();
+
 	return estado_ejecucion;
 }
 

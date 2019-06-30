@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <readline/readline.h>
@@ -20,6 +21,7 @@
 #include "request.h"
 #include "criterio.h"
 #include "metadata.h"
+#include "metricas.h"
 
 
 int kernel_inicializar();

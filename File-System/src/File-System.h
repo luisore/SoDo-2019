@@ -25,6 +25,8 @@
 #include <readline/history.h>
 #include "config/bitmap.h"
 #include "config/metadata.h"
+
+
 //funcion recibir que comunica con memoria
 void recibir_conexion();
 int FileSystem_fd;
@@ -33,6 +35,12 @@ int  LFS_FD;
 
 void lfs_consola();
 
+t_list* obtenerListadoDeSubArchivos(const char * pathDirectorio,const char* extension);
+t_list* obtenerListadoDeSubArchivosCompleto(const char * pathDirectorio,const char* extension);
+RegistroLinea obtenerRegistroLinea(FILE* bloque);
+t_list* obtenerListadoDeNombresDeSubArchivos(const char* pathCarpetaPadre);
+
+//void recorrerArchivosSegunExtension(const char * pathDirectorio,const char* extension, void(*funcion)(void*));
 
 
 #endif /* FILE_SYSTEM_H_ */

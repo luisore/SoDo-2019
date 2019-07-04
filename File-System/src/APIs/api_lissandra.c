@@ -228,11 +228,24 @@ void crearParticiones(const char* tabla, unsigned int numeroDeParticiones){
 	free(path_tabla);
 	free(path_particion);
 }
-
-
-
-void describe1();
-void describe2(const char* nombre_de_tabla);
+void describe1(){
+	char* aux =(char*)malloc(strlen(lfs.puntoDeMontaje)+1+strlen("Tables")+2);//"src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables"
+	sprintf(aux,"%s%s",lfs.puntoDeMontaje,"Tables");
+	puts(aux);
+	t_list* listaDeNombreDeTablas= obtenerListadoDeNombresDeSubArchivos(aux);
+	list_iterate(listaDeNombreDeTablas,puts);
+	free(aux);
+//	list_map(listaDeNombreDeTablas,describe2);
+	list_destroy(listaDeNombreDeTablas);
+}
+void describe2(const char* nombre_de_tabla){
+	Metadata_Tabla* metadata= obtenerMetadata(nombre_de_tabla);
+	printfMetadata(metadata);//esto puede ser enviar metadata a memoria en lugar de imprimir etc  etc
+	free(metadata);
+}
+void printfMetadata(Metadata_Tabla* metadata){
+	printf("	particiones: %d \n	consistencia: %s \n	y tiempo de compactacion: %d \n",metadata->PARTITIONS,metadata->CONSISTENCY,metadata->COMPACTION_TIME);
+}
 void drop(const char* nombre_de_tabla){
 
 }

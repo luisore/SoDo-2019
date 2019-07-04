@@ -11,35 +11,209 @@
 #include "File-System.h"
 #include "config/config.h"
 #include <pthread.h>
-
+#include <dirent.h>
 pthread_t consola,dump;//,compactador;
 
-int main(void) {
-	puts("... INICIA LFS ...");
+void compactar();
 
-	//inicio log
-	logger = log_create("LFS.log", "LISSANDRA - LFS", true, LOG_LEVEL_TRACE);
+
+t_list* obtenerParticionesTemporales(const char* nombreDeTabla);
+t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla);
+
+typedef struct{
+	RegistroLinea registro;
+	unsigned int bloque,particion;
+}RegistroLinea_compactador;
+
+typedef struct{
+	char pathParticion[256];
+	bool esTemporal;
+	unsigned int size;
+	char** bloques;
+}Particion;
+//typedef struct{
+//	char pathParticion[256];
+//	bool esTemporal;
+//}ParticionNombre;
+
+//int main(void) {
+//	puts("... INICIA LFS ...");
+//
+//	//inicio log
+//	logger = log_create("LFS.log", "LISSANDRA - LFS", true, LOG_LEVEL_TRACE);
+//
+//	config_cargar("LFS.config");
+//	log_info(logger,"se cargo LFS.log \n");
+//
+//	memtable=list_create();
+//
+//	imprimir_configuracion();
+//
+//	pthread_create(&consola,NULL,lfs_consola,NULL);
+//	pthread_join(consola,NULL);
+////	lfs_consola();//por el momento funciona con el CREATE
+//
+////	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
+//
+//
+//
+//
+//	log_destroy(logger);
+//	list_destroy(memtable);
+//	puts("... FIN LFS ...");
+//	return EXIT_SUCCESS;
+//}
+int main() {
 
 	config_cargar("LFS.config");
-	log_info(logger,"se cargo LFS.log \n");
+	struct stat estadoDeArchivo;
+		struct dirent* archivo;
+		puts("antes de tabla A");
+		char* pathDeTabla=obtenerPathDeTabla("unaTablaEtc");
+		puts("tablaA");
+		DIR* directorio;
+		for(directorio=opendir(pathDeTabla);(archivo=readdir(directorio))!=NULL;stat(archivo->d_name,&estadoDeArchivo)){
+			puts(archivo->d_name);
+			if((strcmp(archivo->d_name,".")!=0)&&(strcmp(archivo->d_name,"..")!=0)){
+//			Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
+//			if(string_ends_with(archivo->d_name,".tmp")){//es temporal
+//							unaParticion->esTemporal=true;
+//
+//			}
+		}
+		}
+		puts("ahora con la funcion hecha");
+		puts(pathDeTabla);
+		t_list* lista = obtenerListadoDeSubArchivosCompleto(pathDeTabla,".partition");
+		list_iterate(lista,puts);
+		list_destroy(lista);
 
-	memtable=list_create();
-
-	imprimir_configuracion();
-
-	pthread_create(&consola,NULL,lfs_consola,NULL);
-	pthread_join(consola,NULL);
-//	lfs_consola();//por el momento funciona con el CREATE
-
-//	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
+		free(pathDeTabla);
 
 
+		puts("inicio de recorrido de bloque");
+		recorrerBloque("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/2.bin");
 
+		puts("describe2");
+		describe2("tableA");
+		puts("describe1");
+		describe1();
 
-	log_destroy(logger);
-	list_destroy(memtable);
-	puts("... FIN LFS ...");
+		puts("mostrar listado de archivos de punto de montaje");
+		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
+		list_iterate(archivos,puts);
+		list_destroy(archivos);
+		puts("FIN");
+
 	return EXIT_SUCCESS;
+}
+void recorrerBloque(const char* pathBloque){//ok
+	FILE* bloque =fopen(pathBloque,"r+");
+	if(bloque==NULL)perror("error al abrir el bloque para recorrer ");
+	while(!feof(bloque)){
+		RegistroLinea registro;
+		registro.value=malloc(lfs.tamanioValue);
+//		fscanf(bloque,"%d;%d;%s\n",&registro.timestamp,&registro.key,registro.value);
+		registro = obtenerRegistroLinea(bloque);
+		printRegistroLinea(&registro);
+		free(registro.value);
+	}
+	fclose(bloque);
+}
+RegistroLinea obtenerRegistroLinea(FILE* bloque){
+	RegistroLinea registro;//=(RegistroLinea*)malloc(sizeof(RegistroLinea));
+	registro.value=malloc(lfs.tamanioValue);
+//	fseek(bloque,posicionLinea,SEEK_SET);
+	fscanf(bloque,"%d;%d;%s\n",&registro.timestamp,&registro.key,registro.value);
+//	printf("bytes leidos = %d \n",n );
+	return registro;
+}
+void printRegistroLinea(RegistroLinea* registro){
+	printf("Registro linea -> %d;%d;%s\n",registro->timestamp,registro->key,registro->value);
+}
+void registroLineaDestroy(RegistroLinea* linea){
+	free(linea->value);
+	free(linea);
+}
+t_list* obtenerListadoDeSubArchivos(const char * pathDirectorio,const char* extension){//ok
+	t_list* nombresDeArchivos=list_create();
+	struct stat estadoDeArchivo;
+		struct dirent* archivo;
+		DIR* directorio;
+		for(directorio=opendir(pathDirectorio);(archivo=readdir(directorio))!=NULL;stat(archivo->d_name,&estadoDeArchivo)){
+			if(string_ends_with(archivo->d_name,extension)){
+				list_add(nombresDeArchivos,strdup(archivo->d_name));
+			}
+		}
+		return nombresDeArchivos;
+}
+t_list* obtenerListadoDeSubArchivosCompleto(const char * pathDirectorio,const char* extension){
+	t_list* nombresDeArchivos=list_create();
+	struct stat estadoDeArchivo;
+		struct dirent* archivo;
+		DIR* directorio;
+		for(directorio=opendir(pathDirectorio);(archivo=readdir(directorio))!=NULL;stat(archivo->d_name,&estadoDeArchivo)){
+			if(directorio==NULL)perror("error en obtener listado de sub archivos ");
+			if(string_ends_with(archivo->d_name,extension)){
+				char* aux = (char*)malloc(strlen(pathDirectorio)+strlen(archivo->d_name)+2);
+				sprintf(aux,"%s%s%s",pathDirectorio,"/",archivo->d_name);
+				list_add(nombresDeArchivos,aux);
+//				free(aux);
+			}
+		}
+//		bool ordenarPorNombre(const char* unPath,const char* otroPath){
+//			bool ordenado = false;
+//			for(int i =0;unPath[i]!='\0' || otroPath[i]!='\0';i++){
+//				if(unPath[i]<otroPath[i]){
+//					ordenado=true;
+//					break;
+//				}
+//			}
+//		}
+//		list_sort(nombresDeArchivos,ordenarPorNombre);
+		return nombresDeArchivos;
+}
+t_list* obtenerListadoDeNombresDeSubArchivos(const char* pathCarpetaPadre){
+	t_list* lista = list_create();
+	struct stat estadoDeArchivo;
+		struct dirent* archivo;
+		DIR* directorio;
+		for(directorio=opendir(pathCarpetaPadre);(archivo=readdir(directorio))!=NULL;stat(archivo->d_name,&estadoDeArchivo)){
+			if(directorio==NULL)perror("error al obtener listado de subarchivos ");
+			if(!string_contains(archivo->d_name,".")){
+//				char* aux = (char*)malloc(strlen(pathCarpetaPadre)+strlen(archivo->d_name)+2);
+//				sprintf(aux,"%s%s%s",pathCarpetaPadre,"/",archivo->d_name);
+				list_add(lista,strdup(archivo->d_name));
+//				free(aux);
+			}
+		}
+		return lista;
+}
+
+
+void compactar(const char* nombreDeTabla){
+	t_list* particionesTemporales=obtenerParticionesTemporales(nombreDeTabla);
+	t_list* particionesNoTemporales=obtenerParticionesNoTemporales(nombreDeTabla);
+
+
+
+
+	list_destroy(particionesTemporales);
+	list_destroy(particionesNoTemporales);
+}
+t_list* obtenerParticionesTemporales(const char* nombreDeTabla){
+	t_list* particionesTemporales=list_create();
+	Metadata_Tabla *metadataDeTabla = obtenerMetadata(nombreDeTabla);
+	int x = metadataDeTabla->PARTITIONS;
+	char* pathDeLaTabla=obtenerPathDeTabla(nombreDeTabla);
+
+	free(pathDeLaTabla);
+	return particionesTemporales;
+}
+
+t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla){
+	t_list* particionesTemporales=list_create();
+	return particionesTemporales;
 }
 //Persona* buscarPersona(t_list* lista, char* nombre){//para probar
 //	bool buscarLaDePersona1(Persona* p){
@@ -49,6 +223,32 @@ int main(void) {
 //	return encontrada;
 //}
 
+t_list* obtenerParticiones(const char* nombreDeTabla){
+	t_list* particiones = list_create();
+	struct stat estadoDeArchivo;
+	struct dirent* archivo;
+	char* pathDeTabla=obtenerPathDeTabla(nombreDeTabla);
+
+	DIR* directorio;
+	for(directorio=opendir(pathDeTabla);(archivo=readdir(directorio))!=NULL;){
+		puts("x");
+		stat(archivo->d_name,&estadoDeArchivo);
+		puts(archivo->d_name);
+//		if((strcmp(archivo->d_name,".")!=0)&&(strcmp(archivo->d_name,"..")!=0)){
+
+		if(string_ends_with(archivo->d_name,".tmp")){//es temporal
+
+			Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
+			unaParticion->esTemporal=true;
+
+			list_add(particiones,unaParticion);
+
+		}
+	}
+
+	free(pathDeTabla);
+	return particiones;
+}
 void lfs_consola(){
 	while(1){
 		char* linea = readline("LFS@_consola -> ");
@@ -88,55 +288,4 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 			break;
 	}
 }
-//void struct_operacion_destroy(struct_operacion* unaLineaLql){
-//	free_char_x2(unaLineaLql->parametros);
-//}
-void recibir_conexion(){
-
-	crearSocket(&FileSystem_fd);
-	setearParaEscuchar(&FileSystem_fd, lfs.puertoEscucha);
-	LFS_FD=aceptarConexion(FileSystem_fd);
-}
-//int main(void) {
-//	void iterator(char* value)
-//		{
-//			printf("%s\n", value);
-//		}
-//
-//		logger = log_create("LFS.log", "Servidor", 1, LOG_LEVEL_DEBUG);
-//
-//		int server_fd = iniciar_servidor();
-//		log_info(logger, "Servidor listo para recibir al cliente");
-//		int cliente_fd = esperar_cliente(server_fd);
-//
-//		t_list* lista;
-////		while(1)
-////		{
-////			int cod_op = recibir_operacion(cliente_fd);
-////			switch(cod_op)
-////			{
-////			case MENSAJE:
-////				recibir_mensaje(cliente_fd);
-////				break;
-////			case PAQUETE:
-////				lista = recibir_paquete(cliente_fd);
-////				printf("Me llegaron los siguientes valores:\n");
-////				list_iterate(lista, (void*) iterator);
-////				break;
-////			case -1:
-////				log_error(logger, "el cliente se desconecto. Terminando servidor");
-////				return EXIT_FAILURE;
-////			default:
-////				log_warning(logger, "Operacion desconocida. No quieras meter la pata");
-////				break;
-////			}
-////		}
-//		char* s;
-//		while(1){
-//			 s = recibir_mensaje_v2(cliente_fd);
-//			puts(s);
-//		}
-//		free(s);
-//		return EXIT_SUCCESS;
-//}
 

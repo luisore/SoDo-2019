@@ -247,9 +247,22 @@ void printfMetadata(Metadata_Tabla* metadata){
 	printf("	particiones: %d \n	consistencia: %s \n	y tiempo de compactacion: %d \n",metadata->PARTITIONS,metadata->CONSISTENCY,metadata->COMPACTION_TIME);
 }
 void drop(const char* nombre_de_tabla){
+	t_list* listaDeParticiones=obtenerListaDeParticiones(nombre_de_tabla);
+	char* pathDeTabla = obtenerPathDeTabla(nombre_de_tabla);
+	remove(pathDeTabla);
+	free(pathDeTabla);
+
+	list_destroy(listaDeParticiones);
+}
+t_list* obtenerListaDeParticiones(const char* nombre_de_tabla){
+	t_list listaDeParticiones = list_create();
+	char* aux = obtenerPathDeTabla(nombre_de_tabla);
+	t_list* nombresDeParticiones = obtenerListadoDeSubArchivosCompleto(aux,".partition");//puede ser .bin tambien
+	Particion* obtenerParticion(const char* pathDeParticion){
+		obtenerParticionesNoTemporales()
+	}
 
 }
-
 bool  yaExisteTabla(const char* nombre_de_tabla){
 	//if exit(RES)
 
@@ -266,13 +279,6 @@ char*  obtenerPathDeTabla(const char* nombre_de_tabla)
 //	mostrarCaracteres(path_aux);
 //	printf("path de tabla %s es \"%s\" \n",nombre_de_tabla,path_aux);
 	return  path_aux;
-}
-void crear_directorio_para_tabla(nombre_de_tabla){
-
-}
-
-void crear_archivo_metadata(nombre_de_tabla,tipo_consistencia,numero_de_particiones,tiempo_de_compactacion){
-
 }
 void aplicar_retardo(){
 //	sleep(lfs.retardo/1000);

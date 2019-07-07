@@ -20,17 +20,7 @@ void compactar();
 t_list* obtenerParticionesTemporales(const char* nombreDeTabla);
 t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla);
 
-typedef struct{
-	RegistroLinea registro;
-	unsigned int bloque,particion;
-}RegistroLinea_compactador;
 
-typedef struct{
-	char pathParticion[256];
-	bool esTemporal;
-	unsigned int size;
-	char** bloques;
-}Particion;
 //typedef struct{
 //	char pathParticion[256];
 //	bool esTemporal;
@@ -201,6 +191,9 @@ void compactar(const char* nombreDeTabla){
 	list_destroy(particionesTemporales);
 	list_destroy(particionesNoTemporales);
 }
+//t_list* obtenerParticiones(const char* nombreDeTabla){
+//	t_list* particiones
+//}
 t_list* obtenerParticionesTemporales(const char* nombreDeTabla){
 	t_list* particionesTemporales=list_create();
 	Metadata_Tabla *metadataDeTabla = obtenerMetadata(nombreDeTabla);

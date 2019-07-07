@@ -43,6 +43,18 @@ typedef struct {
 //Insert* memtable_de_inserts;
 t_list * memtable;//lista del tipo Insert , el select chequea esto tambien
 
+//-----
+typedef struct{
+	RegistroLinea registro;
+	unsigned int bloque,particion;
+}RegistroLinea_compactador;
+
+typedef struct{
+	char pathParticion[256];
+	bool esTemporal;
+	unsigned int size;
+	char** bloques;
+}Particion;
 //char* aux_tabla_para_la_memtable;
 
 //funciones de la API de LFS,para ser consultadas IMPORTANTES estas 7 funciones, son la posta

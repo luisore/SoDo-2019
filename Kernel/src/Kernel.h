@@ -23,6 +23,8 @@
 #include "metadata.h"
 #include "metricas.h"
 
+int memoria_fd;
+
 
 int kernel_inicializar();
 void kernel_exit();

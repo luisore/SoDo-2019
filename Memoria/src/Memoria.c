@@ -69,9 +69,9 @@ int main(void) {
 
 	//<Agregar codigo paa lo de gossiping en las funciones gossiping y pool>
 
-	//pthread_create(&hilo_pool,NULL,(void*)pool,NULL);
+	pthread_create(&hilo_pool,NULL,(void*)pool,NULL);
 	//pthread_create(&hilo_gossping,NULL,(void*)gossiping,NULL);
-	//pthread_detach(hilo_pool);
+	pthread_detach(hilo_pool);
 	//pthread_detach(hilo_gossiping);
 
 

@@ -35,6 +35,21 @@ int main(void) {
 	pthread_detach(thread_planificador);
 
 
+	//Me conecto a la memoria
+	crearSocket(&memoria_fd);
+
+	//Se conecta al file system
+	if(conectar(&memoria_fd,kernel->puerto_memoria,kernel->ip_memoria)!=0){
+		  puts( "error");
+			exit(1);
+	}
+	else{
+		puts("estableci conexion");
+	}
+
+
+
+
 
 	while (1) {
 	}
@@ -163,11 +178,27 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 		//TODO: cada memoria va a tener por archivo de configuracion su numero de memoria
 
 
+		char *ptr;
+		int nro_key = (int)strtol((operacion->parametros)[1], &ptr, 10);
+
+		//crear_select(nro_key,(operacion->parametros)[0]);
+
+		serializarYEnviar(memoria_fd,SELECT,crear_select(nro_key,(operacion->parametros)[0]));
 
 
 
 
+		int* resultado = recibirYDeserializarEntero(memoria_fd);
 
+		struct_insert* select_resultado;
+		switch (*resultado) {
+			case SELECT_RESULTADO:
+				select_resultado = recibirYDeserializar(memoria_fd,SELECT_RESULTADO);
+
+				break;
+			default:
+				break;
+		}
 
 
 		//agrego la estadistica criterio y operacion

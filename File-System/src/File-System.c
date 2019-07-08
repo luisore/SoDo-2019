@@ -86,13 +86,19 @@ int main() {
 
 		puts("describe2");
 		describe2("tableA");
-		puts("describe1");
-		describe1();
+//		puts("describe1");
+//		describe1();
 
 		puts("mostrar listado de archivos de punto de montaje");
 		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
 		list_iterate(archivos,puts);
 		list_destroy(archivos);
+
+		puts("mostrar particiones de una tabla ");
+		t_list* particiones = obtenerParticiones("tableA");
+		list_iterate(particiones,mostrarParticion);
+		list_destroy(particiones);
+
 		puts("FIN");
 
 	return EXIT_SUCCESS;
@@ -191,9 +197,45 @@ void compactar(const char* nombreDeTabla){
 	list_destroy(particionesTemporales);
 	list_destroy(particionesNoTemporales);
 }
-//t_list* obtenerParticiones(const char* nombreDeTabla){
-//	t_list* particiones
-//}
+t_list* obtenerParticiones(const char* nombreDeTabla){
+	t_list* listaDeParticiones_path = obtenerListaDeParticiones_path(nombreDeTabla);
+	Particion* pathToParticion( char* pathDeParticion ){
+		Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
+		t_config* config = config_create(pathDeParticion);
+		unaParticion->esTemporal=false;
+		if(string_ends_with(pathDeParticion,".tmp") || string_ends_with(pathDeParticion,".tmpc"))unaParticion->esTemporal=true;
+		unaParticion->bloques=config_get_array_value(config,"block");
+		unaParticion->size=config_get_int_value(config,"size");
+		strcpy(unaParticion->pathParticion,pathDeParticion);
+		config_destroy(config);
+		return unaParticion;
+	}
+	t_list* listaDeParticiones = list_map(listaDeParticiones_path,pathToParticion);
+	list_destroy(listaDeParticiones_path);
+	return listaDeParticiones;
+}
+void mostrarParticion(Particion* particion){
+	if(particion->esTemporal)printf("particion = %s \n	size= %d \n	y es temporal\n",particion->pathParticion,particion->size);
+	else printf("particion = %s \n	size= %d \n	y no es temporal\n",particion->esTemporal,particion->size);
+}
+t_list* obtenerListaDeParticiones_path(const char* nombreDeTabla ){//ok
+	t_list* listaDePaths=list_create();
+	char* aux = obtenerPathDeTabla(nombreDeTabla);
+	t_list* listaDeBin = obtenerListadoDeSubArchivosCompleto(aux,".bin");
+	t_list* listaDe_tmp = obtenerListadoDeSubArchivosCompleto(aux,".tmp");
+	t_list* listaDe_tmpc= obtenerListadoDeSubArchivosCompleto(aux,".tmpc");
+	t_list* listaDe_partition=obtenerListadoDeSubArchivosCompleto(aux,".partition");
+	free(aux);
+	list_add_all(listaDePaths,listaDeBin);
+	list_add_all(listaDePaths,listaDe_tmp);
+	list_add_all(listaDePaths,listaDe_tmpc);
+	list_add_all(listaDePaths,listaDe_partition);
+	list_destroy(listaDeBin);
+	list_destroy(listaDe_tmp);
+	list_destroy(listaDe_tmpc);
+	list_destroy(listaDe_partition);
+	return listaDePaths;
+}
 t_list* obtenerParticionesTemporales(const char* nombreDeTabla){
 	t_list* particionesTemporales=list_create();
 	Metadata_Tabla *metadataDeTabla = obtenerMetadata(nombreDeTabla);
@@ -216,32 +258,33 @@ t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla){
 //	return encontrada;
 //}
 
-t_list* obtenerParticiones(const char* nombreDeTabla){
-	t_list* particiones = list_create();
-	struct stat estadoDeArchivo;
-	struct dirent* archivo;
-	char* pathDeTabla=obtenerPathDeTabla(nombreDeTabla);
-
-	DIR* directorio;
-	for(directorio=opendir(pathDeTabla);(archivo=readdir(directorio))!=NULL;){
-		puts("x");
-		stat(archivo->d_name,&estadoDeArchivo);
-		puts(archivo->d_name);
-//		if((strcmp(archivo->d_name,".")!=0)&&(strcmp(archivo->d_name,"..")!=0)){
-
-		if(string_ends_with(archivo->d_name,".tmp")){//es temporal
-
-			Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
-			unaParticion->esTemporal=true;
-
-			list_add(particiones,unaParticion);
-
-		}
-	}
-
-	free(pathDeTabla);
-	return particiones;
-}
+//---------
+//t_list* obtenerParticiones(const char* nombreDeTabla){
+//	t_list* particiones = list_create();
+//	struct stat estadoDeArchivo;
+//	struct dirent* archivo;
+//	char* pathDeTabla=obtenerPathDeTabla(nombreDeTabla);
+//
+//	DIR* directorio;
+//	for(directorio=opendir(pathDeTabla);(archivo=readdir(directorio))!=NULL;){
+//		puts("x");
+//		stat(archivo->d_name,&estadoDeArchivo);
+//		puts(archivo->d_name);
+////		if((strcmp(archivo->d_name,".")!=0)&&(strcmp(archivo->d_name,"..")!=0)){
+//
+//		if(string_ends_with(archivo->d_name,".tmp")){//es temporal
+//
+//			Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
+//			unaParticion->esTemporal=true;
+//
+//			list_add(particiones,unaParticion);
+//
+//		}
+//	}
+//
+//	free(pathDeTabla);
+//	return particiones;
+//}
 void lfs_consola(){
 	while(1){
 		char* linea = readline("LFS@_consola -> ");

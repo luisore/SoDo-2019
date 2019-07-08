@@ -247,22 +247,21 @@ void printfMetadata(Metadata_Tabla* metadata){
 	printf("	particiones: %d \n	consistencia: %s \n	y tiempo de compactacion: %d \n",metadata->PARTITIONS,metadata->CONSISTENCY,metadata->COMPACTION_TIME);
 }
 void drop(const char* nombre_de_tabla){
-	t_list* listaDeParticiones=obtenerListaDeParticiones(nombre_de_tabla);
+	t_list* listaDeParticiones=obtenerParticiones(nombre_de_tabla);
 	char* pathDeTabla = obtenerPathDeTabla(nombre_de_tabla);
 	remove(pathDeTabla);
 	free(pathDeTabla);
-
 	list_destroy(listaDeParticiones);
 }
-t_list* obtenerListaDeParticiones(const char* nombre_de_tabla){
-	t_list listaDeParticiones = list_create();
-	char* aux = obtenerPathDeTabla(nombre_de_tabla);
-	t_list* nombresDeParticiones = obtenerListadoDeSubArchivosCompleto(aux,".partition");//puede ser .bin tambien
-	Particion* obtenerParticion(const char* pathDeParticion){
-		obtenerParticionesNoTemporales()
-	}
-
-}
+//t_list* obtenerListaDeParticiones(const char* nombre_de_tabla){
+//	t_list listaDeParticiones = list_create();
+//	char* aux = obtenerPathDeTabla(nombre_de_tabla);
+//	t_list* nombresDeParticiones = obtenerListadoDeSubArchivosCompleto(aux,".partition");//puede ser .bin tambien
+//	Particion* obtenerParticion(const char* pathDeParticion){
+//		obtenerParticionesNoTemporales()
+//	}
+//
+//}
 bool  yaExisteTabla(const char* nombre_de_tabla){
 	//if exit(RES)
 

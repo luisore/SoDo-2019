@@ -39,6 +39,9 @@ t_list* obtenerListadoDeSubArchivos(const char * pathDirectorio,const char* exte
 t_list* obtenerListadoDeSubArchivosCompleto(const char * pathDirectorio,const char* extension);
 RegistroLinea obtenerRegistroLinea(FILE* bloque);
 t_list* obtenerListadoDeNombresDeSubArchivos(const char* pathCarpetaPadre);
+t_list* obtenerListaDeParticiones_path(const char* nombreDeTabla );//ok
+t_list* obtenerParticiones(const char* nombreDeTabla);
+void mostrarParticion(Particion* particion);
 
 //void recorrerArchivosSegunExtension(const char * pathDirectorio,const char* extension, void(*funcion)(void*));
 

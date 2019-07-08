@@ -125,15 +125,16 @@ char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal){
 	return pathDeParticion;
 }
 Metadata_Tabla* obtenerMetadata(const char* nombreTabla){
-	Metadata_Tabla *unMetadata=malloc(sizeof(Metadata_Tabla));
+	Metadata_Tabla *unMetadata=(Metadata_Tabla*)malloc(sizeof(Metadata_Tabla));
 	char* aux = obtenerPathDeTabla(nombreTabla);
-		char* path_metadata=malloc(strlen(aux)+20);
+		char* path_metadata=malloc(strlen(aux)+strlen("/Metadata.metadata")+1);
 		sprintf(path_metadata,"%s/Metadata.metadata",aux);
 		free(aux);
 		t_config* unConfig=config_create(path_metadata);
 		free(path_metadata);
 			if(unConfig==NULL){
 				fprintf(stderr,"No Existe metadata para la  tabla  \"%s\" \n",nombreTabla);
+				perror("No Existe metadata para la  tabla");
 			}
 			else {
 				unMetadata->COMPACTION_TIME=config_get_int_value(unConfig,"COMPACTION_TIME");
@@ -240,11 +241,11 @@ void describe1(){
 }
 void describe2(const char* nombre_de_tabla){
 	Metadata_Tabla* metadata= obtenerMetadata(nombre_de_tabla);
-	printfMetadata(metadata);//esto puede ser enviar metadata a memoria en lugar de imprimir etc  etc
+	printfMetadata(metadata,nombre_de_tabla);//esto puede ser enviar metadata a memoria en lugar de imprimir etc  etc
 	free(metadata);
 }
-void printfMetadata(Metadata_Tabla* metadata){
-	printf("	particiones: %d \n	consistencia: %s \n	y tiempo de compactacion: %d \n",metadata->PARTITIONS,metadata->CONSISTENCY,metadata->COMPACTION_TIME);
+void printfMetadata(Metadata_Tabla* metadata, const char* nombre_de_tabla){
+		printf("tabla:%s,\n	particiones: %d \n	consistencia: %s \n	y tiempo de compactacion: %d \n",nombre_de_tabla,metadata->PARTITIONS,metadata->CONSISTENCY,metadata->COMPACTION_TIME);
 }
 void drop(const char* nombre_de_tabla){
 	t_list* listaDeParticiones=obtenerParticiones(nombre_de_tabla);

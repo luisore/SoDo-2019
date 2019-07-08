@@ -35,6 +35,11 @@ int  LFS_FD;
 
 void lfs_consola();
 
+void compactar();
+
+
+t_list* obtenerParticionesTemporales(const char* nombreDeTabla);
+t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla);
 t_list* obtenerListadoDeSubArchivos(const char * pathDirectorio,const char* extension);
 t_list* obtenerListadoDeSubArchivosCompleto(const char * pathDirectorio,const char* extension);
 RegistroLinea obtenerRegistroLinea(FILE* bloque);

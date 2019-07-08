@@ -14,13 +14,6 @@
 #include <dirent.h>
 pthread_t consola,dump;//,compactador;
 
-void compactar();
-
-
-t_list* obtenerParticionesTemporales(const char* nombreDeTabla);
-t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla);
-
-
 //typedef struct{
 //	char pathParticion[256];
 //	bool esTemporal;
@@ -99,6 +92,12 @@ int main() {
 		list_iterate(particiones,mostrarParticion);
 		list_destroy(particiones);
 
+		puts("mostrar particiones de una tabla path");
+		t_list* particiones_path = obtenerListaDeParticiones_path("tableA");
+		list_iterate(particiones_path,puts);
+		list_destroy(particiones_path);
+
+
 		puts("FIN");
 
 	return EXIT_SUCCESS;
@@ -143,7 +142,7 @@ t_list* obtenerListadoDeSubArchivos(const char * pathDirectorio,const char* exte
 		}
 		return nombresDeArchivos;
 }
-t_list* obtenerListadoDeSubArchivosCompleto(const char * pathDirectorio,const char* extension){
+t_list* obtenerListadoDeSubArchivosCompleto(const char * pathDirectorio,const char* extension){//ok
 	t_list* nombresDeArchivos=list_create();
 	struct stat estadoDeArchivo;
 		struct dirent* archivo;
@@ -169,7 +168,7 @@ t_list* obtenerListadoDeSubArchivosCompleto(const char * pathDirectorio,const ch
 //		list_sort(nombresDeArchivos,ordenarPorNombre);
 		return nombresDeArchivos;
 }
-t_list* obtenerListadoDeNombresDeSubArchivos(const char* pathCarpetaPadre){
+t_list* obtenerListadoDeNombresDeSubArchivos(const char* pathCarpetaPadre){//ok
 	t_list* lista = list_create();
 	struct stat estadoDeArchivo;
 		struct dirent* archivo;
@@ -197,16 +196,17 @@ void compactar(const char* nombreDeTabla){
 	list_destroy(particionesTemporales);
 	list_destroy(particionesNoTemporales);
 }
-t_list* obtenerParticiones(const char* nombreDeTabla){
+t_list* obtenerParticiones(const char* nombreDeTabla){//ok
 	t_list* listaDeParticiones_path = obtenerListaDeParticiones_path(nombreDeTabla);
-	Particion* pathToParticion( char* pathDeParticion ){
+	Particion* pathToParticion(char* pathDeParticion){
 		Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
 		t_config* config = config_create(pathDeParticion);
 		unaParticion->esTemporal=false;
 		if(string_ends_with(pathDeParticion,".tmp") || string_ends_with(pathDeParticion,".tmpc"))unaParticion->esTemporal=true;
 		unaParticion->bloques=config_get_array_value(config,"block");
 		unaParticion->size=config_get_int_value(config,"size");
-		strcpy(unaParticion->pathParticion,pathDeParticion);
+//		strcpy(unaParticion->pathParticion,pathDeParticion);
+		memcpy(unaParticion->pathParticion,pathDeParticion,strlen(pathDeParticion)*sizeof(char));
 		config_destroy(config);
 		return unaParticion;
 	}
@@ -214,17 +214,17 @@ t_list* obtenerParticiones(const char* nombreDeTabla){
 	list_destroy(listaDeParticiones_path);
 	return listaDeParticiones;
 }
-void mostrarParticion(Particion* particion){
+void mostrarParticion(Particion* particion){//ok
 	if(particion->esTemporal)printf("particion = %s \n	size= %d \n	y es temporal\n",particion->pathParticion,particion->size);
-	else printf("particion = %s \n	size= %d \n	y no es temporal\n",particion->esTemporal,particion->size);
+	else printf("particion = %s \n	size= %d \n	y no es temporal\n",particion->pathParticion,particion->size);
 }
 t_list* obtenerListaDeParticiones_path(const char* nombreDeTabla ){//ok
 	t_list* listaDePaths=list_create();
 	char* aux = obtenerPathDeTabla(nombreDeTabla);
 	t_list* listaDeBin = obtenerListadoDeSubArchivosCompleto(aux,".bin");
+	t_list* listaDe_partition=obtenerListadoDeSubArchivosCompleto(aux,".partition");
 	t_list* listaDe_tmp = obtenerListadoDeSubArchivosCompleto(aux,".tmp");
 	t_list* listaDe_tmpc= obtenerListadoDeSubArchivosCompleto(aux,".tmpc");
-	t_list* listaDe_partition=obtenerListadoDeSubArchivosCompleto(aux,".partition");
 	free(aux);
 	list_add_all(listaDePaths,listaDeBin);
 	list_add_all(listaDePaths,listaDe_tmp);

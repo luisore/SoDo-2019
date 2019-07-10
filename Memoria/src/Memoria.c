@@ -20,7 +20,7 @@ int main(void) {
 
 	directorio_actual();
 	if(validarArchivoConfig(archivo)<0)
-	  	puts("hola");
+		puts("hola");
 	puts("0");
 	cargar_configuracion(archivo);
     puts("1");
@@ -54,6 +54,7 @@ int main(void) {
 	printf("cantidad de paginas %d: \n",cantidad_de_Paginas);
 	printf("tamanio %d: \n",tamanio);
 	printf("diferencia %d: \n",diferencia);
+
 
 	memoria=crearMemoria(cantidadBytes);
 

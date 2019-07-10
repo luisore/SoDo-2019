@@ -13,6 +13,7 @@
 #include <string.h>
 
 unsigned long funcionEpoc();
+unsigned long long getCurrentTime() ;
 void agregarValor (char *memoria,int marco,int tamanioPagina,char *valor);
 void agregarKey (char *memoria,int marco,int tamanioPagina,uint16_t key);
 void agregarTimeStats (char *memoria,int marco,int tamanioPagina,unsigned long timestats);

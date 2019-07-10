@@ -51,6 +51,9 @@ typedef struct{
 
  }t_config_memoria;
 
+ int cantidadBytes;
+
+int tamanio_pagina;
 t_list *lista_tabla_gossping;
 t_list *lista_segmento;
 int FileSystem_fd;

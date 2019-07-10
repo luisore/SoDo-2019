@@ -62,6 +62,24 @@ void criterio_iniciar_colas(){
 	criterio_EC = list_create();
 }
 
+char* criterio_obtener_nombre(char* criterio){
+
+	if (es_strong_consistency(criterio)) {
+
+		return "Strong Consistency";
+
+	} else if (es_strong_hash_consistency(criterio)) {
+
+		return "Strong-Hash Consistency";
+
+	} else if (es_eventual_consistency(criterio)){
+
+		return "Eventual Consistency";
+
+	}
+	return "";
+}
+
 bool es_strong_consistency(char* consistencia){
 	return string_starts_with(consistencia, "SC");
 }

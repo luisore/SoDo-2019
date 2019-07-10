@@ -27,6 +27,6 @@ int criterio_obtener_memoria(char* key,char* consistencia);
 bool es_strong_consistency(char* consistencia);
 bool es_strong_hash_consistency(char* consistencia);
 bool es_eventual_consistency(char* consistencia);
-
+char* criterio_obtener_nombre(char* criterio);
 
 #endif /* CRITERIO_H_ */

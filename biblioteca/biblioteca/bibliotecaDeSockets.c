@@ -134,6 +134,13 @@ int escuchar(int socketListener, fd_set *fd,  void *(funcionSocketNuevo)(int, vo
 	return 0;
 }
 
+struct_select* crear_select(uint16_t key,char *nombreTabla){
+	 struct_select* select = malloc(sizeof(struct_select));
+	 select->key = key;
+	 select->nombreTabla = strdup(nombreTabla);
+	 return select;
+}
+
 //Explicación: Serializamos convirtiendo a un string, de la forma <Tipo de struct>[<Tamaño elemento><Elemento>]
 //Se envían de forma separada enteros y strings llamando a las funciones correspondientes
 void serializarYEnviar(int socket, int tipoDePaquete, void* package){
@@ -194,6 +201,15 @@ void serializarYEnviar(int socket, int tipoDePaquete, void* package){
 			}
 			return;
 		}
+		case SELECT_RESULTADO:
+		{
+			serializarYEnviarString(socket,((struct_insert*)package)->nombreTabla);
+			serializarYEnviarUint16(socket,&((struct_insert*)package)->key);
+			serializarYEnviarString(socket,((struct_insert*)package)->valor);
+			serializarYEnviarUnsignedLong(socket,&((struct_insert*)package)->timestats);
+			return;
+		}
+
   }
 }
 
@@ -284,14 +300,14 @@ void* recibirYDeserializar(int socket,int tipo){
 	case SELECT:
 	{
 		struct_select* select = malloc(sizeof(struct_select));
-		select->nombreTabla =*recibirYDeserializarString(socket);
+		select->nombreTabla = recibirYDeserializarString(socket);
 		select->key =*recibirYDeserializarEntero(socket);
 		return select;
 	}
 	case CREATE:
 	{
 		struct_create* create = malloc(sizeof(struct_create));
-		create->nombreTabla= *recibirYDeserializarString(socket);
+		create->nombreTabla= recibirYDeserializarString(socket);
 		create->tipo= *recibirYDeserializarEntero(socket);
 		create->numeroParticiones=  *recibirYDeserializarEntero(socket);
 		create->tiempoCompactacion = *recibirYDeserializarEntero(socket);
@@ -300,16 +316,16 @@ void* recibirYDeserializar(int socket,int tipo){
 	case INSERT:
 	{
 		struct_insert* insert = malloc (sizeof(struct_insert));
-		insert->nombreTabla =*recibirYDeserializarString(socket);
+		insert->nombreTabla = recibirYDeserializarString(socket);
 		insert->key= *recibirYDeserializarEntero(socket);
-		insert->valor= *recibirYDeserializarString(socket);
+		insert->valor= recibirYDeserializarString(socket);
 		insert->timestats=*recibirYDeserializarEntero(socket);
 		return insert;
 	}
 	case DROP:
 	{
 		struct_tabla* tabla = malloc(sizeof(struct_tabla));
-		tabla->nombreTabla=*recibirYDeserializarString(socket);
+		tabla->nombreTabla=recibirYDeserializarString(socket);
 		return tabla;
 	}
 	case JOURNAL:
@@ -329,12 +345,22 @@ void* recibirYDeserializar(int socket,int tipo){
 		int cantidad = *recibirYDeserializarEntero(socket);
 		for(int i=0;i<cantidad;i++){
 			t_nodo_tabla_gossiping *nodo =malloc(sizeof(t_nodo_tabla_gossiping));
-			nodo->ip= *recibirYDeserializarString(socket);
+			nodo->ip= recibirYDeserializarString(socket);
 			nodo->puerto=*recibirYDeserializarEntero(socket);
 			list_add(lista_tabla,nodo);
 		}
 		return lista_tabla;
 	}
+	case SELECT_RESULTADO:
+	{
+		struct_insert* insert = malloc (sizeof(struct_insert));
+		insert->nombreTabla = recibirYDeserializarString(socket);
+		insert->key= *recibirYDeserializarEntero(socket);
+		insert->valor= recibirYDeserializarString(socket);
+		insert->timestats=*recibirYDeserializarEntero(socket);
+		return insert;
+	}
+
 	default:
 		return NULL;
 	}
@@ -377,7 +403,7 @@ uint16_t *recibirYDeserializarUint16(int socket){
 		return NULL;
 	}
 
-	int *numero= malloc(*tam);
+	uint16_t *numero= malloc(*tam);
 
 	memset(numero,0,*tam);
 
@@ -404,7 +430,7 @@ unsigned long *recibirYDeserializarUnsignedLong(int socket){
 		return NULL;
 	}
 
-	int *numero= malloc(*tam);
+	unsigned long *numero= malloc(*tam);
 
 	memset(numero,0,*tam);
 

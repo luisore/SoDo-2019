@@ -2,7 +2,7 @@
 
 
 void metadata_imprimir(metadata_tabla* metadata){
-	printf("Metadata. NOMBRE: %s, CONSISTENCY: %s, PARTITIONS: %u, COMPACTION_TIME: %lu",	metadata->NOMBRE,
+	log_info(kernel_log,"Metadata. NOMBRE: %s, CONSISTENCY: %s, PARTITIONS: %u, COMPACTION_TIME: %lu",	metadata->NOMBRE,
 																							metadata->CONSISTENCY,
 																							metadata->PARTITIONS,
 																							metadata->COMPACTION_TIME);
@@ -23,11 +23,21 @@ metadata_tabla* metadata_crear(char* nombre_tabla,char* consistency,char* partit
 
 metadata_tabla* metadata_obtener(char* nombre_tabla){
 
-	bool coincide_nombre_tabla(char * nombre){
-		return string_equals_ignore_case(nombre, nombre_tabla);
+	bool coincide_nombre_tabla(metadata_tabla* metadata){
+		return string_equals_ignore_case(metadata->NOMBRE, nombre_tabla);
 	}
 
 	return list_find(metadata_tablas,(void *)coincide_nombre_tabla);
+}
+
+
+bool metadata_existe(char* nombre_tabla){
+
+	bool coincide_nombre_tabla(metadata_tabla* metadata){
+		return string_equals_ignore_case(metadata->NOMBRE, nombre_tabla);
+	}
+
+	return list_any_satisfy(metadata_tablas, (void *)coincide_nombre_tabla);
 }
 
 void metadata_agregar(metadata_tabla* metadata){

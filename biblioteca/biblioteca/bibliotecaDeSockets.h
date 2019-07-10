@@ -31,6 +31,8 @@ typedef enum{
 	VERIFICAR_TABLA,
 	PEDIR_GOSSIPING,
 	ENVIAR_GOSSIPING,
+
+	SELECT_RESULTADO,
 }t_protocolo;
 
 
@@ -89,6 +91,7 @@ typedef struct{
 }t_tabla_gossiping;
 
 typedef struct{
+	int id_memoria;
 	char *ip;
 	int puerto;
 }t_nodo_tabla_gossiping;
@@ -113,6 +116,12 @@ int escuchar(int socket, fd_set *listaDeSockets,
 	void *(*funcionParaSocketNuevo)(int, void*), void *parametrosParaSocketNuevo,
 	void *(*funcionParaSocketYaConectado)(int, void*),
 	void *parametrosParaSocketYaConectado);
+
+
+//funciones para crear paquetes
+struct_select* crear_select(uint16_t key,char *nombreTabla);
+
+
 
 void* recibirYDeserializar(int socket,int tipo);
 char* recibirYDeserializarString(int socket);

@@ -33,6 +33,7 @@ typedef enum{
 	ENVIAR_GOSSIPING,
 
 	SELECT_RESULTADO,
+	INSERT_TERMINADO,
 }t_protocolo;
 
 
@@ -79,7 +80,7 @@ typedef struct {
 typedef struct {
 	uint16_t key;
 	char *valor;
-	unsigned long timestats;;
+	unsigned long long timestats;;
 } struct_registro;
 
 typedef struct {

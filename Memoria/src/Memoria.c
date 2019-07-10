@@ -44,23 +44,32 @@ int main(void) {
 	pthread_t hilo_inotify;
 
 
-	int cantidadBytes=150;
-	int valor = 10;
+	cantidadBytes= config_memoria.tam_mem;
 
-	int tamanio;
-	tamanio=valor +sizeof(unsigned long)+sizeof(uint16_t);
+	//pedir a file system
+	valor = 10;
+
+
+	tamanio_pagina=valor +sizeof(unsigned long long)+sizeof(uint16_t);
+
+	int tamanio = tamanio_pagina;
 	cantidad_de_Paginas =  cantidadBytes/ (tamanio);
 	int diferencia= cantidad_de_Paginas % 8;
 	printf("cantidad de paginas %d: \n",cantidad_de_Paginas);
 	printf("tamanio %d: \n",tamanio);
 	printf("diferencia %d: \n",diferencia);
 
-
+	//Crea Memoria
 	memoria=crearMemoria(cantidadBytes);
 
+	//Array de Marcos
 	marcos = crearBitmap(cantidad_de_Paginas,diferencia);
+
+	//Paginas en Modificado
 	modificado = crearBitmap(cantidad_de_Paginas,diferencia);
-	//lista_segmento = crearTablaDeSegmentos();
+
+
+	//lista_segmento
 	lista_segmento = crearTablaDeSegmentos();
 
 
@@ -109,13 +118,17 @@ void consola_memoria(){
 		if(!strncmp(linea, "INSERT ", 7)){
 			//nuevoSegmento(,lista_segmento);
 			resultado=agregarDatOaTabla((operacion->parametros)[0],marcos,modificado,10,lista_segmento,cantidad_de_Paginas);
-			if(resultado<0){
+			if (resultado <0){
 				//iniciar journal
+
+				//volver a agregar a tabla
+				resultado=agregarDatOaTabla((operacion->parametros)[0],marcos,modificado,10,lista_segmento,cantidad_de_Paginas);
 			}
-			else{
-				guardarEnMemoria(memoria,resultado,valor,operacion);
-			}
+
+			//usar la estructura registro
+			//guardarEnMemoria(memoria,resultado,valor,operacion);
 		}
+
 		if(!strncmp(linea, "CREATE ", 7)){
 			//mandar create a file system
 		}
@@ -169,11 +182,34 @@ void pool(){
 				case SELECT:
 				{
 					struct_select* select = recibirYDeserializar(conexion_fd,tipo_operacion);
+
+				    int resultado=existeTablaEnTablaDeSegmento(select->nombreTabla,lista_segmento);
+					if(resultado<0){
+								//Mandar msj a file system
+					}
+					else{
+
+						int resultado = SELECT_RESULTADO;
+						serializarYEnviarEntero(conexion_fd, &resultado);
+					}
+
 					break;
 				}
 				case INSERT:
 				{
 					struct_insert* insert = recibirYDeserializar(conexion_fd,tipo_operacion);
+
+					int resultado=agregarDatOaTabla(insert->nombreTabla,marcos,modificado,10,lista_segmento,cantidad_de_Paginas);
+					if(resultado<0){
+							//realizar journal
+
+							//volver a agregar
+							resultado=agregarDatOaTabla(insert->nombreTabla,marcos,modificado,10,lista_segmento,cantidad_de_Paginas);
+					}
+					//guardar en marco
+					//guardarEnMemoria(memoria,resultado,valor,operacion);
+					resultado = INSERT_TERMINADO;
+					serializarYEnviarEntero(conexion_fd, &resultado);
 					break;
 				}
 				case DROP:

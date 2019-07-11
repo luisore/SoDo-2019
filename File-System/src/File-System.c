@@ -83,26 +83,25 @@ int main() {
 //		describe1();
 
 		puts("describe1 simulacion ------");
-
 		describe2("unaTablaEtc");
-		describe2("tableA");
-		describe2("tableA2");
 		describe2("tableA3");
+		describe2("tableA2");
+		describe2("tableA");
 
-//		puts("mostrar listado de archivos de punto de montaje");
-//		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
-//		list_iterate(archivos,puts);
-//		list_destroy(archivos);
-//
-//		puts("mostrar particiones de una tabla ");
-//		t_list* particiones = obtenerParticiones("tableA");
-//		list_iterate(particiones,mostrarParticion);
-//		list_destroy(particiones);
-//
-//		puts("mostrar particiones de una tabla path");
-//		t_list* particiones_path = obtenerListaDeParticiones_path("tableA");
-//		list_iterate(particiones_path,puts);
-//		list_destroy(particiones_path);
+		puts("mostrar listado de archivos de punto de montaje");
+		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
+		list_iterate(archivos,puts);
+		list_destroy(archivos);
+
+		puts("mostrar particiones de una tabla ");
+		t_list* particiones = obtenerParticiones("tableA");
+		list_iterate(particiones,mostrarParticion);
+		list_destroy(particiones);
+
+		puts("mostrar particiones de una tabla path");
+		t_list* particiones_path = obtenerListaDeParticiones_path("tableA");
+		list_iterate(particiones_path,puts);
+		list_destroy(particiones_path);
 
 
 		puts("FIN");

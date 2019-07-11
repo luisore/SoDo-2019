@@ -75,6 +75,7 @@ typedef struct {
 
 typedef struct {
 	int cantidad;
+	t_list *lista;
 } struct_journal_tabla;
 
 typedef struct {
@@ -90,6 +91,10 @@ typedef struct {
 typedef struct{
 	t_list *lista;
 }t_tabla_gossiping;
+
+typedef struct{
+	t_list *lista;
+}t_lista_enviar;
 
 typedef struct{
 	int id_memoria;

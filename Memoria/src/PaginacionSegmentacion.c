@@ -218,27 +218,26 @@ int buscarPaginasContiguas(int cantidadDepaginasContiguas){
 	return primeraPaginaContiguaLibre;
 }
 
-void guardarEnMemoria(char *memoria,int marco,int valor,struct_operacion* operacion){
-	char *registro;
-	int tam_registro = sizeof(unsigned long long)+sizeof(uint16_t)+valor;
-	//registro = malloc(tam_registro);
-	memcpy(memoria+marco*tam_registro,(operacion->parametros)[2],valor);
-	uint16_t  result = strtol((operacion->parametros)[1],NULL,16);
-	memcpy(memoria+marco*tam_registro+valor,&result,sizeof(uint16_t));
-	//memcpy(memoria+marco*tam_registro+sizeof(unsigned long long)+sizeof(uint16_t),(operacion->parametros)[3],sizeof(unsigned long long));
-	unsigned long long timestats =  atol((operacion->parametros)[3]);
+void guardarEnMemoria(char *memoria,int marco,int valor,struct_registro* registro){
 
+	int tam_registro = sizeof(unsigned long long)+sizeof(uint16_t)+valor;
+
+	unsigned long long timestats =  registro->timestats;
+	uint16_t  result_key = registro->key;
+
+	memcpy(memoria+marco*tam_registro,registro->valor,valor);
+	memcpy(memoria+marco*tam_registro+valor,&result_key,sizeof(uint16_t));
 	memcpy(memoria+marco*tam_registro+valor+sizeof(uint16_t),&timestats,sizeof(unsigned long long));
 
 	//test
-	registro=malloc(valor);
-	memcpy(registro,memoria+marco*tam_registro,valor);
+	char *otro_registro=malloc(valor);
 	uint16_t otro_result;
 	unsigned long long otro_timestas;
+	memcpy(otro_registro,memoria+marco*tam_registro,valor);
 	memcpy(&otro_result,memoria+marco*tam_registro+valor,sizeof(uint16_t));
 	memcpy(&otro_timestas,memoria+marco*tam_registro+valor+sizeof(uint16_t),sizeof(unsigned long long));
 
-	printf ("resultado %s \n", registro);
+	printf ("resultado %s \n", otro_registro);
 	printf ("resultado %d \n", otro_result);
 	printf ("resultado %llu \n",otro_timestas );
 

@@ -63,6 +63,6 @@ int existeTablaEnTablaDeSegmento(char *nombreTabla,t_list *tablaDeSegmentos);
 t_bitarray *crearBitmap(int cantidadDepagina,int diferencia);
 void setearPaginaEnOcupada(int numeroDepagina);
 t_bitarray *bitarray;
-void guardarEnMemoria(char *memoria,int marco,int valor,struct_operacion* operacion);
+void guardarEnMemoria(char *memoria,int marco,int valor,struct_registro* registro);
 
 #endif /* PAGINACIONSEGMENTACION_H_ */

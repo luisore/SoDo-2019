@@ -182,6 +182,13 @@ void serializarYEnviar(int socket, int tipoDePaquete, void* package){
 		case JOURNAL:
 		{
 			serializarYEnviarEntero(socket,&((struct_journal_tabla*)package)->cantidad);
+			for(int i=0 ; i<((struct_journal_tabla*)package)->cantidad;i++ ){
+				struct_insert *insert =list_get (((struct_journal_tabla*)package)->lista,i);
+				serializarYEnviarString(socket,insert->nombreTabla);
+				serializarYEnviarUint16(socket,insert->key);
+				serializarYEnviarString(socket,insert->valor);
+				serializarYEnviarUnsignedLong(socket,insert->timestats);
+			}
 			return;
 		}
 		case VERIFICAR_TABLA:
@@ -332,6 +339,14 @@ void* recibirYDeserializar(int socket,int tipo){
 	{
 		struct_journal_tabla* journal = malloc (sizeof(struct_journal_tabla));
 		journal->cantidad = *recibirYDeserializarEntero(socket);
+		journal->lista =list_create();
+		for(int i=0;i<journal->cantidad;i++){
+			struct_insert* insert = malloc (sizeof(struct_insert));
+			insert->nombreTabla = recibirYDeserializarString(socket);
+			insert->key= *recibirYDeserializarEntero(socket);
+			insert->valor= recibirYDeserializarString(socket);
+			insert->timestats=*recibirYDeserializarEntero(socket);
+		}
 		return journal ;
 	}
 	case VERIFICAR_TABLA:

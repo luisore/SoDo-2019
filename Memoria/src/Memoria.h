@@ -66,4 +66,5 @@ void directorio_actual();
 t_config_memoria config_memoria;
 
 void cargar_configuracion(char *archivo);
+void journal(t_list *lista_segmento,t_bitarray* modificado,int socket);
 #endif /* MEMORIA_H_ */

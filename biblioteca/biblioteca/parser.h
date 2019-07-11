@@ -7,6 +7,7 @@
 #include <string.h>
 #include <commons/string.h>
 #include <commons/collections/list.h>
+#include "bibliotecaDeSockets.h"
 
 typedef enum {
 	API_SELECT = 1,
@@ -33,6 +34,6 @@ void free_operacion(struct_operacion* operacion);
 
 //otras
 void free_list_of_strings(char** list_of_strings);
-
+void* estructura_registro (struct_operacion* operacion,int tipo_operacion);
 
 #endif /* PARSER_H_ */

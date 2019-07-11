@@ -268,4 +268,36 @@ void directorio_actual(){
 	}
 	puts(dir_actual);
 }
+void journal(t_list *lista_segmento,t_bitarray* modificado,int socket){
+	int cantidad = list_size(lista_segmento);
+	int tam_registro = sizeof(unsigned long long)+sizeof(uint16_t)+valor;
+	t_list * lista_enviar= list_create();
+	for (int i=0;i<cantidad;i++){
+		 segmentacion* segmento =list_get(lista_segmento,i);
+		 int cantidad_tabla=list_size(segmento->direccionTablaDePaginas);
+		 for  (int k=0;k<cantidad_tabla;i++){
+			  paginacion *unaPagina = list_get(segmento->direccionTablaDePaginas,k);
+			  if( bitarray_test_bit(modificado,unaPagina->numeroPagina)){
+				  int marco=k;
+				  struct_insert *registro_enviar = malloc(sizeof(struct_insert));
+				  registro_enviar->nombreTabla=strdup(segmento->nombreTabla);
+				  memcpy(registro_enviar->valor,memoria+marco*tam_registro,valor);
+				  memcpy(&registro_enviar->key,memoria+marco*tam_registro+valor,sizeof(uint16_t));
+				  memcpy(&registro_enviar->timestats,memoria+marco*tam_registro+valor+sizeof(uint16_t),sizeof(unsigned long long));
+				  list_add(lista_enviar,registro_enviar);
+			  }
+			  list_destroy_and_destroy_elements(segmento->direccionTablaDePaginas,free);
+		 }
+	}
+	struct_journal_tabla* enviar = malloc(sizeof(struct_journal_tabla));
+	enviar->lista = lista_enviar;
+
+	enviar->cantidad = sizeof(lista_enviar);
+	int operacion = JOURNAL ;
+	serializarYEnviar(socket,operacion,enviar);
+	list_clean_and_destroy_elements(lista_segmento,free);
+	list_destroy(lista_enviar);
+	free(enviar);
+
+}
 

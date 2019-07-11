@@ -165,4 +165,38 @@ void free_operacion(struct_operacion* operacion){
 	free(operacion);
 }
 
+void* estructura_registro (struct_operacion* operacion,int tipo_operacion){
+	switch (tipo_operacion) {
+		case SELECT:{
+			struct_select *select = malloc(sizeof(struct_select));
+			select->key=strtol((operacion->parametros)[1],NULL,16);
+			select->nombreTabla=strdup((operacion->parametros)[0]);
+			return select;
+		}
+		case INSERT:{
+			struct_insert *insert = malloc(sizeof(struct_insert));
+			insert->nombreTabla=strdup((operacion->parametros)[0]);
+			insert->key=strtol((operacion->parametros)[1],NULL,16);
+			insert->valor=strdup((operacion->parametros)[2]);
+			insert->timestats= atoi((operacion->parametros)[3]);
+			return insert;
+
+		}
+		case CREATE:{
+			struct_create *create = malloc(sizeof(struct_create));
+			create->nombreTabla=strdup((operacion->parametros)[0]);
+			create->tipo= atoi((operacion->parametros)[1]);
+			create->numeroParticiones=atoi((operacion->parametros)[2]);
+			create->tiempoCompactacion=atoi((operacion->parametros)[3]);
+			return create;
+		}
+
+		default:
+			return NULL;
+
+
+	}
+}
+
+
 

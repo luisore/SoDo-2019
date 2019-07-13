@@ -66,12 +66,11 @@ int main() {
 //			}
 		}
 		}
-		puts("ahora con la funcion hecha");
+		puts("obtener listado de subarchivos con path completo con extension .partition ");
 		puts(pathDeTabla);
 		t_list* lista = obtenerListadoDeSubArchivosCompleto(pathDeTabla,".partition");
 		list_iterate(lista,puts);
 		list_destroy(lista);
-
 		free(pathDeTabla);
 
 
@@ -81,8 +80,6 @@ int main() {
 		list_destroy(particiones);
 
 
-		puts("inicio de recorrido de bloque");
-		recorrerBloque("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/2.bin");
 
 		puts("describe2---------");
 		describe2("tableA");
@@ -108,9 +105,42 @@ int main() {
 		list_destroy(particiones_path);
 
 
-		puts("drop en tableA");
-		drop("tableA");
+//		puts("drop en tableA");
+//		drop("tableA");
 
+
+
+
+		puts("escribo registro en el  bloque 4 ");
+		FILE* bloque4 = txt_open_for_append("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/4.bin");
+		RegistroLinea unRegistro={.key=32,.timestamp=999999999,.value="ALGOv4"};
+		printf("len de long long %lu , y len de uint16 %d \n",sizeof(long long), sizeof(uint16_t));
+		int tamanio_total = sizeof(unsigned long long)+strlen(";")+strlen(";") + sizeof(uint16_t)+lfs.tamanioValue;
+		printf("len de long long %d  \n",tamanio_total);
+
+		char *time_ = malloc (tamanio_total);
+
+		memcpy(&time_,&unRegistro.timestamp,sizeof(unsigned long long));
+		memcpy(&time_+sizeof(unsigned long long),&unRegistro.timestamp,sizeof(unsigned long long));
+		memcpy(&time_+sizeof(unsigned long long)+1,";",1);
+
+		memcpy(&time_+sizeof(unsigned long long)+1+sizeof(uint16_t),&unRegistro.key,sizeof(uint16_t));
+		memcpy(&time_+sizeof(unsigned long long)+1+sizeof(uint16_t)+1,";",1);
+		memcpy(&time_+sizeof(unsigned long long)+1+sizeof(uint16_t)+1+lfs.tamanioValue,unRegistro.value,lfs.tamanioValue);
+
+		fprintf(bloque4,"%s;%s;%s\n",time_,unRegistro.key,unRegistro.value);
+
+	    fwrite(time_,sizeof(unsigned long long)+1+sizeof(uint16_t)+1+lfs.tamanioValue,1,bloque4);
+//		fprintf(bloque4,";");
+//		fwrite(unRegistro.key,1,sizeof(uint16_t),bloque4);
+//		fprintf(bloque4,";%s\n",unRegistro.value);
+		fclose(bloque4);
+
+
+
+
+		puts("inicio de recorrido de bloque 4 ");
+		recorrerBloque("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/4.bin");
 		puts("FIN");
 
 	return EXIT_SUCCESS;
@@ -218,8 +248,8 @@ t_list* obtenerParticiones(const char* nombreDeTabla){//ok
 		if(string_ends_with(pathDeParticion,".tmp") || string_ends_with(pathDeParticion,".tmpc"))unaParticion->esTemporal=true;
 		unaParticion->bloques=config_get_array_value(config,"block");
 		unaParticion->size=config_get_int_value(config,"size");
-//		strcpy(unaParticion->pathParticion,pathDeParticion);
-		memcpy(unaParticion->pathParticion,pathDeParticion,strlen(pathDeParticion)*sizeof(char));
+		strcpy(unaParticion->pathParticion,pathDeParticion);
+//		memcpy(unaParticion->pathParticion,pathDeParticion,strlen(pathDeParticion)*sizeof(char));
 		config_destroy(config);
 		return unaParticion;
 	}
@@ -234,16 +264,16 @@ void mostrarParticion(Particion* particion){//ok
 t_list* obtenerListaDeParticiones_path(const char* nombreDeTabla ){//ok
 	t_list* listaDePaths=list_create();
 	char* aux = obtenerPathDeTabla(nombreDeTabla);
-	t_list* listaDeBin = obtenerListadoDeSubArchivosCompleto(aux,".bin");
+	t_list* listaDe_bin = obtenerListadoDeSubArchivosCompleto(aux,".bin");
 	t_list* listaDe_partition=obtenerListadoDeSubArchivosCompleto(aux,".partition");
 	t_list* listaDe_tmp = obtenerListadoDeSubArchivosCompleto(aux,".tmp");
 	t_list* listaDe_tmpc= obtenerListadoDeSubArchivosCompleto(aux,".tmpc");
 	free(aux);
-	list_add_all(listaDePaths,listaDeBin);
+	list_add_all(listaDePaths,listaDe_bin);
 	list_add_all(listaDePaths,listaDe_tmp);
 	list_add_all(listaDePaths,listaDe_tmpc);
 	list_add_all(listaDePaths,listaDe_partition);
-	list_destroy(listaDeBin);
+	list_destroy(listaDe_bin);
 	list_destroy(listaDe_tmp);
 	list_destroy(listaDe_tmpc);
 	list_destroy(listaDe_partition);
@@ -254,11 +284,9 @@ t_list* obtenerParticionesTemporales(const char* nombreDeTabla){
 	Metadata_Tabla *metadataDeTabla = obtenerMetadata(nombreDeTabla);
 	int x = metadataDeTabla->PARTITIONS;
 	char* pathDeLaTabla=obtenerPathDeTabla(nombreDeTabla);
-
 	free(pathDeLaTabla);
 	return particionesTemporales;
 }
-
 t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla){
 	t_list* particionesTemporales=list_create();
 	return particionesTemporales;
@@ -272,32 +300,6 @@ t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla){
 //}
 
 //---------
-//t_list* obtenerParticiones(const char* nombreDeTabla){
-//	t_list* particiones = list_create();
-//	struct stat estadoDeArchivo;
-//	struct dirent* archivo;
-//	char* pathDeTabla=obtenerPathDeTabla(nombreDeTabla);
-//
-//	DIR* directorio;
-//	for(directorio=opendir(pathDeTabla);(archivo=readdir(directorio))!=NULL;){
-//		puts("x");
-//		stat(archivo->d_name,&estadoDeArchivo);
-//		puts(archivo->d_name);
-////		if((strcmp(archivo->d_name,".")!=0)&&(strcmp(archivo->d_name,"..")!=0)){
-//
-//		if(string_ends_with(archivo->d_name,".tmp")){//es temporal
-//
-//			Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
-//			unaParticion->esTemporal=true;
-//
-//			list_add(particiones,unaParticion);
-//
-//		}
-//	}
-//
-//	free(pathDeTabla);
-//	return particiones;
-//}
 void lfs_consola(){
 	while(1){
 		char* linea = readline("LFS@_consola -> ");
@@ -314,6 +316,8 @@ void lfs_consola(){
 	}
 }
 void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
+	size_t cantidadDeParametros;
+	for(cantidadDeParametros=0;parametros_de_linea_lql->parametros[cantidadDeParametros];cantidadDeParametros++);
 	switch (parametros_de_linea_lql->nombre_operacion) {
 		case API_CREATE:
 			lfs_create((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);

@@ -28,6 +28,10 @@
 #include <commons/string.h>
 #include <math.h>
 
+
+#include "../../../biblioteca/biblioteca/bibliotecaDeSockets.h"
+#include "../../../biblioteca/biblioteca/parser.h"
+
 typedef struct {
 	int cantParticionesTemporales;
 	char* nombreDeLaTabla;
@@ -35,8 +39,8 @@ typedef struct {
 	t_list* registros;
 }Insert;
 typedef struct {
-		unsigned long timestamp;
-		unsigned int key;
+		unsigned long long timestamp;
+		uint16_t key;
 		char* value;
 //		char value[lfs.tamanioValue];
 }RegistroLinea;
@@ -56,6 +60,11 @@ typedef struct{
 	char** bloques;
 }Particion;
 //char* aux_tabla_para_la_memtable;
+typedef struct {
+	char CONSISTENCY[3];//=SC
+	unsigned int PARTITIONS;//=3
+	unsigned long COMPACTION_TIME;//=60000
+}Metadata_Tabla;
 
 //funciones de la API de LFS,para ser consultadas IMPORTANTES estas 7 funciones, son la posta
 void select1(const char * nombre_de_tabla, unsigned int key);
@@ -67,19 +76,17 @@ void describe1();
 void describe2(const char* nombre_de_tabla);
 void drop(const char* nombre_de_tabla);
 
-//misma funcion de antes pero que solo reciben strings
+//misma funcion de antes pero que solo reciben strings y las que usa este proceso
 void lfs_create(const char* nombre_de_tabla,const char* tipo_consistencia,const char*  numero_de_particiones,const char* tiempo_de_compactacion );
+void lfs_drop(const char* nombre_de_tabla);
+void lfs_insert1(const char* nombre_de_tabla,const char* key,const char* value );
+void lfs_insert2(const char* nombre_de_tabla,const char* key, const char* value, const char* timestamp );
+void lfs_describe();
+void lfs_describe2(const char* nombre_de_tabla);
 
-
-bool yaExisteTabla(const char* nombre_de_tabla);
-
-typedef struct {
-	char CONSISTENCY[3];//=SC
-	unsigned int PARTITIONS;//=3
-	unsigned long COMPACTION_TIME;//=60000
-}Metadata_Tabla;
 
 //auxiliares
+bool yaExisteTabla(const char* nombre_de_tabla);
 char archivo_path(const char rutaMontaje, const char *rutaArchivo);
 
 void mostrarMetadata(const char* nombreTabla);

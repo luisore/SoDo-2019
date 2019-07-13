@@ -49,6 +49,7 @@ pthread_t consola,dump;//,compactador;
 int main() {
 
 	config_cargar("LFS.config");
+	imprimir_configuracion();
 	struct stat estadoDeArchivo;
 		struct dirent* archivo;
 		puts("antes de tabla A");
@@ -74,6 +75,12 @@ int main() {
 		free(pathDeTabla);
 
 
+		puts("mostrar particiones de una tabla tableA");
+			t_list* particiones = obtenerParticiones("tableA");
+		list_iterate(particiones,mostrarParticion);
+		list_destroy(particiones);
+
+
 		puts("inicio de recorrido de bloque");
 		recorrerBloque("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/2.bin");
 
@@ -82,27 +89,27 @@ int main() {
 //		puts("describe1------");
 //		describe1();
 
-		puts("describe1 simulacion ------");
-		describe2("unaTablaEtc");
-		describe2("tableA3");
-		describe2("tableA2");
-		describe2("tableA");
+//		puts("describe1 simulacion ------");
+//		describe2("unaTablaEtc");
+//		describe2("tableA3");
+//		describe2("tableA2");
+//		describe2("tableA");
 
 		puts("mostrar listado de archivos de punto de montaje");
 		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
 		list_iterate(archivos,puts);
 		list_destroy(archivos);
 
-		puts("mostrar particiones de una tabla ");
-		t_list* particiones = obtenerParticiones("tableA");
-		list_iterate(particiones,mostrarParticion);
-		list_destroy(particiones);
+
 
 		puts("mostrar particiones de una tabla path");
 		t_list* particiones_path = obtenerListaDeParticiones_path("tableA");
 		list_iterate(particiones_path,puts);
 		list_destroy(particiones_path);
 
+
+		puts("drop en tableA");
+		drop("tableA");
 
 		puts("FIN");
 
@@ -221,8 +228,8 @@ t_list* obtenerParticiones(const char* nombreDeTabla){//ok
 	return listaDeParticiones;
 }
 void mostrarParticion(Particion* particion){//ok
-	if(particion->esTemporal)printf("particion = %s \n	size= %d \n	y es temporal\n",particion->pathParticion,particion->size);
-	else printf("particion = %s \n	size= %d \n	y no es temporal\n",particion->pathParticion,particion->size);
+	if(particion->esTemporal)printf("particion = %s \n	size= %d \n	y es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
+	else printf("particion = %s \n	size= %d \n	y no es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
 }
 t_list* obtenerListaDeParticiones_path(const char* nombreDeTabla ){//ok
 	t_list* listaDePaths=list_create();

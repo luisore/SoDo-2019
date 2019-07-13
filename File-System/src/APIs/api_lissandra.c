@@ -252,8 +252,24 @@ void drop(const char* nombre_de_tabla){
 	char* pathDeTabla = obtenerPathDeTabla(nombre_de_tabla);
 	remove(pathDeTabla);
 	free(pathDeTabla);
+	void borrarBloqueSegunParticion(Particion* unaParticion){
+		char* pathDeBloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+strlen(unaParticion->pathParticion));//la longitud es grande pero necesito una longitud maxima para que no tire error de reserva de memoria
+		for(int bloque_i=0;(unaParticion->bloques)[bloque_i]!=NULL;bloque_i++){
+			fprintf(pathDeBloque,"%sBloques/%s",lfs.puntoDeMontaje,(unaParticion->bloques)[bloque_i]);
+			puts("DROP-> compruebo path del bloque, imprimo el path");
+			puts(pathDeBloque);
+			FILE* bloque=fopen(pathDeBloque,"w+");
+			if(bloque==NULL)perror("DROP error en path del bloque");
+			fclose(bloque);
+		}
+		free(pathDeBloque);
+	}
+	list_iterate(listaDeParticiones,borrarBloqueSegunParticion);
 	list_destroy(listaDeParticiones);
 }
+//void borrarBloquesSegunParticiones(t_list* 	 listaDeParticiones){
+//
+//}
 //t_list* obtenerListaDeParticiones(const char* nombre_de_tabla){
 //	t_list listaDeParticiones = list_create();
 //	char* aux = obtenerPathDeTabla(nombre_de_tabla);

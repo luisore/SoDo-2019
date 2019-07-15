@@ -250,12 +250,12 @@ void printfMetadata(Metadata_Tabla* metadata, const char* nombre_de_tabla){
 }
 void drop(const char* nombre_de_tabla){
 	t_list* listaDeParticiones=obtenerParticiones(nombre_de_tabla);
-	list_iterate(listaDeParticiones,mostrarParticion);
+//	list_iterate(listaDeParticiones,mostrarParticion);
 	char* pathDeTabla = obtenerPathDeTabla(nombre_de_tabla);
 	puts(pathDeTabla);
 	int remove_=remove(pathDeTabla);
-	if(remove==-1)perror("DROP:error en remove");
-	if(remove==0)puts("DROP :exito remove ");
+	if(remove_==-1)perror("DROP:error en remove");
+	if(remove_==0)puts("DROP :exito remove ");
 	free(pathDeTabla);
 	void borrarBloqueSegunParticion(Particion* unaParticion){
 		char* pathDeBloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+strlen(unaParticion->pathParticion));//la longitud es grande pero necesito una longitud maxima para que no tire error de reserva de memoria

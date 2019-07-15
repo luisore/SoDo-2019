@@ -115,4 +115,6 @@ Insert* buscarTablaEnLaMemtable(const char * tabla);
 
 //auxiliares para imrpimir
 void printfMetadata(Metadata_Tabla* metadata, const char* nombre_de_tabla);
+void mostrarParticion(Particion* particion);
+
 #endif /* APIS_API_LISSANDRA_H_ */

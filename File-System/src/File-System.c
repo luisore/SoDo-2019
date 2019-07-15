@@ -50,29 +50,6 @@ int main() {
 
 	config_cargar("LFS.config");
 	imprimir_configuracion();
-	struct stat estadoDeArchivo;
-		struct dirent* archivo;
-		puts("antes de tabla A");
-		char* pathDeTabla=obtenerPathDeTabla("unaTablaEtc");
-		puts("tablaA");
-		DIR* directorio;
-		for(directorio=opendir(pathDeTabla);(archivo=readdir(directorio))!=NULL;stat(archivo->d_name,&estadoDeArchivo)){
-			puts(archivo->d_name);
-			if((strcmp(archivo->d_name,".")!=0)&&(strcmp(archivo->d_name,"..")!=0)){
-//			Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
-//			if(string_ends_with(archivo->d_name,".tmp")){//es temporal
-//							unaParticion->esTemporal=true;
-//
-//			}
-		}
-		}
-		puts("obtener listado de subarchivos con path completo con extension .partition ");
-		puts(pathDeTabla);
-		t_list* lista = obtenerListadoDeSubArchivosCompleto(pathDeTabla,".partition");
-		list_iterate(lista,puts);
-		list_destroy(lista);
-		free(pathDeTabla);
-
 
 		puts("mostrar particiones de una tabla tableA");
 			t_list* particiones = obtenerParticiones("tableA");
@@ -92,7 +69,7 @@ int main() {
 //		describe2("tableA2");
 //		describe2("tableA");
 
-		puts("mostrar listado de archivos de punto de montaje");
+		puts("->>>mostrar listado de tablas");
 		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
 		list_iterate(archivos,puts);
 		list_destroy(archivos);
@@ -104,43 +81,19 @@ int main() {
 		list_iterate(particiones_path,puts);
 		list_destroy(particiones_path);
 
+		puts("mostrar particiones de una tabla struct ");
+		t_list* particiones_=obtenerParticiones("tableA");
+		list_iterate(particiones_,mostrarParticion);
+		list_destroy(particiones_);
 
-//		puts("drop en tableA");
-//		drop("tableA");
-
-
-
-
-		puts("escribo registro en el  bloque 4 ");
-		FILE* bloque4 = txt_open_for_append("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/4.bin");
-		RegistroLinea unRegistro={.key=32,.timestamp=999999999,.value="ALGOv4"};
-		printf("len de long long %lu , y len de uint16 %d \n",sizeof(long long), sizeof(uint16_t));
-		int tamanio_total = sizeof(unsigned long long)+strlen(";")+strlen(";") + sizeof(uint16_t)+lfs.tamanioValue;
-		printf("len de long long %d  \n",tamanio_total);
-
-		char *time_ = malloc (tamanio_total);
-
-		memcpy(&time_,&unRegistro.timestamp,sizeof(unsigned long long));
-		memcpy(&time_+sizeof(unsigned long long),&unRegistro.timestamp,sizeof(unsigned long long));
-		memcpy(&time_+sizeof(unsigned long long)+1,";",1);
-
-		memcpy(&time_+sizeof(unsigned long long)+1+sizeof(uint16_t),&unRegistro.key,sizeof(uint16_t));
-		memcpy(&time_+sizeof(unsigned long long)+1+sizeof(uint16_t)+1,";",1);
-		memcpy(&time_+sizeof(unsigned long long)+1+sizeof(uint16_t)+1+lfs.tamanioValue,unRegistro.value,lfs.tamanioValue);
-
-		fprintf(bloque4,"%s;%s;%s\n",time_,unRegistro.key,unRegistro.value);
-
-	    fwrite(time_,sizeof(unsigned long long)+1+sizeof(uint16_t)+1+lfs.tamanioValue,1,bloque4);
-//		fprintf(bloque4,";");
-//		fwrite(unRegistro.key,1,sizeof(uint16_t),bloque4);
-//		fprintf(bloque4,";%s\n",unRegistro.value);
-		fclose(bloque4);
+		puts("drop en tableA");
+		drop("tableA");
 
 
 
+//		puts("inicio de recorrido de bloque 4 ");
+//		recorrerBloque("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/4.bin");
 
-		puts("inicio de recorrido de bloque 4 ");
-		recorrerBloque("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/4.bin");
 		puts("FIN");
 
 	return EXIT_SUCCESS;
@@ -162,7 +115,7 @@ RegistroLinea obtenerRegistroLinea(FILE* bloque){
 	RegistroLinea registro;//=(RegistroLinea*)malloc(sizeof(RegistroLinea));
 	registro.value=malloc(lfs.tamanioValue);
 //	fseek(bloque,posicionLinea,SEEK_SET);
-	fscanf(bloque,"%d;%d;%s\n",&registro.timestamp,&registro.key,registro.value);
+	fscanf(bloque,"%lu;%d;%s\n",&registro.timestamp,&registro.key,registro.value);
 //	printf("bytes leidos = %d \n",n );
 	return registro;
 }
@@ -257,10 +210,7 @@ t_list* obtenerParticiones(const char* nombreDeTabla){//ok
 	list_destroy(listaDeParticiones_path);
 	return listaDeParticiones;
 }
-void mostrarParticion(Particion* particion){//ok
-	if(particion->esTemporal)printf("particion = %s \n	size= %d \n	y es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
-	else printf("particion = %s \n	size= %d \n	y no es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
-}
+
 t_list* obtenerListaDeParticiones_path(const char* nombreDeTabla ){//ok
 	t_list* listaDePaths=list_create();
 	char* aux = obtenerPathDeTabla(nombreDeTabla);

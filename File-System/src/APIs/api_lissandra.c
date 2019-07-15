@@ -250,14 +250,18 @@ void printfMetadata(Metadata_Tabla* metadata, const char* nombre_de_tabla){
 }
 void drop(const char* nombre_de_tabla){
 	t_list* listaDeParticiones=obtenerParticiones(nombre_de_tabla);
+	list_iterate(listaDeParticiones,mostrarParticion);
 	char* pathDeTabla = obtenerPathDeTabla(nombre_de_tabla);
-	remove(pathDeTabla);
+	puts(pathDeTabla);
+	int remove_=remove(pathDeTabla);
+	if(remove==-1)perror("DROP:error en remove");
+	if(remove==0)puts("DROP :exito remove ");
 	free(pathDeTabla);
 	void borrarBloqueSegunParticion(Particion* unaParticion){
 		char* pathDeBloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+strlen(unaParticion->pathParticion));//la longitud es grande pero necesito una longitud maxima para que no tire error de reserva de memoria
 		for(int bloque_i=0;(unaParticion->bloques)[bloque_i]!=NULL;bloque_i++){
-			fprintf(pathDeBloque,"%sBloques/%s",lfs.puntoDeMontaje,(unaParticion->bloques)[bloque_i]);
-			puts("DROP-> compruebo path del bloque, imprimo el path");
+			sprintf(pathDeBloque,"%sBloques/%s",lfs.puntoDeMontaje,(unaParticion->bloques)[bloque_i]);
+			puts("DROP-> compruebo path del bloque de FS, imprimo el path");
 			puts(pathDeBloque);
 			FILE* bloque=fopen(pathDeBloque,"w+");
 			if(bloque==NULL)perror("DROP error en path del bloque");
@@ -363,10 +367,9 @@ void mostrarMetadata(const char* tabla){ //ok
 
 
 }
-//void metadata_destroy(Metadata_Tabla* unaMetadata){
-//	free(unaMetadata->COMPACTION_TIME);
-//	free(unaMetadata->CONSISTENCY);
-//	free(unaMetadata->PARTITIONS);
-//}
+void mostrarParticion(Particion* particion){//ok
+	if(particion->esTemporal)printf("particion = %s \n	size= %d \n	y es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
+	else printf("particion = %s \n	size= %d \n	y no es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
+}
 
 //--------------------------EJECUCIONES FIN

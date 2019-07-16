@@ -69,13 +69,9 @@ void dumpear(){
 void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(Insert* unInsert,t_list* listaDeRegistros){//el insert contiene el nombre de la tabla
 	size_t sizeTotalDeParticion=tamanioDeListaDeRegistros(listaDeRegistros);
 	char* pathDeParticionTemporal=obtenerPathDeParticionTemporal(unInsert->cantParticionesTemporales);
-//	for(int fila_de_tabla_iesima =0;fila_de_tabla_iesima<list_size(unInsert->registros);fila_de_tabla_iesima++){
-//				RegistroLinea* unRegistro_o_filaDeTabla=(RegistroLinea*)list_get((unInsert->registros),fila_de_tabla_iesima);
-//				escribirAParticion(pathDeParticionTemporal,unRegistro_o_filaDeTabla);
-//				int bloqueGrabado=grabarRegistroABloques(unRegistro_o_filaDeTabla);
-//	}
 	t_list* bloquesNecesarios=calcularBloquesNecesarios( sizeTotalDeParticion);
-	crearParticionTemporalConRegistros(pathDeParticionTemporal,sizeTotalDeParticion,bloquesNecesarios);
+	crearParticion(pathDeParticionTemporal,sizeTotalDeParticion,bloquesNecesarios);
+	escribirRegistrosABloquesFS(bloquesNecesarios,listaDeRegistros);
 	list_destroy(bloquesNecesarios);
 }
 t_list* calcularBloquesNecesarios(size_t size_){
@@ -83,14 +79,33 @@ t_list* calcularBloquesNecesarios(size_t size_){
 	int cantidadDeBloques=(int)lfs_metadata.tamanio_de_bloque/size_;
 	if(lfs_metadata.tamanio_de_bloque%size_!=0)cantidadDeBloques++;
 	for(int i=0;i<cantidadDeBloques;i++){
-		char* pathDeBloqueObtenido=lfs_getBloqueLibrePath();
-		list_add(bloques,pathDeBloqueObtenido);
-		printf("calcularBloquesNecesarios()->  bloque: %s \n",pathDeBloqueObtenido);
+		Bloque_LFS* bloqueObtenido=lfs_obtenerBloqueLibre();
+		list_add(bloques,bloqueObtenido);
+		printf("calcularBloquesNecesarios()->  bloque:%s \n",bloqueObtenido->path);
 	}
 	return bloques;
 }
-void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_list* bloques){
-
+void crearParticion(const char* pathDeParticion,int size, t_list* bloques){
+	FILE* particion =fopen(pathDeParticion,"w+r");
+	fprintf(particion,"SIZE=%d\n",size);
+	char* key_bloques = malloc(sizeof(char)*(strlen("[,]")+list_size(bloques)*4));//una longitud maxima
+	sprintf(key_bloques,"[");
+	size_t cant_bloques=list_size(bloques);
+	for(int i=0;i<cant_bloques;i++){
+		int numero_de_bloque=((Bloque_LFS*)(list_get(bloques,i)))->numero;
+		strcat(key_bloques,string_itoa(numero_de_bloque));
+		if(i+1==cant_bloques)break;//si ese fue el ultimo bloque
+		strcat(key_bloques,",");
+	}
+	strcat(key_bloques,"]");
+	printf("crearParticion(),key_bloques=%s\n",key_bloques);
+	fprintf(particion,"BLOCKS=%s",key_bloques);
+	free(key_bloques);
+	fclose(particion);
+	void my_set_bloques(Bloque_LFS* bloque){
+		setear_bloque_ocupado_en_posicion(bloque->numero);
+	}
+	list_iterate(bloques,my_set_bloques);
 }
 size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros){
 	size_t  size_de_particion =0;
@@ -99,20 +114,6 @@ size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros){
 	}
 	list_iterate(listaDeRegistros,sumarSize);
 	return size_de_particion;
-}
-void escribirAParticion(const char* path_particion,RegistroLinea* registro){
-	size_t longitud_usada=longitudDeRegistroAlFileSystem(registro);
-	t_config* config_particion = config_create(path_particion);
-	if(config_particion==NULL){//hay que crear la particion
-		FILE* part=fopen(path_particion,"w+r");
-		fprintf(part,"SIZE=  \n");
-		fprintf(part,"BLOCKS=  \n");
-		fclose(part);
-	}
-	config_set_value(config_particion,"SIZE",string_itoa(longitud_usada));
-//	config_set_value(config_particion,"BLOCKS",string_itoa(longitud_usada));//falta grabar este campo , ejemplo grabar [1,2,3,4] por ejemplo
-
-	config_destroy(config_particion);
 }
 size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro){
 	size_t longitud;
@@ -124,7 +125,7 @@ size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro){
 }
 char* registroLineaAString(RegistroLinea* registro){
 	char* registro_string=malloc(longitudDeRegistroAlFileSystem(registro));
-	sprintf(registro_string,"%d;%d;%s\n",registro->timestamp,registro->key,registro->value);
+	sprintf(registro_string,"%lu;%d;%s\n",registro->timestamp,registro->key,registro->value);
 	return registro_string;
 }
 
@@ -157,7 +158,7 @@ Metadata_Tabla* obtenerMetadata(const char* nombreTabla){
 int  grabarRegistroABloques(RegistroLinea* unRegistro){
 	int posicionBloqueLibre = getBloqueLibre_int();
 	char* bloqueLibre_path=obtenerPathDelNumeroDeBloque(posicionBloqueLibre);
-	escribirRegistroABloque(bloqueLibre_path,unRegistro);
+	escribirRegistrosABloquesFS(bloqueLibre_path,unRegistro);
 	free(bloqueLibre_path);
 	return posicionBloqueLibre;
 }
@@ -167,10 +168,41 @@ char* obtenerPathDelNumeroDeBloque(int numeroDeBloque){
 	return path_del_bloque;
 }
 
-void escribirRegistroABloque(const char * bloque_path,RegistroLinea* unRegistro){
-	FILE* unBloque = txt_open_for_append(bloque_path);//fopen(bloque_path,"r+w");
-	fprintf(unBloque,"%d;%d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
-	fclose(unBloque);
+void escribirRegistrosABloquesFS(t_list* listaDeBloques ,t_list* listaDeRegistros){
+	FILE* bloque_actual;
+	char* registroRestante=strdup("");
+	for(int bloque_i=0;bloque_i<list_size(listaDeBloques);bloque_i++){
+		Bloque_LFS* bloque = list_get(listaDeBloques,bloque_i);
+		bloque_actual=txt_open_for_append(bloque->path);
+
+		for(int registro_i=0;registro_i<list_size(listaDeRegistros);registro_i++){
+			RegistroLinea* unRegistro = list_get(listaDeRegistros,registro_i);
+			if(strlen(registroRestante)>0 || registroRestante!=NULL){//si hay contenido restante , entonces
+						fprintf(bloque_actual,registroRestante);
+						free(registroRestante);
+			}
+			char* registroAEscribir =registroLineaAString(unRegistro);
+			int longitudRestanteParaEscribir=lfs_metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloque_actual);
+			if(longitudRestanteParaEscribir<=0){
+				perror("escribirRegistroABLoque(), longitud negativa o no hay espacio en bloque");
+				registroRestante=registroAEscribir;
+				goto alSiguienteBloque;
+			}
+			if(longitudRestanteParaEscribir<strlen(registroAEscribir)){//hay que recortar registro
+				registroRestante=string_substring_from(registroAEscribir,longitudRestanteParaEscribir);
+				goto imprimirRestante;
+			}
+			imprimirRestante:{
+				fprintf(bloque_actual,registroRestante);
+				free(registroRestante);
+			}
+			fprintf(bloque_actual,registroAEscribir);
+			free(registroAEscribir);
+			alSiguienteBloque:;
+		}
+		txt_close_file(bloque);
+	}
+	free(registroRestante);
 }
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones){
 	return unRegistro->key % cantidad_de_particiones;
@@ -215,7 +247,7 @@ void crearTabla(const char* nombreDeTabla){//ok
 //	mostrarCaracteres(path_aux);
 	printf("path de tabla %s es \"%s\" \n",nombreDeTabla,aux_path_de_la_tabla);
 	if(mkdir(aux_path_de_la_tabla, S_IRWXU) == -1){
-		log_error(logger, "No se pudo crear directorio para tabla  \"%s\" o ya existe \n" ,nombreDeTabla);
+		log_error(lfs_log, "No se pudo crear directorio para tabla  \"%s\" o ya existe \n" ,nombreDeTabla);
 		free(aux_path_de_la_tabla);
 		return ;
 	}

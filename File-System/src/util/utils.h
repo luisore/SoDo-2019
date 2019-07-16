@@ -28,7 +28,7 @@ typedef enum
 	PAQUETE
 }op_code;
 
-t_log* logger;
+t_log* lfs_log;
 
 void* recibir_buffer(int*, int);
 

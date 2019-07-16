@@ -11,7 +11,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 
-t_log * logger ; // variable del archivo de loggeo de hitos
+t_log * lfs_log ; // variable del archivo de loggeo de hitos
 
 //typedef struct {
 //	unsigned int tamanioBloque,cantidadDeBloques;

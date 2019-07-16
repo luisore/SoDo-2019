@@ -10,14 +10,15 @@
 
 //BITMAP begin
 void cargar_configuracion_bitmap(){
-	bloqueActual_int=0;
 	bitarray_=NULL;
 //	char bits[metadata.cantidad_bloques/8];//bits es una variable auxiliar
 //	char* bitmap_array=strdup(bits);
 //	int cantidadDeBytes=metadata.cantidad_bloques/8;
 //	for(int k =0;k<cantidadDeBytes;k++)bitmap_array[k]=0b00000000;
 //	printf("strlen es  %d con valor %s \n",cantidadDeBytes,bitmap_array);
-	char* bits=fileToString_v2("fifa-examples/fifa-entrega/Metadata/Bitmap.bin");
+	char* aux_path_bitmap=bitmap_obtener_path();
+	char* bits=fileToString_v2(aux_path_bitmap);
+	free(aux_path_bitmap);
 	bitarray_ = bitarray_create_with_mode(bits,lfs_metadata.cantidad_bloques/8,MSB_FIRST);// LSB_FIRST);
 //	bitmap_file=fopen("Bitmap.bin","r+w");
 //	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
@@ -25,7 +26,12 @@ void cargar_configuracion_bitmap(){
 //	txt_close_file(bitmap_file);
 
 }
-
+char* bitmap_obtener_path(){
+	char* path=malloc(sizeof(char)*(strlen(lfs.puntoDeMontaje)+strlen("Metadata/")+strlen("Bitmap.bin")+2));
+	sprintf(path,"%sMetadata/Bitmap.bin",lfs.puntoDeMontaje);
+	printf("bitmap_obtener_path() , path:%s\n",path);
+	return path;
+}
 void setear_bloque_ocupado_en_posicion(off_t pos){//ok
 	bitarray_set_bit(bitarray_,pos);
 }
@@ -38,35 +44,33 @@ bool testear_bloque_libre_en_posicion(int pos){
 void mostrar_bitarray(){
 	for(int k =0;k<(bitarray_get_max_bit(bitarray_));k++)printf("test bit posicion, es  %d en posicion %d \n", bitarray_test_bit(bitarray_,k),k);
 }
-void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
+void setBloqueActuaLleno(unsigned int bloqueActual_int){//agregar un 1 al bitmap.bin
 	bitarray_set_bit(bitarray_,bloqueActual_int);
 }
-void lfs_getBloqueLibrePath(){
-	int posicionDeUnBloqueLibre=getBloqueLibre_int();
-	bloqueActual_int=posicionDeUnBloqueLibre;
-//	bloqueActual_path=malloc()
-	char * path_completo_aux=malloc(1500);
-	sprintf(path_completo_aux,"%s%s%d.bin",lfs.puntoDeMontaje,"Bloques/",posicionDeUnBloqueLibre);//ok
-	FILE* f_aux= fopen(bloqueActual_path,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
-	free(path_completo_aux);
+Bloque_LFS* lfs_obtenerBloqueLibre(){
+	Bloque_LFS* unBloqueLibre=malloc(sizeof(Bloque_LFS));
+	unBloqueLibre->numero=getBloqueLibre_int();
+	unBloqueLibre->path=malloc(strlen(lfs.puntoDeMontaje)+strlen("/bloques/")+strlen("xxxxxx.bin"));//solo un tamanio maximo para longitud de path
+	sprintf(unBloqueLibre->path,"%s%s%d.bin",lfs.puntoDeMontaje,"Bloques/",unBloqueLibre->numero);//ok
+	FILE* f_aux= fopen(unBloqueLibre->path,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	if(f_aux==NULL)perror("lfs_obtenerBloqueLibre()");
 	txt_close_file(f_aux);
-//	return bloqueActual_path;
+	return unBloqueLibre;
 }
-bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
-	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
+void bloque_destroy(Bloque_LFS* bloque){
+	free(bloque->path);
+	free(bloque);
 }
+
 int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
-	int j;
-	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre,OK
+	int bloque_i;
+	for( bloque_i =0;testear_bloque_libre_en_posicion(bloque_i);bloque_i++);//hasta un bloque lbre,OK
 
-	if(j>lfs_metadata.cantidad_bloques){
+	if(bloque_i>lfs_metadata.cantidad_bloques){
 		perror("cantidad insuficiente de espacio o bloques ");
-//		exit(EXIT_SUCCESS);
 	}
-
-	setear_bloque_ocupado_en_posicion(j);
-
-	return j;
+	setear_bloque_ocupado_en_posicion(bloque_i);
+	return bloque_i;
 }
 char* bloquesToString(const char* pathFile){//ok
 //	puts("begin bloquesToString()");
@@ -111,13 +115,13 @@ char* recortarString(const char* stream, off_t desde, off_t size){
 	char* parcial = string_substring(stream,(off_t)desde,(off_t)size);
 	return parcial;
 }
-size_t getCantidadDeBloquesOcupadosSegunPath(const char* pathFile){//OK
-	size_t cantidad=0;
-	t_list* listaDeBloques=bloquesToList(pathFile);
-	cantidad=list_size(listaDeBloques);
-	list_create(listaDeBloques);
-	return cantidad;
-}
+//size_t getCantidadDeBloquesOcupadosSegunPath(const char* pathFile){//OK
+//	size_t cantidad=0;
+//	t_list* listaDeBloques=bloquesToList(pathFile);
+//	cantidad=list_size(listaDeBloques);
+//	list_create(listaDeBloques);
+//	return cantidad;
+//}
 //BITMAP end
 
 

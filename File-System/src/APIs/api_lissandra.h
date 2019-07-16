@@ -14,10 +14,6 @@
 #include <sys/stat.h> // para a estructura stat que me da la descripcion del archivo
 #include <dirent.h>
 #include <stdlib.h>
-//#define EXITSUCCESS 1
-//#define EXITFAILURE 0
-//#define STRONGCONSISTENCY "SC"
-//#define EVENTUALCONSISTENCY "EC"
 #include <stdbool.h>
 
 //#include "../File-System.h"
@@ -32,6 +28,7 @@
 #include "../../../biblioteca/biblioteca/bibliotecaDeSockets.h"
 #include "../../../biblioteca/biblioteca/parser.h"
 #include "../config/metadata.h"
+#include "../config/bitmap.h"
 
 typedef struct {
 	int cantParticionesTemporales;
@@ -106,6 +103,8 @@ bool laMemtableTieneContenido();
 void dumpear();// lo que hay en la memtable, bajar a las particiones .tmp
 //el insert contiene el nombre de la tabla
 void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(Insert* unInsert,t_list* listaDeRegistros);
+
+//lista del tipo Bloque_LFS
 t_list* calcularBloquesNecesarios(size_t size_);
 
 size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros);
@@ -116,7 +115,8 @@ void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_l
 size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro);
 
 int grabarRegistroABloques(RegistroLinea* unRegistro);
-void escribirRegistroABloque(const char * bloque_path,RegistroLinea* unRegistro);
+//bloques de tipo BloqueLFS, y registros del tipo RegistroLinea
+void escribirRegistrosABloquesFS(t_list* bloques,t_list* registros);
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);
 char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal);

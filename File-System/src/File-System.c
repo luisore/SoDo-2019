@@ -262,6 +262,7 @@ void lfs_consola(){
 //		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
 //		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
 //		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
+		if(string_contains(linea,"DUMP"))dumpear();//dumpeo, dumpaear debe de ser ejecutado cada cierto tiempo por un hilo
 		free(linea);
 	}
 }
@@ -287,7 +288,7 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 //			drop();
 			break;
 		default:
-			log_error(logger,"linea LQL leida erronea \n");
+			log_error(lfs_log,"linea LQL leida erronea \n");
 			break;
 	}
 }

@@ -170,36 +170,44 @@ char* obtenerPathDelNumeroDeBloque(int numeroDeBloque){
 
 void escribirRegistrosABloquesFS(t_list* listaDeBloques ,t_list* listaDeRegistros){
 	FILE* bloque_actual;
-	char* registroRestante=strdup("");
-	for(int bloque_i=0;bloque_i<list_size(listaDeBloques);bloque_i++){
+	char* registroRestante=NULL;
+	for(int bloque_i=0, registro_i=0;bloque_i<list_size(listaDeBloques);bloque_i++){
 		Bloque_LFS* bloque = list_get(listaDeBloques,bloque_i);
 		bloque_actual=txt_open_for_append(bloque->path);
-
-		for(int registro_i=0;registro_i<list_size(listaDeRegistros);registro_i++){
+		while(registro_i<list_size(listaDeRegistros)){
 			RegistroLinea* unRegistro = list_get(listaDeRegistros,registro_i);
-			if(strlen(registroRestante)>0 || registroRestante!=NULL){//si hay contenido restante , entonces
+			//si hay contenido restante , entonces
+			if( registroRestante!=NULL){
 						fprintf(bloque_actual,registroRestante);
 						free(registroRestante);
+						registroRestante=NULL;//para que no tire error en free()
 			}
 			char* registroAEscribir =registroLineaAString(unRegistro);
 			int longitudRestanteParaEscribir=lfs_metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloque_actual);
-			if(longitudRestanteParaEscribir<=0){
+			//si no hay espacio en bloque
+			if(longitudRestanteParaEscribir<=0){//ok
 				perror("escribirRegistroABLoque(), longitud negativa o no hay espacio en bloque");
 				registroRestante=registroAEscribir;
-				goto alSiguienteBloque;
+//				goto alSiguienteBloque;
+				break;
 			}
-			if(longitudRestanteParaEscribir<strlen(registroAEscribir)){//hay que recortar registro
+			if( !strlen(registroAEscribir)<=longitudRestanteParaEscribir){//hay que recortar el string  registro
 				registroRestante=string_substring_from(registroAEscribir,longitudRestanteParaEscribir);
-				goto imprimirRestante;
-			}
-			imprimirRestante:{
-				fprintf(bloque_actual,registroRestante);
-				free(registroRestante);
+				char* primeros_caracteres_a_escribir=malloc(sizeof(char)*longitudRestanteParaEscribir);
+				strncpy(primeros_caracteres_a_escribir,registroAEscribir,longitudRestanteParaEscribir);
+				fprintf(bloque_actual,primeros_caracteres_a_escribir);
+				free(primeros_caracteres_a_escribir);
+//				goto alSiguienteBloque;
+				break;
 			}
 			fprintf(bloque_actual,registroAEscribir);
+			free(registroRestante);
 			free(registroAEscribir);
-			alSiguienteBloque:;
+			registroRestante=NULL;
+			registroAEscribir=NULL;
+			registro_i++;
 		}
+//		alSiguienteBloque:;
 		txt_close_file(bloque);
 	}
 	free(registroRestante);

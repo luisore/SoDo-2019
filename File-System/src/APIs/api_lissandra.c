@@ -128,9 +128,10 @@ char* registroLineaAString(RegistroLinea* registro){
 	return registro_string;
 }
 
-char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal){
-	char* pathDeParticion=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Tables/")+40);
-	sprintf(pathDeParticion,"%sTables/%d.tmp");
+char* obtenerPathDeParticionTemporal(const char* tabla,int numeroDeParticionTemporal){
+	char* pathDeParticion=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Tables/")+strlen(tabla)+40);
+	sprintf(pathDeParticion,"%sTables%s/%d.tmp",lfs.puntoDeMontaje,tabla,numeroDeParticionTemporal);
+	printf("obtenerPathDeParticionTemporal() path:%s\n",pathDeParticion);
 	return pathDeParticion;
 }
 Metadata_Tabla* obtenerMetadata(const char* nombreTabla){

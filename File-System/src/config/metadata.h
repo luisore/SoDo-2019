@@ -32,7 +32,7 @@ struct METADATA{
 	int tamanio_de_bloque;//en bytes, ni dice eso el enunciado
 	int cantidad_bloques;
 	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable, no sirve , es la extension de los archivos d config escriptorio
-}metadata;
+}lfs_metadata;
 
 void cargar_configuracion_metadata(const char* pathMetadata);
 void mostrar_configuracion_metadata();

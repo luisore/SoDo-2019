@@ -18,7 +18,7 @@ void cargar_configuracion_bitmap(){
 //	for(int k =0;k<cantidadDeBytes;k++)bitmap_array[k]=0b00000000;
 //	printf("strlen es  %d con valor %s \n",cantidadDeBytes,bitmap_array);
 	char* bits=fileToString_v2("fifa-examples/fifa-entrega/Metadata/Bitmap.bin");
-	bitarray_ = bitarray_create_with_mode(bits,metadata.cantidad_bloques/8,MSB_FIRST);// LSB_FIRST);
+	bitarray_ = bitarray_create_with_mode(bits,lfs_metadata.cantidad_bloques/8,MSB_FIRST);// LSB_FIRST);
 //	bitmap_file=fopen("Bitmap.bin","r+w");
 //	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
 ////	memmove(bitmap_file,bitarray_->bitarray,bitarray_->size);
@@ -41,7 +41,7 @@ void mostrar_bitarray(){
 void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 	bitarray_set_bit(bitarray_,bloqueActual_int);
 }
-void getBloqueLibre_path(){
+void lfs_getBloqueLibrePath(){
 	int posicionDeUnBloqueLibre=getBloqueLibre_int();
 	bloqueActual_int=posicionDeUnBloqueLibre;
 //	bloqueActual_path=malloc()
@@ -59,7 +59,7 @@ int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 	int j;
 	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre,OK
 
-	if(j>metadata.cantidad_bloques){
+	if(j>lfs_metadata.cantidad_bloques){
 		perror("cantidad insuficiente de espacio o bloques ");
 //		exit(EXIT_SUCCESS);
 	}

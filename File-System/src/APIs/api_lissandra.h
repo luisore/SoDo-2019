@@ -31,6 +31,7 @@
 
 #include "../../../biblioteca/biblioteca/bibliotecaDeSockets.h"
 #include "../../../biblioteca/biblioteca/parser.h"
+#include "../config/metadata.h"
 
 typedef struct {
 	int cantParticionesTemporales;
@@ -103,7 +104,15 @@ void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const cha
 bool hay_datos_a_dumpear();
 bool laMemtableTieneContenido();
 void dumpear();// lo que hay en la memtable, bajar a las particiones .tmp
-void insertarRegistrosEnParticionTemporal(const char* tabla,  RegistroLinea* unRegistro,int cantidadDeParticionesTemporales);
+//el insert contiene el nombre de la tabla
+void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(Insert* unInsert,t_list* listaDeRegistros);
+t_list* calcularBloquesNecesarios(size_t size_);
+
+size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros);
+t_list* calcularBloquesNecesarios(size_t size_);
+void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_list* bloques);
+
+
 size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro);
 
 int grabarRegistroABloques(RegistroLinea* unRegistro);

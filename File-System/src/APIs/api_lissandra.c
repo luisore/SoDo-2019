@@ -50,34 +50,55 @@ void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const cha
 	}
 }
 Insert* buscarTablaEnLaMemtable(const char * tabla){
-//	Insert* insertConTabla;
 	bool existeTablaEnLaMemtable(Insert *unInsert) {//simulo aplicacion parcial
 	            			return strcmp(unInsert->nombreDeLaTabla,tabla)==0;//string_equals_ignore_case(unInsert->nombreDeLaTabla, tabla);
 	            		}
-//	aux_tabla_para_la_memtable=tabla;
 	return list_find(memtable,existeTablaEnLaMemtable);// // le puse (void*) por que en los tests lo manejan asi
-//	return insertConTabla;
 }
 bool hay_datos_a_dumpear(){
-//	bool hay_datos_en_memoria_para_dump=false;
-//	hay_datos_en_memoria_para_dump=laMemtableTieneContenido();
-//	return laMemtableTieneContenido();
 	return list_size(memtable)>0;//hay datos en la memtable
 }
 void dumpear(){
 	Insert* unInsert;
 	for(int tabla_iesima =0;tabla_iesima<list_size(memtable);tabla_iesima++){
 		unInsert = list_get(memtable,tabla_iesima);
-		for(int fila_iesima =0;fila_iesima<list_size(unInsert->registros);fila_iesima++){
-			insertarRegistrosEnParticionTemporal(unInsert->nombreDeLaTabla,(RegistroLinea*)list_get((unInsert->registros),fila_iesima), unInsert->cantParticionesTemporales);
-			unInsert->cantParticionesTemporales++;
-		}
+		unInsert->cantParticionesTemporales++;//cuando hay un dump se baja de la memtable a una particion temporal .tmp, se crea una temporal nueva
+		insertarListaDeRegistrosDeTablaANuevaParticionTemporal(unInsert,unInsert->registros);
 	}
 }
-void insertarRegistrosEnParticionTemporal(const char* tabla,  RegistroLinea* unRegistro,int cantidadDeParticionesTemporales){
-	char* path_de_particion_temporal=obtenerPathDeParticionTemporal(cantidadDeParticionesTemporales+1);
-	escribirAParticion(path_de_particion_temporal,unRegistro);
-	int bloqueGrabado=grabarRegistroABloques(unRegistro);
+void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(Insert* unInsert,t_list* listaDeRegistros){//el insert contiene el nombre de la tabla
+	size_t sizeTotalDeParticion=tamanioDeListaDeRegistros(listaDeRegistros);
+	char* pathDeParticionTemporal=obtenerPathDeParticionTemporal(unInsert->cantParticionesTemporales);
+//	for(int fila_de_tabla_iesima =0;fila_de_tabla_iesima<list_size(unInsert->registros);fila_de_tabla_iesima++){
+//				RegistroLinea* unRegistro_o_filaDeTabla=(RegistroLinea*)list_get((unInsert->registros),fila_de_tabla_iesima);
+//				escribirAParticion(pathDeParticionTemporal,unRegistro_o_filaDeTabla);
+//				int bloqueGrabado=grabarRegistroABloques(unRegistro_o_filaDeTabla);
+//	}
+	t_list* bloquesNecesarios=calcularBloquesNecesarios( sizeTotalDeParticion);
+	crearParticionTemporalConRegistros(pathDeParticionTemporal,sizeTotalDeParticion,bloquesNecesarios);
+	list_destroy(bloquesNecesarios);
+}
+t_list* calcularBloquesNecesarios(size_t size_){
+	t_list* bloques = list_create();
+	int cantidadDeBloques=(int)lfs_metadata.tamanio_de_bloque/size_;
+	if(lfs_metadata.tamanio_de_bloque%size_!=0)cantidadDeBloques++;
+	for(int i=0;i<cantidadDeBloques;i++){
+		char* pathDeBloqueObtenido=lfs_getBloqueLibrePath();
+		list_add(bloques,pathDeBloqueObtenido);
+		printf("calcularBloquesNecesarios()->  bloque: %s \n",pathDeBloqueObtenido);
+	}
+	return bloques;
+}
+void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_list* bloques){
+
+}
+size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros){
+	size_t  size_de_particion =0;
+	void sumarSize(RegistroLinea* unRegistro){
+		 size_de_particion+=longitudDeRegistroAlFileSystem(unRegistro);
+	}
+	list_iterate(listaDeRegistros,sumarSize);
+	return size_de_particion;
 }
 void escribirAParticion(const char* path_particion,RegistroLinea* registro){
 	size_t longitud_usada=longitudDeRegistroAlFileSystem(registro);
@@ -249,15 +270,8 @@ void printfMetadata(Metadata_Tabla* metadata, const char* nombre_de_tabla){
 		printf("tabla:%s,\n	particiones: %d \n	consistencia: %s \n	y tiempo de compactacion: %d \n",nombre_de_tabla,metadata->PARTITIONS,metadata->CONSISTENCY,metadata->COMPACTION_TIME);
 }
 void drop(const char* nombre_de_tabla){
-	t_list* listaDeParticiones=obtenerParticiones(nombre_de_tabla);
-//	list_iterate(listaDeParticiones,mostrarParticion);
-	char* pathDeTabla = obtenerPathDeTabla(nombre_de_tabla);
-	puts(pathDeTabla);
-	int remove_=remove(pathDeTabla);
-	if(remove_==-1)perror("DROP:error en remove");
-	if(remove_==0)puts("DROP :exito remove ");
-	free(pathDeTabla);
 	void borrarBloqueSegunParticion(Particion* unaParticion){
+		puts("aca llego ");
 		char* pathDeBloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+strlen(unaParticion->pathParticion));//la longitud es grande pero necesito una longitud maxima para que no tire error de reserva de memoria
 		for(int bloque_i=0;(unaParticion->bloques)[bloque_i]!=NULL;bloque_i++){
 			sprintf(pathDeBloque,"%sBloques/%s",lfs.puntoDeMontaje,(unaParticion->bloques)[bloque_i]);
@@ -270,21 +284,21 @@ void drop(const char* nombre_de_tabla){
 		free(pathDeBloque);
 		free_list_of_strings(unaParticion->bloques);
 	}
+	t_list* listaDeParticiones=obtenerParticiones(nombre_de_tabla);
+		char* pathDeTabla = obtenerPathDeTabla(nombre_de_tabla);
+		puts(pathDeTabla);
+		int remove_=remove(pathDeTabla);
+		if(remove_==-1)perror("DROP:error en remove");
+		if(remove_==0)perror("DROP:exito remove ");
+		if(listaDeParticiones==NULL)perror("DROP error en lista de particiones");
+		if(list_size(listaDeParticiones)==0){
+			perror("DROP lista de particiones de particiones vacia");
+			return;
+		}
+		free(pathDeTabla);
 	list_iterate(listaDeParticiones,borrarBloqueSegunParticion);
 	list_destroy(listaDeParticiones);
 }
-//void borrarBloquesSegunParticiones(t_list* 	 listaDeParticiones){
-//
-//}
-//t_list* obtenerListaDeParticiones(const char* nombre_de_tabla){
-//	t_list listaDeParticiones = list_create();
-//	char* aux = obtenerPathDeTabla(nombre_de_tabla);
-//	t_list* nombresDeParticiones = obtenerListadoDeSubArchivosCompleto(aux,".partition");//puede ser .bin tambien
-//	Particion* obtenerParticion(const char* pathDeParticion){
-//		obtenerParticionesNoTemporales()
-//	}
-//
-//}
 bool  yaExisteTabla(const char* nombre_de_tabla){
 	//if exit(RES)
 
@@ -294,8 +308,7 @@ bool  yaExisteTabla(const char* nombre_de_tabla){
 	free(path);
 	return yaExiste;
 }
-char*  obtenerPathDeTabla(const char* nombre_de_tabla)
-{
+char*  obtenerPathDeTabla(const char* nombre_de_tabla){
 	char* path_aux = malloc(strlen(nombre_de_tabla)+strlen("Tables/")+strlen(lfs.puntoDeMontaje));
 	sprintf(path_aux,"%s%s%s",lfs.puntoDeMontaje,"Tables/",nombre_de_tabla);
 //	mostrarCaracteres(path_aux);
@@ -308,7 +321,6 @@ void aplicar_retardo(){
 }
 
 char archivo_path(const char rutaMontaje, const char *rutaArchivo){
-
 	char  complete_path = (char ) malloc(1 + strlen(rutaMontaje) + strlen(rutaArchivo));
     strcpy(complete_path, rutaMontaje);
     strcat(complete_path, rutaArchivo);
@@ -327,11 +339,10 @@ bool yaExisteCarpeta(const char* path_tabla){
 	bool existe=false;
 	DIR *directorio = opendir(path_tabla);
 	if(directorio != NULL){
-
 		existe = true;
 		closedir(directorio);
 		return true;
-//	}
+	}
 	closedir(directorio);
 	existe = false;
 	return existe;
@@ -345,18 +356,6 @@ bool yaExisteCarpeta(const char* path_tabla){
 void mostrarMetadata(const char* tabla){ //ok
 	//obtener metadata
 	Metadata_Tabla *unMetadata=obtenerMetadata(tabla);
-//	t_config* unConfig=config_create(path_metadata);
-//	if(unConfig==NULL){
-//		fprintf(stderr,"No Existe el archivo %s \n",path_metadata);
-//		return;
-//	}
-//	else {
-//		unMetadata.COMPACTION_TIME=config_get_int_value(unConfig,"COMPACTION_TIME");
-//		unMetadata.CONSISTENCY=strdup(config_get_string_value(unConfig,"CONSISTENCY"));
-//		unMetadata.PARTITIONS=config_get_int_value(unConfig,"PARTITIONS");
-//	}
-//	config_destroy(unConfig);
-	//mostrar
 	printf("COMPACTION_TIME = %d  \n",unMetadata->COMPACTION_TIME);
 	printf("CONSISTENCY= %s \n",unMetadata->COMPACTION_TIME);
 	printf("PARTITIONS= %d \n",unMetadata->PARTITIONS);
@@ -366,10 +365,18 @@ void mostrarMetadata(const char* tabla){ //ok
 }
 
 
-}
 void mostrarParticion(Particion* particion){//ok
 	if(particion->esTemporal)printf("particion = %s \n	size= %d \n	y es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
 	else printf("particion = %s \n	size= %d \n	y no es temporal y un bloque es %s\n",particion->pathParticion,particion->size,particion->bloques[0]);
 }
-
+void lfs_mostrar_memtable(){
+	void mostrar_insert(Insert* unInsert){
+		printf("MOSTRANDO MEMTABLE para TABLA:%s y PARTICIONES:%d\n",unInsert->nombreDeLaTabla,unInsert->cantParticionesTemporales);
+		for(int registro_i=0;registro_i<list_size(unInsert->registros);registro_i++){
+			RegistroLinea* unRegistro = list_get(unInsert->registros,registro_i);
+			printf("	MEMTABLE -> %lu;&d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
+		}
+	}
+	list_iterate(memtable,mostrar_insert);
+}
 //--------------------------EJECUCIONES FIN

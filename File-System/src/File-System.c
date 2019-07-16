@@ -86,8 +86,8 @@ int main() {
 		list_iterate(particiones_,mostrarParticion);
 		list_destroy(particiones_);
 
-		puts("drop en tableA");
-		drop("tableA");
+		puts("drop en tableA3");
+		drop("tableA3");
 
 
 

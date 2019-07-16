@@ -30,7 +30,7 @@ bool testear_bloque_libre_en_posicion(int pos);
 //void setBloqueLleno();//agregar un 1 al bitmap.bin
 void mostrar_bitarray();
 
-void getBloqueLibre_path();
+void lfs_getBloqueLibrePath();
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
 void cargar_configuracion_bitmap();
 

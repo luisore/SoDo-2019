@@ -25,6 +25,7 @@ t_bitarray* bitarray_;
 
 
 Bloque_LFS* lfs_obtenerBloqueLibre();
+void bloque_destroy(Bloque_LFS* bloque);
 char* bitmap_obtener_path();
 t_list* bloquesToList(const char* pathFile);//Ok
 

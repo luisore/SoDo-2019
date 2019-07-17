@@ -50,7 +50,6 @@ typedef struct{
 	RegistroLinea registro;
 	unsigned int bloque,particion;
 }RegistroLinea_compactador;
-
 typedef struct{
 	char pathParticion[256];
 	bool esTemporal;
@@ -63,12 +62,11 @@ typedef struct {
 	unsigned int PARTITIONS;//=3
 	unsigned long COMPACTION_TIME;//=60000
 }Metadata_Tabla;
-
 //funciones de la API de LFS,para ser consultadas IMPORTANTES estas 7 funciones, son la posta
-void select1(const char * nombre_de_tabla, unsigned int key);
-	//el timestamp es opcional
+void select1(const char * nombre_de_tabla,unsigned int key);
+//el timestamp es opcional
 void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value);
-void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, unsigned  long  timestamp);
+void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, unsigned  long long timestamp);
 void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion );
 void describe1();
 void describe2(const char* nombre_de_tabla);
@@ -97,12 +95,15 @@ bool yaExisteCarpeta(const char* path_tabla);
 char*  obtenerPathDeTabla(const char* nombre_de_tabla);
 void crearParticiones(const char* tabla, unsigned int numeroDeParticiones);
 
-void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long timestamp);
+void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long long timestamp);
 bool hay_datos_a_dumpear();
 bool laMemtableTieneContenido();
 void dumpear();// lo que hay en la memtable, bajar a las particiones .tmp
 //el insert contiene el nombre de la tabla
-void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(Insert* unInsert,t_list* listaDeRegistros);
+void memtable_reboot();
+void insert_destroy(Insert* unInsert);
+void registroLinea_destroy(RegistroLinea* unRegistro);
+void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInsert,const t_list* listaDeRegistros);
 
 //lista del tipo Bloque_LFS
 t_list* calcularBloquesNecesarios(size_t size_);
@@ -114,7 +115,7 @@ void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_l
 
 size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro);
 
-int grabarRegistroABloques(RegistroLinea* unRegistro);
+//int grabarRegistroABloques(RegistroLinea* unRegistro);
 //bloques de tipo BloqueLFS, y registros del tipo RegistroLinea
 void escribirRegistrosABloquesFS(t_list* bloques,t_list* registros);
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);

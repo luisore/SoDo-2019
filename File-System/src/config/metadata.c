@@ -8,8 +8,11 @@
 
 
 //METADATA
-void cargar_configuracion_metadata(const char* pathMetadata){
+void cargar_configuracion_metadata(){
+	char*  pathMetadata=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Metadata/")+strlen("Metadata.bin")+1);
+	sprintf(pathMetadata,"%sMetadata/Metadata.bin",lfs.puntoDeMontaje);
 	t_config *configuracion_cfg_temporal=config_create(pathMetadata);
+	free(pathMetadata);
 	if(configuracion_cfg_temporal==NULL)perror("no cargo bien  Metadata.bin\n");
 //	(&metadata)->cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
 	lfs_metadata.cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");

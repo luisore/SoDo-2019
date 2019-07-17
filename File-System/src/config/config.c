@@ -17,18 +17,21 @@ void config_cargar(const char* dir_config){
 		 	if(configuracion==NULL){
 		 		perror("No se encuentra archivo LFS.CONFIG \n");
 //		 		log_error(lfs_log, "No se encuentra archivo LFS.config \n");
-		 	}
-		 	else{
-		 			lfs.puertoEscucha=config_get_int_value(configuracion,"PUERTO_ESCUCHA");
-//		 			strcpy(lfs.puntoDeMontaje,config_get_string_value(configuracion,"PUNTO_DE_MONTAJE"));
-		 			lfs.puntoDeMontaje=string_duplicate(config_get_string_value(configuracion,"PUNTO_MONTAJE"));
-		 			lfs.tamanioValue=config_get_int_value(configuracion,"TAMANIO_VALUE");
-		 			lfs.tiempoDump=config_get_long_value(configuracion,"TIEMPO_DUMP");
-		 			lfs.retardo=config_get_long_value(configuracion,"RETARDO");
-		 			config_destroy(configuracion);
-		 	}
+		 		return;
+			}
+	lfs.puertoEscucha=config_get_int_value(configuracion,"PUERTO_ESCUCHA");
+		 //		 			strcpy(lfs.puntoDeMontaje,config_get_string_value(configuracion,"PUNTO_DE_MONTAJE"));
+	lfs.puntoDeMontaje=string_duplicate(config_get_string_value(configuracion,"PUNTO_MONTAJE"));
+	lfs.tamanioValue=config_get_int_value(configuracion,"TAMANIO_VALUE");
+	lfs.tiempoDump=config_get_long_value(configuracion,"TIEMPO_DUMP");
+	lfs.retardo=config_get_long_value(configuracion,"RETARDO");
+	config_destroy(configuracion);
 
-
+	cargar_configuracion_metadata();
+	cargar_configuracion_bitmap();
+	//inicio log
+	lfs_log = log_create("LFS.log", "LISSANDRA - LFS", true, LOG_LEVEL_TRACE);
+	puts("config_cargar() fin ");
 }
 
 void imprimir_configuracion(){

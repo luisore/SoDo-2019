@@ -34,7 +34,7 @@ struct METADATA{
 	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable, no sirve , es la extension de los archivos d config escriptorio
 }lfs_metadata;
 
-void cargar_configuracion_metadata(const char* pathMetadata);
+void cargar_configuracion_metadata();
 void mostrar_configuracion_metadata();
 
 //METADATA

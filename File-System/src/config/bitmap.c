@@ -11,19 +11,16 @@
 //BITMAP begin
 void cargar_configuracion_bitmap(){
 	bitarray_=NULL;
-//	char bits[metadata.cantidad_bloques/8];//bits es una variable auxiliar
-//	char* bitmap_array=strdup(bits);
-//	int cantidadDeBytes=metadata.cantidad_bloques/8;
-//	for(int k =0;k<cantidadDeBytes;k++)bitmap_array[k]=0b00000000;
-//	printf("strlen es  %d con valor %s \n",cantidadDeBytes,bitmap_array);
-	char* aux_path_bitmap=bitmap_obtener_path();
-	char* bits=fileToString_v2(aux_path_bitmap);
-	free(aux_path_bitmap);
-	bitarray_ = bitarray_create_with_mode(bits,lfs_metadata.cantidad_bloques/8,MSB_FIRST);// LSB_FIRST);
-//	bitmap_file=fopen("Bitmap.bin","r+w");
-//	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
-////	memmove(bitmap_file,bitarray_->bitarray,bitarray_->size);
-//	txt_close_file(bitmap_file);
+	char* bitmap_array=malloc(sizeof(char)*(lfs_metadata.cantidad_bloques)/8);//strdup(bits);
+	memset(bitmap_array,0b00000000,sizeof(char)*(lfs_metadata.cantidad_bloques)/8);
+//	char* aux_path_bitmap=bitmap_obtener_path();
+//	char* bits=fileToString_v2(aux_path_bitmap);
+//	free(bits);//free para probar
+//	free(aux_path_bitmap);
+
+	bitarray_ = bitarray_create_with_mode(bitmap_array,lfs_metadata.cantidad_bloques/8,MSB_FIRST);// LSB_FIRST);
+//	for(int i=0;i<bitarray_get_max_bit(bitarray_);i++)setear_bloque_ocupado_en_posicion(i);//setea todos los bloques, OK
+//	mostrar_bitarray();
 
 }
 char* bitmap_obtener_path(){
@@ -59,7 +56,7 @@ Bloque_LFS* lfs_obtenerBloqueLibre(){
 }
 void bloque_destroy(Bloque_LFS* bloque){
 	free(bloque->path);
-	free(bloque);
+//	free(bloque);
 }
 
 int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK

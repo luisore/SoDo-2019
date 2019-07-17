@@ -9,9 +9,6 @@
  */
 
 #include "File-System.h"
-#include "config/config.h"
-#include <pthread.h>
-#include <dirent.h>
 pthread_t consola,dump;//,compactador;
 
 //typedef struct{
@@ -19,47 +16,45 @@ pthread_t consola,dump;//,compactador;
 //	bool esTemporal;
 //}ParticionNombre;
 
-//int main(void) {
-//	puts("... INICIA LFS ...");
-//
-//	//inicio log
-//	logger = log_create("LFS.log", "LISSANDRA - LFS", true, LOG_LEVEL_TRACE);
-//
-//	config_cargar("LFS.config");
-//	log_info(logger,"se cargo LFS.log \n");
-//
-//	memtable=list_create();
-//
-//	imprimir_configuracion();
-//
-//	pthread_create(&consola,NULL,lfs_consola,NULL);
-//	pthread_join(consola,NULL);
-////	lfs_consola();//por el momento funciona con el CREATE
-//
-////	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
-//
-//
-//
-//
-//	log_destroy(logger);
-//	list_destroy(memtable);
-//	puts("... FIN LFS ...");
-//	return EXIT_SUCCESS;
-//}
-int main() {
-
+int main(void) {
+	puts("... INICIA LFS ...");
 	config_cargar("LFS.config");
+	log_info(lfs_log,"se cargo LFS.log \n");
+	memtable=list_create();
+
 	imprimir_configuracion();
 
-		puts("mostrar particiones de una tabla tableA");
-			t_list* particiones = obtenerParticiones("tableA");
-		list_iterate(particiones,mostrarParticion);
-		list_destroy(particiones);
+	pthread_create(&consola,NULL,lfs_consola,NULL);
+	pthread_join(consola,NULL);
+//	lfs_consola();//por el momento funciona con el CREATE
+
+//	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
 
 
 
-		puts("describe2---------");
-		describe2("tableA");
+
+	log_destroy(lfs_log);
+	list_destroy(memtable);
+
+	puts("... FIN LFS ...");
+	return EXIT_SUCCESS;
+}
+
+//int main() {
+//
+//	config_cargar("LFS.config");
+//	imprimir_configuracion();
+//
+//		puts("mostrar particiones de una tabla tableA");
+//			t_list* particiones = obtenerParticiones("tableA");
+//		list_iterate(particiones,mostrarParticion);
+//		list_destroy(particiones);
+
+
+
+//		puts("describe2---------");
+//		describe2("tableA");
+
 //		puts("describe1------");
 //		describe1();
 
@@ -69,35 +64,30 @@ int main() {
 //		describe2("tableA2");
 //		describe2("tableA");
 
-		puts("->>>mostrar listado de tablas");
-		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
-		list_iterate(archivos,puts);
-		list_destroy(archivos);
+//		puts("->>>mostrar listado de tablas");
+//		t_list* archivos = obtenerListadoDeNombresDeSubArchivos("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables");
+//		list_iterate(archivos,puts);
+//		list_destroy(archivos);
 
+//		puts("mostrar particiones de una tabla path");
+//		t_list* particiones_path = obtenerListaDeParticiones_path("tableA");
+//		list_iterate(particiones_path,puts);
+//		list_destroy(particiones_path);
+//
+//		puts("mostrar particiones de una tabla struct ");
+//		t_list* particiones_=obtenerParticiones("tableA");
+//		list_iterate(particiones_,mostrarParticion);
+//		list_destroy(particiones_);
 
-
-		puts("mostrar particiones de una tabla path");
-		t_list* particiones_path = obtenerListaDeParticiones_path("tableA");
-		list_iterate(particiones_path,puts);
-		list_destroy(particiones_path);
-
-		puts("mostrar particiones de una tabla struct ");
-		t_list* particiones_=obtenerParticiones("tableA");
-		list_iterate(particiones_,mostrarParticion);
-		list_destroy(particiones_);
-
-		puts("drop en tableA3");
-		drop("tableA3");
-
-
-
+//		puts("drop en tableA3");
+//		drop("tableA3");
 //		puts("inicio de recorrido de bloque 4 ");
 //		recorrerBloque("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/4.bin");
 
-		puts("FIN");
-
-	return EXIT_SUCCESS;
-}
+//		puts("FIN");
+//
+//	return EXIT_SUCCESS;
+//}
 void recorrerBloque(const char* pathBloque){//ok
 	FILE* bloque =fopen(pathBloque,"r+");
 	if(bloque==NULL)perror("error al abrir el bloque para recorrer ");
@@ -122,10 +112,7 @@ RegistroLinea obtenerRegistroLinea(FILE* bloque){
 void printRegistroLinea(RegistroLinea* registro){
 	printf("Registro linea -> %d;%d;%s\n",registro->timestamp,registro->key,registro->value);
 }
-void registroLineaDestroy(RegistroLinea* linea){
-	free(linea->value);
-	free(linea);
-}
+
 t_list* obtenerListadoDeSubArchivos(const char * pathDirectorio,const char* extension){//ok
 	t_list* nombresDeArchivos=list_create();
 	struct stat estadoDeArchivo;
@@ -180,14 +167,9 @@ t_list* obtenerListadoDeNombresDeSubArchivos(const char* pathCarpetaPadre){//ok
 		}
 		return lista;
 }
-
-
 void compactar(const char* nombreDeTabla){
 	t_list* particionesTemporales=obtenerParticionesTemporales(nombreDeTabla);
 	t_list* particionesNoTemporales=obtenerParticionesNoTemporales(nombreDeTabla);
-
-
-
 
 	list_destroy(particionesTemporales);
 	list_destroy(particionesNoTemporales);
@@ -253,43 +235,46 @@ t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla){
 void lfs_consola(){
 	while(1){
 		char* linea = readline("LFS@_consola -> ");
-
 		struct_operacion* parametros_lql_leidos = parsear_linea(linea);
 		ejecutar_linea_lql(parametros_lql_leidos);
-//
 		printf(" se leyo la  la sentencia \"%s\" LQL\n", linea);
 //		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
 //		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
 //		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
 //		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
 		if(string_contains(linea,"DUMP"))dumpear();//dumpeo, dumpaear debe de ser ejecutado cada cierto tiempo por un hilo
+		if(string_contains(linea,"MEMTABLE"))memtable_mostrar();
 		free(linea);
 	}
 }
 void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 	size_t cantidadDeParametros;
-	for(cantidadDeParametros=0;parametros_de_linea_lql->parametros[cantidadDeParametros];cantidadDeParametros++);
+	for(cantidadDeParametros=0;parametros_de_linea_lql->parametros[cantidadDeParametros]!=NULL;cantidadDeParametros++);
 	switch (parametros_de_linea_lql->nombre_operacion) {
 		case API_CREATE:
 			lfs_create((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);
 			break;
 		case API_INSERT:
-			//insert();
+			if(cantidadDeParametros==3)lfs_insert1((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2]);
+			else lfs_insert2((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);
 			break;
 		case API_SELECT:
 //			select1();
 //			lfs_select()
 			break;
 		case API_DESCRIBE:
-//			describe1();
-//			describe2();
+			if(cantidadDeParametros==0)lfs_describe();
+			else lfs_describe2((parametros_de_linea_lql->parametros)[0]);
 			break;
 		case API_DROP:
-//			drop();
+			lfs_drop((parametros_de_linea_lql->parametros)[0]);
 			break;
 		default:
 			log_error(lfs_log,"linea LQL leida erronea \n");
 			break;
 	}
+}
+unsigned long long lfs_timestamp(){
+	return (unsigned long long)time(NULL);
 }
 

@@ -48,5 +48,4 @@ RegistroLinea obtenerRegistroLinea(FILE* bloque);
 t_list* obtenerListadoDeNombresDeSubArchivos(const char* pathCarpetaPadre);
 t_list* obtenerListaDeParticiones_path(const char* nombreDeTabla );//ok
 t_list* obtenerParticiones(const char* nombreDeTabla);
-unsigned long long lfs_timestamp();
 #endif /* FILE_SYSTEM_H_ */

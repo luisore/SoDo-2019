@@ -8,46 +8,72 @@
 
 
 void select1(const char * nombre_de_tabla, unsigned int key){
-//	if yaExisteTabla(nombre_de_tabla);
-//	Metadata_Tabla* unaMetadata=obtenerMetadata(nombre_de_tabla);
-//	if(hayDatosParaDumpear()){
-//
-//	}
-	return ;
+	if (!yaExisteTabla(nombre_de_tabla))perror("SELECT no existe tabla ");
+	Metadata_Tabla* unaMetadata=obtenerMetadata(nombre_de_tabla);
+	t_list* listaDeRegistros=list_create();
+	list_add(listaDeRegistros,buscarRegistrosEnMemtable(nombre_de_tabla,key));
+//	list_add(listaDeRegistros,buscarRegistrosEnParticiones(nombre_de_tabla,key));
+	mostrarListaDeRegistros(listaDeRegistros,nombre_de_tabla);
+	list_iterate(listaDeRegistros,registroLinea_destroy);
+	list_destroy(listaDeRegistros);
 }
-//el timestamp es opcional
+void mostrarListaDeRegistros(const t_list* listaDeRegistros,const char* tabla){
+	printf("mostrarListaDeRegistros() de tabla %s  \n", tabla);
+
+	list_iterate(listaDeRegistros,registroLinea_mostrar);
+}
+void registroLinea_mostrar(RegistroLinea* unRegistro){
+		printf("	registroLinea_mostrar-> %lu;%d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
+}
+t_list*  buscarRegistrosEnMemtable(const char* tabla,uint16_t key){
+	bool buscarTablaDeInsert(Insert* unInsert){
+		return string_equals_ignore_case(unInsert->nombreDeLaTabla,tabla);//strcmp(unInsert->nombreDeLaTabla,tabla)==0;
+	}
+	Insert* insert_conListaDeRegistrosDeTabla=list_find(memtable,buscarTablaDeInsert);
+	bool buscarRegistroConKeyDado(RegistroLinea* unRegistro){
+		return unRegistro->key==key;
+	}
+	t_list* listaDeRegistrosDeLaMismaKey=list_filter(insert_conListaDeRegistrosDeTabla->registros,buscarRegistroConKeyDado);
+	return listaDeRegistrosDeLaMismaKey;
+}
 void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value){
 	insert_2(nombre_de_tabla,key,value,lfs_timestamp());
 }
 void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, unsigned long long timestamp){
 	if(!yaExisteTabla(nombre_de_tabla)){
-		fprintf(stderr,"no exixte la tabla \"%s\" \n",nombre_de_tabla);
+		fprintf(stderr,"INSERT no existe la tabla \"%s\" ",nombre_de_tabla);//\n
+		perror("");
 	}
 	else {
-		if(hay_datos_a_dumpear())dumpear();//aca en lugar de if , se reemplaza con un semaforo , pues dumpear() es una seccion critica, con un mutex, solo hay un proceso dumpeo
+//		if(hay_datos_a_dumpear())dumpear();//aca en lugar de if , se reemplaza con un semaforo , pues dumpear() es una seccion critica, con un mutex, solo hay un proceso dumpeo
+		puts("insert_2() insertando datos");
 		insertarEnMemtable( nombre_de_tabla, key , value,timestamp);
 	}
 }
 void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long long  timestamp){//la logica  es esta, ok
-	Insert* unInsert = buscarTablaEnLaMemtable(nombre_de_tabla);
+	Insert* insertDeMemtableConTablaCorrespondiente = buscarTablaEnLaMemtable(nombre_de_tabla);
 	RegistroLinea* unRegistro=(RegistroLinea*)malloc(sizeof(RegistroLinea));
 			unRegistro->key=key;
 			unRegistro->value=strdup(value);
 			unRegistro->timestamp;
-	if(unInsert==NULL){//si es igual a NULL no esta en la memtable
-		unInsert =malloc(sizeof(Insert));
-		unInsert->nombreDeLaTabla=strdup(nombre_de_tabla);
-		unInsert->cantParticionesTemporales=0;
-		unInsert->registros=list_create();
-		list_add((unInsert->registros),unRegistro);
+			Metadata_Tabla* metadata_=obtenerMetadata(nombre_de_tabla);
+			unRegistro->particionCorrespondiente=key%metadata_->PARTITIONS;
+	if(insertDeMemtableConTablaCorrespondiente==NULL){//si es igual a NULL la tabla no esta en la memtable
+		insertDeMemtableConTablaCorrespondiente =malloc(sizeof(Insert));
+		insertDeMemtableConTablaCorrespondiente->nombreDeLaTabla=strdup(nombre_de_tabla);
+		insertDeMemtableConTablaCorrespondiente->cantParticionesTemporales=0;
+		insertDeMemtableConTablaCorrespondiente->registros=list_create();
+		list_add(memtable,insertDeMemtableConTablaCorrespondiente);
+		list_add((insertDeMemtableConTablaCorrespondiente->registros),unRegistro);
 	}
 	else {
-		list_add((unInsert->registros),unRegistro);
+		if(insertDeMemtableConTablaCorrespondiente->registros!=NULL)perror("insertarEnMemtable() error al aniadir registro");
+		list_add((insertDeMemtableConTablaCorrespondiente->registros),unRegistro);
 	}
 }
 Insert* buscarTablaEnLaMemtable(const char * tabla){
 	bool existeTablaEnLaMemtable(Insert *unInsert) {//simulo aplicacion parcial
-		return strcmp(unInsert->nombreDeLaTabla,tabla)==0;//string_equals_ignore_case(unInsert->nombreDeLaTabla, tabla);
+		return string_equals_ignore_case(unInsert->nombreDeLaTabla,tabla);//strcmp() ,string_equals_ignore_case(unInsert->nombreDeLaTabla, tabla);
 	}
 	return list_find(memtable,existeTablaEnLaMemtable);// // le puse (void*) por que en los tests lo manejan asi
 }
@@ -62,6 +88,10 @@ void dumpear(){
 		insertarListaDeRegistrosDeTablaANuevaParticionTemporal(unInsert,unInsert->registros);
 	}
 	memtable_reboot();
+}
+
+unsigned long long lfs_timestamp(){
+	return (unsigned long long)time(NULL);
 }
 //destroy
 void memtable_reboot(){
@@ -88,10 +118,10 @@ void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInse
 	list_iterate(bloquesNecesarios,bloque_destroy);
 	list_destroy(bloquesNecesarios);
 }
-t_list* calcularBloquesNecesarios(size_t size_){
+t_list* calcularBloquesNecesarios(size_t size_de_particion){
 	t_list* bloques = list_create();
-	int cantidadDeBloques=(int)lfs_metadata.tamanio_de_bloque/size_;
-	if(lfs_metadata.tamanio_de_bloque%size_!=0)cantidadDeBloques++;
+	int cantidadDeBloques=(int)lfs_metadata.tamanio_de_bloque/size_de_particion;
+	if(lfs_metadata.tamanio_de_bloque%size_de_particion!=0)cantidadDeBloques++;
 	for(int i=0;i<cantidadDeBloques;i++){
 		Bloque_LFS* bloqueObtenido=lfs_obtenerBloqueLibre();
 		list_add(bloques,bloqueObtenido);
@@ -264,6 +294,9 @@ void lfs_describe(){
 void lfs_describe2(const char* nombre_de_tabla){
 	describe2(nombre_de_tabla);
 }
+void lfs_select1(const char* nombre_tabla,const char* key){
+	select1(nombre_tabla,atoi(key));
+}
 
 void crearTabla(const char* nombreDeTabla){//ok
 	char* aux_path_de_la_tabla = malloc(strlen(nombreDeTabla)+strlen("Tables/")+strlen(lfs.puntoDeMontaje));
@@ -357,8 +390,6 @@ void drop(const char* nombre_de_tabla){
 	list_destroy(listaDeParticiones);
 }
 bool  yaExisteTabla(const char* nombre_de_tabla){
-	//if exit(RES)
-
 	//loggear el error (de que existe la tabla )
 	char* path = obtenerPathDeTabla(nombre_de_tabla);
 	bool yaExiste=yaExisteCarpeta(path);
@@ -414,7 +445,7 @@ void mostrarMetadata(const char* tabla){ //ok
 	//obtener metadata
 	Metadata_Tabla *unMetadata=obtenerMetadata(tabla);
 	printf("COMPACTION_TIME = %d  \n",unMetadata->COMPACTION_TIME);
-	printf("CONSISTENCY= %s \n",unMetadata->COMPACTION_TIME);
+	printf("CONSISTENCY= %s \n",unMetadata->CONSISTENCY);
 	printf("PARTITIONS= %d \n",unMetadata->PARTITIONS);
 
 	free(unMetadata);
@@ -428,10 +459,10 @@ void mostrarParticion(Particion* particion){//ok
 }
 void memtable_mostrar(){
 	void mostrar_insert(Insert* unInsert){
-		printf("MOSTRANDO MEMTABLE para TABLA:%s y PARTICIONES:%d\n",unInsert->nombreDeLaTabla,unInsert->cantParticionesTemporales);
+		printf("MOSTRANDO MEMTABLE para TABLA:%s y PARTICIONES TEMPORALES:%d \n",unInsert->nombreDeLaTabla,unInsert->cantParticionesTemporales);
 		for(int registro_i=0;registro_i<list_size(unInsert->registros);registro_i++){
 			RegistroLinea* unRegistro = list_get(unInsert->registros,registro_i);
-			printf("	MEMTABLE -> %lu;&d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
+			printf("	REGISTRO -> %lu;&d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
 		}
 	}
 	list_iterate(memtable,mostrar_insert);

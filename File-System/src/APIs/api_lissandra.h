@@ -31,8 +31,9 @@
 #include "../config/bitmap.h"
 
 typedef struct {
-	int cantParticionesTemporales;
+	unsigned int cantParticionesTemporales;
 	char* nombreDeLaTabla;
+	unsigned int   cantParticiones;
 //	t_list *_inserts;//esto es del tipo RegistroLinea
 	t_list* registros;
 }Insert;
@@ -40,6 +41,7 @@ typedef struct {
 		unsigned long long timestamp;
 		uint16_t key;
 		char* value;
+		unsigned int particionCorrespondiente;
 //		char value[lfs.tamanioValue];
 }RegistroLinea;
 //Insert* memtable_de_inserts;
@@ -64,7 +66,7 @@ typedef struct {
 }Metadata_Tabla;
 //funciones de la API de LFS,para ser consultadas IMPORTANTES estas 7 funciones, son la posta
 void select1(const char * nombre_de_tabla,unsigned int key);
-//el timestamp es opcional
+
 void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value);
 void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, unsigned  long long timestamp);
 void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion );
@@ -81,7 +83,16 @@ void lfs_describe();
 void lfs_describe2(const char* nombre_de_tabla);
 
 
+unsigned long long lfs_timestamp();
 //auxiliares
+
+void mostrarListaDeRegistros(const t_list* listaDeRegistros,const char* tabla);
+void registroLinea_mostrar(RegistroLinea* unRegistro);
+//revuelve lista del tipo RegistroLinea
+t_list*  buscarRegistrosEnMemtable(const char* tabla,uint16_t key);
+//devuelve una lista del tipo de RegistroLinea
+t_list* buscarRegistrosEnParticiones(const char* tabla,uint16_t key);
+//el timestamp es opcional
 bool yaExisteTabla(const char* nombre_de_tabla);
 char archivo_path(const char rutaMontaje, const char *rutaArchivo);
 

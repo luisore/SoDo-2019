@@ -24,14 +24,16 @@ int main(void) {
 
 	imprimir_configuracion();
 
-	pthread_create(&consola,NULL,lfs_consola,NULL);
-	pthread_join(consola,NULL);
+//	pthread_create(&consola,NULL,lfs_consola,NULL);
+//	pthread_join(consola,NULL);
+
 //	lfs_consola();//por el momento funciona con el CREATE
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
 
-
-
+	insert_1("TABLEA",12,"esto es basura");
+	insert_1("TABLEA",13,"esto es basura2");
+	insert_1("TABLEA",10,"esto es basura3");
 
 	log_destroy(lfs_log);
 	list_destroy(memtable);
@@ -96,7 +98,7 @@ void recorrerBloque(const char* pathBloque){//ok
 		registro.value=malloc(lfs.tamanioValue);
 //		fscanf(bloque,"%d;%d;%s\n",&registro.timestamp,&registro.key,registro.value);
 		registro = obtenerRegistroLinea(bloque);
-		printRegistroLinea(&registro);
+		registroLinea_mostrar(&registro);
 		free(registro.value);
 	}
 	fclose(bloque);
@@ -109,9 +111,9 @@ RegistroLinea obtenerRegistroLinea(FILE* bloque){
 //	printf("bytes leidos = %d \n",n );
 	return registro;
 }
-void printRegistroLinea(RegistroLinea* registro){
-	printf("Registro linea -> %d;%d;%s\n",registro->timestamp,registro->key,registro->value);
-}
+//void printRegistroLinea(RegistroLinea* registro){
+//	printf("Registro linea -> %d;%d;%s\n",registro->timestamp,registro->key,registro->value);
+//}
 
 t_list* obtenerListadoDeSubArchivos(const char * pathDirectorio,const char* extension){//ok
 	t_list* nombresDeArchivos=list_create();
@@ -223,13 +225,6 @@ t_list* obtenerParticionesNoTemporales(const char* nombreDeTabla){
 	t_list* particionesTemporales=list_create();
 	return particionesTemporales;
 }
-//Persona* buscarPersona(t_list* lista, char* nombre){//para probar
-//	bool buscarLaDePersona1(Persona* p){
-//			return strcmp(p->nombre,"Jhon")==0;
-//		}
-//	Persona* encontrada=list_find(lista,buscarLaDePersona1);
-//	return encontrada;
-//}
 
 //---------
 void lfs_consola(){
@@ -250,6 +245,7 @@ void lfs_consola(){
 void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 	size_t cantidadDeParametros;
 	for(cantidadDeParametros=0;parametros_de_linea_lql->parametros[cantidadDeParametros]!=NULL;cantidadDeParametros++);
+	printf("ejecutar_linea_lql(), cantidad de parametros = %d\n",cantidadDeParametros);
 	switch (parametros_de_linea_lql->nombre_operacion) {
 		case API_CREATE:
 			lfs_create((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);
@@ -273,8 +269,5 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 			log_error(lfs_log,"linea LQL leida erronea \n");
 			break;
 	}
-}
-unsigned long long lfs_timestamp(){
-	return (unsigned long long)time(NULL);
 }
 

@@ -34,14 +34,13 @@ int main(void) {
 	insert_1("tableA",12,"esto es basura");
 	insert_1("tableA",13,"esto es basura2");
 	insert_1("tableA",10,"esto es basura3");
+	insert_1("tableA",10,"esto es basura4");
+	insert_1("tableA",10,"esto es basura5");
+	insert_1("tableA",10,"esto es basura6");
+	insert_1("tableA",10,"esto es basura7");
 	puts("mostrar memtable");
-	Insert* i = buscarTablaEnLaMemtable("tableA");
-	puts(i->nombreDeLaTabla);
-	list_iterate(i->registros,registroLinea_mostrar);
-	list_destroy(i->registros);
-	free(i->nombreDeLaTabla);
 	memtable_mostrar();
-
+	select1("tableA",10);
 	log_destroy(lfs_log);
 	list_destroy(memtable);
 

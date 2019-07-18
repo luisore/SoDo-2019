@@ -32,9 +32,9 @@
 
 typedef struct {
 	unsigned int cantParticionesTemporales;
-	char* nombreDeLaTabla;
+	char nombreDeLaTabla[255];//255 caracteres como maximo tiene un nobre de un archivo
 	unsigned int   cantParticiones;
-//	t_list *_inserts;//esto es del tipo RegistroLinea
+	//registros, esto es del tipo RegistroLinea
 	t_list* registros;
 }Insert;
 typedef struct {
@@ -86,7 +86,7 @@ void lfs_describe2(const char* nombre_de_tabla);
 unsigned long long lfs_timestamp();
 //auxiliares
 
-void mostrarListaDeRegistros(const t_list* listaDeRegistros,const char* tabla);
+void select_mostrar_lista_de_registros(const t_list* listaDeRegistros,const char* tabla);
 void registroLinea_mostrar(RegistroLinea* unRegistro);
 //revuelve lista del tipo RegistroLinea
 t_list*  buscarRegistrosEnMemtable(const char* tabla,uint16_t key);
@@ -137,5 +137,8 @@ Insert* buscarTablaEnLaMemtable(const char * tabla);
 //auxiliares para imrpimir
 void printfMetadata(Metadata_Tabla* metadata, const char* nombre_de_tabla);
 void mostrarParticion(Particion* particion);
+void memtable_mostrar();
+void mostrar_insert(const Insert* unInsert);
+
 
 #endif /* APIS_API_LISSANDRA_H_ */

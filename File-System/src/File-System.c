@@ -31,9 +31,16 @@ int main(void) {
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
 
-	insert_1("TABLEA",12,"esto es basura");
-	insert_1("TABLEA",13,"esto es basura2");
-	insert_1("TABLEA",10,"esto es basura3");
+	insert_1("tableA",12,"esto es basura");
+	insert_1("tableA",13,"esto es basura2");
+	insert_1("tableA",10,"esto es basura3");
+	puts("mostrar memtable");
+	Insert* i = buscarTablaEnLaMemtable("tableA");
+	puts(i->nombreDeLaTabla);
+	list_iterate(i->registros,registroLinea_mostrar);
+	list_destroy(i->registros);
+	free(i->nombreDeLaTabla);
+	memtable_mostrar();
 
 	log_destroy(lfs_log);
 	list_destroy(memtable);

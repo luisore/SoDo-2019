@@ -19,7 +19,6 @@ void select1(const char * nombre_de_tabla, unsigned int key){
 }
 void mostrarListaDeRegistros(const t_list* listaDeRegistros,const char* tabla){
 	printf("mostrarListaDeRegistros() de tabla %s  \n", tabla);
-
 	list_iterate(listaDeRegistros,registroLinea_mostrar);
 }
 void registroLinea_mostrar(RegistroLinea* unRegistro){
@@ -52,24 +51,25 @@ void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, 
 }
 void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long long  timestamp){//la logica  es esta, ok
 	Insert* insertDeMemtableConTablaCorrespondiente = buscarTablaEnLaMemtable(nombre_de_tabla);
-	RegistroLinea* unRegistro=(RegistroLinea*)malloc(sizeof(RegistroLinea));
-			unRegistro->key=key;
-			unRegistro->value=strdup(value);
-			unRegistro->timestamp;
+	RegistroLinea* unRegistroAInsertar=(RegistroLinea*)malloc(sizeof(RegistroLinea));
+			unRegistroAInsertar->key=key;
+			unRegistroAInsertar->value=strdup(value);
+			unRegistroAInsertar->timestamp;
 			Metadata_Tabla* metadata_=obtenerMetadata(nombre_de_tabla);
-			unRegistro->particionCorrespondiente=key%metadata_->PARTITIONS;
+			unRegistroAInsertar->particionCorrespondiente=key%metadata_->PARTITIONS;
+			free(metadata_);
 	if(insertDeMemtableConTablaCorrespondiente==NULL){//si es igual a NULL la tabla no esta en la memtable
 		insertDeMemtableConTablaCorrespondiente =malloc(sizeof(Insert));
 		insertDeMemtableConTablaCorrespondiente->nombreDeLaTabla=strdup(nombre_de_tabla);
 		insertDeMemtableConTablaCorrespondiente->cantParticionesTemporales=0;
 		insertDeMemtableConTablaCorrespondiente->registros=list_create();
 		list_add(memtable,insertDeMemtableConTablaCorrespondiente);
-		list_add((insertDeMemtableConTablaCorrespondiente->registros),unRegistro);
+//		list_add((insertDeMemtableConTablaCorrespondiente->registros),unRegistro);
 	}
-	else {
-		if(insertDeMemtableConTablaCorrespondiente->registros!=NULL)perror("insertarEnMemtable() error al aniadir registro");
-		list_add((insertDeMemtableConTablaCorrespondiente->registros),unRegistro);
-	}
+	//lista de registros nula
+	if(insertDeMemtableConTablaCorrespondiente->registros==NULL)perror("insertarEnMemtable() error al aniadir registro");
+	list_add((insertDeMemtableConTablaCorrespondiente->registros),unRegistroAInsertar);
+
 }
 Insert* buscarTablaEnLaMemtable(const char * tabla){
 	bool existeTablaEnLaMemtable(Insert *unInsert) {//simulo aplicacion parcial
@@ -87,7 +87,7 @@ void dumpear(){
 		unInsert->cantParticionesTemporales++;//cuando hay un dump se baja de la memtable a una particion temporal .tmp, se crea una temporal nueva
 		insertarListaDeRegistrosDeTablaANuevaParticionTemporal(unInsert,unInsert->registros);
 	}
-	memtable_reboot();
+//	memtable_reboot();
 }
 
 unsigned long long lfs_timestamp(){
@@ -435,11 +435,6 @@ bool yaExisteCarpeta(const char* path_tabla){
 	existe = false;
 	return existe;
 }
-////--------------------------VALIDACIONES FIN
-//
-//
-////--------------------------EJECUCIONES INICIO
-
 
 void mostrarMetadata(const char* tabla){ //ok
 	//obtener metadata
@@ -460,10 +455,7 @@ void mostrarParticion(Particion* particion){//ok
 void memtable_mostrar(){
 	void mostrar_insert(Insert* unInsert){
 		printf("MOSTRANDO MEMTABLE para TABLA:%s y PARTICIONES TEMPORALES:%d \n",unInsert->nombreDeLaTabla,unInsert->cantParticionesTemporales);
-		for(int registro_i=0;registro_i<list_size(unInsert->registros);registro_i++){
-			RegistroLinea* unRegistro = list_get(unInsert->registros,registro_i);
-			printf("	REGISTRO -> %lu;&d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
-		}
+		list_iterate(unInsert->registros,registroLinea_mostrar);
 	}
 	list_iterate(memtable,mostrar_insert);
 }

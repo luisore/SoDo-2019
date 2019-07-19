@@ -185,11 +185,12 @@ void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInse
 	escribirRegistrosABloquesFS(bloquesNecesarios,unInsert->registros);
 	list_iterate(bloquesNecesarios,bloque_destroy);
 	list_destroy(bloquesNecesarios);
+	puts("insertarListaDeRegistrosDeTablaANuevaParticionTemporal( ) FIN ");
 }
 t_list* calcularBloquesNecesarios(size_t size_de_particion){
 	t_list* bloques = list_create();
 	int cantidadDeBloques=size_de_particion/lfs_metadata.tamanio_de_bloque;
-	if(size_de_particion&lfs_metadata.tamanio_de_bloque!=0)cantidadDeBloques++;
+	if(size_de_particion%lfs_metadata.tamanio_de_bloque!=0)cantidadDeBloques++;
 	printf("calcularBloquesNecesario() cantidad de bloques=%d, con SIZE de particion %d y tamanio bloque %d\n",cantidadDeBloques,size_de_particion,lfs_metadata.tamanio_de_bloque);
 	for(int i=0;i<cantidadDeBloques;i++)list_add(bloques,lfs_obtenerBloqueLibre);
 
@@ -201,16 +202,18 @@ t_list* calcularBloquesNecesarios(size_t size_de_particion){
 	puts("fin calcular bloques necesarios");
 	return bloques;
 }
-void crearParticion(const char* pathDeParticion,int size, t_list* bloques){
-	FILE* particion =fopen(pathDeParticion,"w+r");
+void crearParticion(const char* pathDeParticion,int size, t_list* bloquesObtenidos){
+	FILE* particion =fopen(pathDeParticion,"w+");
 	fprintf(particion,"SIZE=%d\n",size);
-	char* key_bloques = malloc(sizeof(char)*(strlen("[,]")+list_size(bloques)*4));//una longitud maxima
+	char* key_bloques = malloc(sizeof(char)*(strlen("[,]")+list_size(bloquesObtenidos)*4));//una longitud maxima
 	memset(key_bloques,0,strlen(key_bloques));
 	sprintf(key_bloques,"[");
-	size_t cant_bloques=list_size(bloques);
+	size_t cant_bloques=list_size(bloquesObtenidos);
 	for(int i=0;i<cant_bloques;i++){
-		int numero_de_bloque=((Bloque_LFS*)(list_get(bloques,i)))->numero;
-		strcat(key_bloques,string_itoa(numero_de_bloque));
+		int numero_de_bloque=((Bloque_LFS*)(list_get(bloquesObtenidos,i)))->numero;
+		char* aux =string_itoa(numero_de_bloque);
+		strcat(key_bloques,aux);
+		free(aux);
 		if(i+1==cant_bloques)break;//si ese fue el ultimo bloque
 		strcat(key_bloques,",");
 	}
@@ -219,10 +222,10 @@ void crearParticion(const char* pathDeParticion,int size, t_list* bloques){
 	fprintf(particion,"BLOCKS=%s",key_bloques);
 	free(key_bloques);
 	fclose(particion);
-	void my_set_bloques(Bloque_LFS* bloque){
-		setear_bloque_ocupado_en_posicion(bloque->numero);
-	}
-	list_iterate(bloques,my_set_bloques);
+//	void my_set_bloques(Bloque_LFS* bloque){
+//		setear_bloque_ocupado_en_posicion(bloque->numero);
+//	}
+//	list_iterate(bloques,my_set_bloques);
 }
 size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros){
 	size_t  size_de_particion =0;
@@ -248,9 +251,9 @@ char* registroLineaAString(RegistroLinea* registro){
 }
 
 char* obtenerPathDeParticionTemporal(const char* tabla, unsigned int  numeroDeParticionTemporal){
-	char* pathDeParticion=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Tables/")+strlen(tabla)+40);
+	char* pathDeParticion=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Tables/")+strlen(tabla)+100);
 	sprintf(pathDeParticion,"%sTables/%s/%d.tmp",lfs.puntoDeMontaje,tabla,numeroDeParticionTemporal);
-	lfs_log_info("obtenerPathDeParticionTemporal() path:%s\n",pathDeParticion);
+	printf("obtenerPathDeParticionTemporal() path:%s\n",pathDeParticion);
 	return pathDeParticion;
 }
 Metadata_Tabla* obtenerMetadata(const char* nombreTabla){

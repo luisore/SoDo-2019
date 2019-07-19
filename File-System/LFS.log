@@ -580,3 +580,124 @@
 
 [INFO] 22:19:09:448 LISSANDRA - LFS/(6277:6277): obtenerPathDeParticionTemporal() path:
 
+[INFO] 22:21:07:622 LISSANDRA - LFS/(6330:6330): se cargo LFS.log 
+
+[INFO] 22:21:07:625 LISSANDRA - LFS/(6330:6330): Mostrando  memtable 
+
+[INFO] 22:21:07:625 LISSANDRA - LFS/(6330:6330): dump 
+
+[INFO] 22:21:07:625 LISSANDRA - LFS/(6330:6330): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:22:25:829 LISSANDRA - LFS/(6400:6400): se cargo LFS.log 
+
+[INFO] 22:22:25:847 LISSANDRA - LFS/(6400:6400): Mostrando  memtable 
+
+[INFO] 22:22:25:847 LISSANDRA - LFS/(6400:6400): dump 
+
+[INFO] 22:22:25:847 LISSANDRA - LFS/(6400:6400): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:23:06:68 LISSANDRA - LFS/(6421:6421): se cargo LFS.log 
+
+[INFO] 22:23:06:71 LISSANDRA - LFS/(6421:6421): Mostrando  memtable 
+
+[INFO] 22:23:06:71 LISSANDRA - LFS/(6421:6421): dump 
+
+[INFO] 22:23:06:71 LISSANDRA - LFS/(6421:6421): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:23:44:26 LISSANDRA - LFS/(6484:6484): se cargo LFS.log 
+
+[INFO] 22:23:44:29 LISSANDRA - LFS/(6484:6484): Mostrando  memtable 
+
+[INFO] 22:23:44:29 LISSANDRA - LFS/(6484:6484): dump 
+
+[INFO] 22:23:44:29 LISSANDRA - LFS/(6484:6484): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:24:30:616 LISSANDRA - LFS/(6544:6544): se cargo LFS.log 
+
+[INFO] 22:24:30:619 LISSANDRA - LFS/(6544:6544): Mostrando  memtable 
+
+[INFO] 22:24:30:619 LISSANDRA - LFS/(6544:6544): dump 
+
+[INFO] 22:25:54:97 LISSANDRA - LFS/(6562:6562): se cargo LFS.log 
+
+[INFO] 22:25:54:113 LISSANDRA - LFS/(6562:6562): Mostrando  memtable 
+
+[INFO] 22:25:54:113 LISSANDRA - LFS/(6562:6562): dump 
+
+[INFO] 22:28:45:245 LISSANDRA - LFS/(6636:6636): se cargo LFS.log 
+
+[INFO] 22:28:45:247 LISSANDRA - LFS/(6636:6636): Mostrando  memtable 
+
+[INFO] 22:28:45:247 LISSANDRA - LFS/(6636:6636): dump 
+
+[INFO] 22:29:08:730 LISSANDRA - LFS/(6650:6650): se cargo LFS.log 
+
+[INFO] 22:29:08:732 LISSANDRA - LFS/(6650:6650): Mostrando  memtable 
+
+[INFO] 22:29:08:732 LISSANDRA - LFS/(6650:6650): dump 
+
+[INFO] 22:30:00:195 LISSANDRA - LFS/(6673:6673): se cargo LFS.log 
+
+[INFO] 22:30:00:209 LISSANDRA - LFS/(6673:6673): Mostrando  memtable 
+
+[INFO] 22:30:00:209 LISSANDRA - LFS/(6673:6673): dump 
+
+[INFO] 22:39:46:906 LISSANDRA - LFS/(6876:6876): se cargo LFS.log 
+
+[INFO] 22:39:46:909 LISSANDRA - LFS/(6876:6876): Mostrando  memtable 
+
+[INFO] 22:39:46:909 LISSANDRA - LFS/(6876:6876): dump 
+
+[INFO] 22:40:16:371 LISSANDRA - LFS/(6929:6929): se cargo LFS.log 
+
+[INFO] 22:40:16:375 LISSANDRA - LFS/(6929:6929): Mostrando  memtable 
+
+[INFO] 22:40:16:376 LISSANDRA - LFS/(6929:6929): dump 
+
+[INFO] 22:45:45:514 LISSANDRA - LFS/(7087:7087): se cargo LFS.log 
+
+[INFO] 22:45:45:515 LISSANDRA - LFS/(7087:7087): Mostrando  memtable 
+
+[INFO] 22:45:45:515 LISSANDRA - LFS/(7087:7087): dump 
+
+[INFO] 22:46:20:437 LISSANDRA - LFS/(7148:7148): se cargo LFS.log 
+
+[INFO] 22:46:20:443 LISSANDRA - LFS/(7148:7148): Mostrando  memtable 
+
+[INFO] 22:46:20:443 LISSANDRA - LFS/(7148:7148): dump 
+
+[INFO] 22:47:24:899 LISSANDRA - LFS/(7209:7209): se cargo LFS.log 
+
+[INFO] 22:47:24:909 LISSANDRA - LFS/(7209:7209): Mostrando  memtable 
+
+[INFO] 22:47:24:909 LISSANDRA - LFS/(7209:7209): dump 
+
+[INFO] 22:48:13:674 LISSANDRA - LFS/(7225:7225): se cargo LFS.log 
+
+[INFO] 22:48:13:688 LISSANDRA - LFS/(7225:7225): Mostrando  memtable 
+
+[INFO] 22:48:13:689 LISSANDRA - LFS/(7225:7225): dump 
+
+[INFO] 22:50:50:484 LISSANDRA - LFS/(7332:7332): se cargo LFS.log 
+
+[INFO] 22:50:50:487 LISSANDRA - LFS/(7332:7332): Mostrando  memtable 
+
+[INFO] 22:50:50:487 LISSANDRA - LFS/(7332:7332): dump 
+
+[INFO] 22:51:04:801 LISSANDRA - LFS/(7367:7367): se cargo LFS.log 
+
+[INFO] 22:51:04:803 LISSANDRA - LFS/(7367:7367): Mostrando  memtable 
+
+[INFO] 22:51:04:803 LISSANDRA - LFS/(7367:7367): dump 
+
+[INFO] 22:51:28:251 LISSANDRA - LFS/(7384:7384): se cargo LFS.log 
+
+[INFO] 22:51:28:257 LISSANDRA - LFS/(7384:7384): Mostrando  memtable 
+
+[INFO] 22:51:28:258 LISSANDRA - LFS/(7384:7384): dump 
+
+[INFO] 23:12:32:350 LISSANDRA - LFS/(7654:7654): se cargo LFS.log 
+
+[INFO] 23:12:32:363 LISSANDRA - LFS/(7654:7654): Mostrando  memtable 
+
+[INFO] 23:12:32:364 LISSANDRA - LFS/(7654:7654): dump

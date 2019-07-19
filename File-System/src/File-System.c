@@ -40,7 +40,7 @@ int main(void) {
 	insert_1("tableA",10,"esto es basura7");
 	lfs_log_info("Mostrando  memtable \n");
 	memtable_mostrar();
-	lfs_log_info("dump \n");
+	lfs_log_info("dump");
 	dumpear();
 	memtable_mostrar();
 	select1("tableA",10);

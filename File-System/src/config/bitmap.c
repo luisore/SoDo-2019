@@ -72,24 +72,23 @@ unsigned int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 	printf("getBloqueLibre_int()-> bloque libre = %d\n",bloque_i);
 	return bloque_i;
 }
-char* bloquesToString(const char* pathFile){//ok
-//	puts("begin bloquesToString()");
-	char* bloques=NULL;
-	char* path_aux = malloc((5024)*sizeof(char));
-	sprintf(path_aux,"%s%s%s",lfs.puntoDeMontaje,"Archivos/",pathFile);
-//	puts(path_aux);
-	t_list* listaDeBloques =  bloquesToList(path_aux);
-//	mostrarLista(listaDeBloques);
-	for (int var = 0; var < list_size(listaDeBloques); var++) {
-		sprintf(path_aux,"%s%s%d.bin",lfs.puntoDeMontaje,"Bloques/",list_get(listaDeBloques,var));
-		bloques=str_concat(bloques,fileToString_v2(path_aux));
-	}
-	free(path_aux);
-	list_destroy(listaDeBloques);
-//	puts("end bloquesToString()");
-	return bloques;
-
-}
+//char* bloquesToString(const char* pathFile){//ok
+////	puts("begin bloquesToString()");
+//	char* bloques=NULL;
+//	char* path_aux = malloc((5024)*sizeof(char));
+//	sprintf(path_aux,"%s%s%s",lfs.puntoDeMontaje,"Archivos/",pathFile);
+////	puts(path_aux);
+//	t_list* listaDeBloques =  bloquesToList(path_aux);
+////	mostrarLista(listaDeBloques);
+//	for (int var = 0; var < list_size(listaDeBloques); var++) {
+//		sprintf(path_aux,"%s%s%d.bin",lfs.puntoDeMontaje,"Bloques/",list_get(listaDeBloques,var));
+//		bloques=str_concat(bloques,fileToString_v2(path_aux));
+//	}
+//	free(path_aux);
+//	list_destroy(listaDeBloques);
+////	puts("end bloquesToString()");
+//	return bloques;
+//}
 t_list* bloquesToList(const char* pathFile){//Ok
 	t_config* scriptGuardado=config_create(pathFile);
 		if(scriptGuardado==NULL)fprintf(stderr,"-> bloquesToList() , no existe path:%s\n",pathFile);

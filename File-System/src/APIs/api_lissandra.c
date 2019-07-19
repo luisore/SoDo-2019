@@ -184,7 +184,7 @@ void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInse
 	t_list* bloquesNecesarios=calcularBloquesNecesarios(sizeTotalDeParticion);
 	crearParticion(pathDeParticionTemporal,sizeTotalDeParticion,bloquesNecesarios);
 	free(pathDeParticionTemporal);
-	escribirRegistrosABloquesFS(bloquesNecesarios,unInsert->registros);
+	escribirRegistrosABloquesFS_v2(bloquesNecesarios,unInsert->registros);
 	list_iterate(bloquesNecesarios,bloque_destroy);
 	list_destroy(bloquesNecesarios);
 	puts("insertarListaDeRegistrosDeTablaANuevaParticionTemporal( ) FIN ");
@@ -233,6 +233,7 @@ void crearParticion(const char* pathDeParticion,int size, t_list* bloquesObtenid
 //		setear_bloque_ocupado_en_posicion(bloque->numero);
 //	}
 //	list_iterate(bloques,my_set_bloques);
+	puts("crearParticion() fin ");
 }
 size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros){//ok
 	size_t  size_de_particion =0;
@@ -359,33 +360,40 @@ void escribirRegistrosABloquesFS(const t_list* listaDeBloques ,const t_list* lis
 	free(registroRestante);
 }
 void escribirRegistrosABloquesFS_v2(const t_list* listaDeBloques,const t_list* listaDeRegistros){
-	FILE* bloqueActual=NULL;
-	char* registroRestanteAEscribir=NULL;
+
 	unsigned int registro_actual=0;
+	char* registroRestanteAEscribir=NULL;
 	void my_ocuparBloqueConRegistros(Bloque_LFS* unBLoque){
-		bloqueActual=txt_open_for_append(unBLoque->path);
+//		FILE* bloqueActual=NULL;
+		FILE* bloqueActual=fopen(unBLoque->path,"w");//txt_open_for_append(unBLoque->path);7
+		if(bloqueActual==NULL)perror("escribirRegistrosABloquesFS_v2(), no existe el path ");
+		printf("my_ocuparBloqueConRegistros() path %s\n",unBLoque->path);
 		while(registro_actual<list_size(listaDeRegistros)){
 				if( registroRestanteAEscribir!=NULL){//si ya habia string timestamp;key;value por escribir
 						fprintf(bloqueActual,registroRestanteAEscribir);
 						registroRestanteAEscribir=NULL;//para que no tire error en free() o strlen de NULL
 						registro_actual++;
 				}
+				unsigned int longitud_restante_para_escribir_en_bloque=lfs_metadata.tamanio_de_bloque-ftell(bloqueActual);//cantidadDeCaracteresDeFile(unBLoque->path);
+				if(longitud_restante_para_escribir_en_bloque<=0)break;
 				RegistroLinea* unRegistro=list_get(listaDeRegistros,registro_actual);
 				char* registro_para_escribir=registroLineaAString(unRegistro);
-				unsigned int longitud_restante_para_escribir_en_bloque=lfs_metadata.tamanio_de_bloque-cantidadDeCaracteresDeFile(unBLoque->path);
+				printf("my_ocuparBloqueConRegistros() registro a escribir \"%s\" y cantidad de caracteres file %d  \n",registro_para_escribir,ftell(bloqueActual));
 				fprintf(bloqueActual,registro_para_escribir);
 				registro_actual++;
-				if(longitud_restante_para_escribir_en_bloque==0)break;
 				//si se pasa de tamanio de bloque, recortar
-				if(!longitud_restante_para_escribir_en_bloque>=strlen(registro_para_escribir)){
-					ftruncate(fileno(bloqueActual),lfs_metadata.tamanio_de_bloque);
+				if(strlen(registro_para_escribir)>longitud_restante_para_escribir_en_bloque){
 					registroRestanteAEscribir=string_substring_from(registro_para_escribir,longitud_restante_para_escribir_en_bloque);
+//					puts(registroRestanteAEscribir);
 					registro_actual--;
 				}
+				if(longitud_restante_para_escribir_en_bloque>=strlen(registro_para_escribir))registroRestanteAEscribir=NULL;
+//				free(registro_para_escribir);
 		}
+		ftruncate(fileno(bloqueActual),lfs_metadata.tamanio_de_bloque);
 		txt_close_file(bloqueActual);
+//		bloqueActual=NULL;
 	}
-
 	list_iterate(listaDeBloques,my_ocuparBloqueConRegistros);
 }
 

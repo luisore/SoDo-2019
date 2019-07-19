@@ -85,43 +85,52 @@ char* intToString( int n){//OK, atoa y atoi ya existen igual
 	sprintf(aux,"%d",n);
 	return aux;
 }
-off_t cantidadDeCaracteresDeFile(const char* pathFile){//usar esto
-	off_t cantidad=0;
-	struct stat inFoDelInodo;
-	stat(pathFile,&inFoDelInodo);
-	cantidad=inFoDelInodo.st_size;
-	return cantidad;
-}
-char* fileToString(const char* pathFile){//en revision ,deberia de funcionar
-	int cantidad=cantidadDeCaracteresDeFile(pathFile);
-	char aux[cantidad];
-	char* string =strdup(aux);
-	FILE* file = fopen(pathFile,"r+");
-	int p = 0;
-	for(char letra = getc(file);letra!=EOF;letra=getc(file)){
-		string[p]=letra;
-		p++;
-	}
-	fclose(file);
-	return string;
-}
-char * fileToString_v2(const char* pathFile){//ok,
-	int cantidad=cantidadDeCaracteresDeFile(pathFile);
-	FILE* file = fopen(pathFile,"r+");
-		//abrimos la proyeccion del segundo archivo para escritura, de forma compartida
-		   char*  memoria2 = (char *)mmap(0, cantidad,PROT_WRITE, MAP_SHARED, fileno(file), 0);
-		   char* string =strdup(memoria2);
-		    if (memoria2 == MAP_FAILED) {//retorna en memoria la direccion principal de la proyeccion
-		        perror("Fallo la proyeccion2");//si fallo devuelve MAP_FAILED
-//		        exit(-1);
-		    }
-		    if (munmap (memoria2, cantidad) == -1) {//cerrar la proyeccion.
-		        printf("Error al cerrar la proyeccion \n");
-//		        exit(-1);
-		    }
-	fclose(file);
-	return string;
-}
+//off_t cantidadDeCaracteresDeFile(const char* pathFile){
+////	off_t cantidad=0;
+////	struct stat inFoDelInodo;
+////	stat(pathFile,&inFoDelInodo);
+////	cantidad=inFoDelInodo.st_size;
+////	return cantidad;
+//	unsigned int cantidad;
+//	FILE* aux = fopen(pathFile,"r+");
+//	unsigned int posicion= ftell(aux);
+//	fseek(aux,0,SEEK_SET);
+//	for(cantidad=0;getc(aux)!=EOF;cantidad++);
+//	fseek(aux,posicion,SEEK_SET);
+//	fclose(aux);
+//	return cantidad;
+//}
+
+//char* fileToString(const char* pathFile){//en revision ,deberia de funcionar
+//	int cantidad=cantidadDeCaracteresDeFile(pathFile);
+//	char aux[cantidad];
+//	char* string =strdup(aux);
+//	FILE* file = fopen(pathFile,"r+");
+//	int p = 0;
+//	for(char letra = getc(file);letra!=EOF;letra=getc(file)){
+//		string[p]=letra;
+//		p++;
+//	}
+//	fclose(file);
+//	return string;
+//}
+//char * fileToString_v2(const char* pathFile){//ok,
+//	int cantidad=cantidadDeCaracteresDeFile(pathFile);
+//	FILE* file = fopen(pathFile,"r+");
+//		//abrimos la proyeccion del segundo archivo para escritura, de forma compartida
+//		   char*  memoria2 = (char *)mmap(0, cantidad,PROT_WRITE, MAP_SHARED, fileno(file), 0);
+//		   char* string =strdup(memoria2);
+//		    if (memoria2 == MAP_FAILED) {//retorna en memoria la direccion principal de la proyeccion
+//		        perror("Fallo la proyeccion2");//si fallo devuelve MAP_FAILED
+////		        exit(-1);
+//		    }
+//		    if (munmap (memoria2, cantidad) == -1) {//cerrar la proyeccion.
+//		        printf("Error al cerrar la proyeccion \n");
+////		        exit(-1);
+//		    }
+//	fclose(file);
+//	return string;
+//}
 
 
 

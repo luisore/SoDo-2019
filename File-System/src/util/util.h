@@ -36,10 +36,10 @@ void mostrarCaracteres(const char* string);
 char* intToString( int n);//OK,se puede borrar el printf
 
 void crearBloques(int cantidad);//ok
-off_t cantidadDeCaracteresDeFile(const char* pathFile);
+//off_t cantidadDeCaracteresDeFile(const char* pathFile);
 
-char* fileToString(const char* pathFile);
-char* fileToString_v2(const char* pathFile);
+//char* fileToString(const char* pathFile);
+//char* fileToString_v2(const char* pathFile);
 
 
 

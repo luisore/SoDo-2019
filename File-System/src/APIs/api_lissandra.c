@@ -181,7 +181,7 @@ void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInse
 	size_t sizeTotalDeParticion=tamanioDeListaDeRegistros(unInsert->registros);
 	printf("insertarListaDeRegistrosDeTablaANuevaParticionTemporal() SIZE = %d\n",sizeTotalDeParticion);
 	char* pathDeParticionTemporal=obtenerPathDeParticionTemporal(unInsert->nombreDeLaTabla,unInsert->cantParticionesTemporales);
-	t_list* bloquesNecesarios=calcularBloquesNecesarios( sizeTotalDeParticion);
+	t_list* bloquesNecesarios=calcularBloquesNecesarios(sizeTotalDeParticion);
 	crearParticion(pathDeParticionTemporal,sizeTotalDeParticion,bloquesNecesarios);
 	free(pathDeParticionTemporal);
 	escribirRegistrosABloquesFS(bloquesNecesarios,unInsert->registros);
@@ -189,16 +189,21 @@ void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInse
 	list_destroy(bloquesNecesarios);
 	puts("insertarListaDeRegistrosDeTablaANuevaParticionTemporal( ) FIN ");
 }
-t_list* calcularBloquesNecesarios(size_t size_de_particion){
+t_list* calcularBloquesNecesarios(size_t size_de_particion){//ok
 	t_list* bloques = list_create();
 	int cantidadDeBloques=size_de_particion/lfs_metadata.tamanio_de_bloque;
 	if(size_de_particion%lfs_metadata.tamanio_de_bloque!=0)cantidadDeBloques++;
-	printf("calcularBloquesNecesario() cantidad de bloques=%d, con SIZE de particion %d y tamanio bloque %d\n",cantidadDeBloques,size_de_particion,lfs_metadata.tamanio_de_bloque);
-	for(int i=0;i<cantidadDeBloques;i++)list_add(bloques,lfs_obtenerBloqueLibre);
+	printf("calcularBloquesNecesarios() cantidad de bloques=%d, con SIZE de particion %d y tamanio bloque %d\n",cantidadDeBloques,size_de_particion,lfs_metadata.tamanio_de_bloque);
+	for(int i=0;i<cantidadDeBloques;i++){
+		Bloque_LFS* unBloque=lfs_obtenerBloqueLibre();
+		list_add(bloques,unBloque);
+//		printf("-----Bloque libre %d,path %s\n",unBloque->numero,unBloque->path);
+	}
 
 	void bloquesLFS_mostrar(Bloque_LFS* bloque){
 		printf("	bloque FS numero:%d y path %s\n",bloque->numero,bloque->path);
 	}
+	if(list_is_empty(bloques))perror("calcularBloquesNecesarios(), no hay bloques ");
 	puts("calcularBloquesNecesarios() mostrando bloques calculados ");
 	list_iterate(bloques,bloquesLFS_mostrar);
 	puts("fin calcular bloques necesarios");
@@ -258,6 +263,7 @@ char* obtenerPathDeParticionTemporal(const char* tabla, unsigned int  numeroDePa
 	printf("obtenerPathDeParticionTemporal() path:%s\n",pathDeParticion);
 	return pathDeParticion;
 }
+
 Metadata_Tabla* obtenerMetadata(const char* nombreTabla){
 	Metadata_Tabla *unMetadata=(Metadata_Tabla*)malloc(sizeof(Metadata_Tabla));
 	char* aux = obtenerPathDeTabla(nombreTabla);

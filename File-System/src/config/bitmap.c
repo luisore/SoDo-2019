@@ -46,14 +46,14 @@ void setBloqueActuaLleno(unsigned int bloqueActual_int){//agregar un 1 al bitmap
 }
 Bloque_LFS* lfs_obtenerBloqueLibre(){
 	puts("lfs_obtenerBloqueLibre() begin ");
-	Bloque_LFS* unBloqueLibre=malloc(sizeof(Bloque_LFS));
+	Bloque_LFS* unBloqueLibre=(Bloque_LFS*)malloc(sizeof(Bloque_LFS));
 	unBloqueLibre->numero=getBloqueLibre_int();
-	unBloqueLibre->path=(char*)malloc(strlen(lfs.puntoDeMontaje)+strlen("/bloques/")+strlen("xxxxxx.bin"));//solo un tamanio maximo para longitud de path
+	unBloqueLibre->path=(char*)malloc(sizeof(char)*(strlen(lfs.puntoDeMontaje)+strlen("/Bloques/")+strlen("xxxxxx.bin")));//solo un tamanio maximo para longitud de path
 	sprintf(unBloqueLibre->path,"%s%s%d.bin",lfs.puntoDeMontaje,"Bloques/",unBloqueLibre->numero);//ok
-	FILE* f_aux= fopen(unBloqueLibre->path,"w+");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	FILE* f_aux= fopen(unBloqueLibre->path,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
 	if(f_aux==NULL)perror("lfs_obtenerBloqueLibre()");
 	txt_close_file(f_aux);
-	printf("lfs_obtenerBloqueLibre() bloque %d y path %s", unBloqueLibre->numero,unBloqueLibre->path);
+	printf("lfs_obtenerBloqueLibre() bloque %d y path %s\n", unBloqueLibre->numero,unBloqueLibre->path);
 	return unBloqueLibre;
 }
 void bloque_destroy(Bloque_LFS* bloque){
@@ -69,6 +69,7 @@ unsigned int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 		perror("cantidad insuficiente de espacio o bloques ");
 	}
 	setear_bloque_ocupado_en_posicion(bloque_i);
+	printf("getBloqueLibre_int()-> bloque libre = %d\n",bloque_i);
 	return bloque_i;
 }
 char* bloquesToString(const char* pathFile){//ok

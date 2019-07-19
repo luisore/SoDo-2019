@@ -55,7 +55,7 @@ int main(void) {
 	log_destroy(lfs_logger);
 	list_destroy(memtable);
 
-	puts("... FIN LFS ...");
+	lfs_log_info("... FIN LFS ...");
 	return EXIT_SUCCESS;
 }
 

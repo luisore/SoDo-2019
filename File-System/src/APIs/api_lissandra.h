@@ -119,9 +119,8 @@ void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInse
 
 //lista del tipo Bloque_LFS
 t_list* calcularBloquesNecesarios(size_t size_);
-
 size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros);
-t_list* calcularBloquesNecesarios(size_t size_);
+
 void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_list* bloques);
 
 
@@ -134,6 +133,7 @@ void escribirRegistrosABloquesFS_v2(const t_list* bloques,const t_list* registro
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);
 char* obtenerPathDeParticionTemporal(const char* tabla,unsigned int  numeroDeParticionTemporal);
+
 //char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal);
 Insert* buscarTablaEnLaMemtable(const char * tabla);
 

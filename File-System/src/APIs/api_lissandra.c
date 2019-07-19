@@ -7,14 +7,13 @@
 #include "api_lissandra.h"
 
 
-void select1(const char * nombre_de_tabla, unsigned int key){
+void select1(const char * nombre_de_tabla, unsigned int key){//hasta ahora OK hasta la memtable
 	if (!yaExisteTabla(nombre_de_tabla))perror("SELECT no existe tabla ");
 //	Metadata_Tabla* unaMetadata=obtenerMetadata(nombre_de_tabla);
-	t_list* listaDeRegistros=list_create();
-	list_add_all(listaDeRegistros,buscarRegistrosEnMemtable(nombre_de_tabla,key));
-	select_mostrar_lista_de_registros(listaDeRegistros,nombre_de_tabla);
-	list_iterate(listaDeRegistros,registroLinea_destroy);
-	list_destroy(listaDeRegistros);
+	t_list* select_listaDeRegistros=filtrarRegistrosEnLaMemtable(nombre_de_tabla,key);
+	select_mostrar_lista_de_registros(select_listaDeRegistros,nombre_de_tabla,key);
+//	list_iterate(select_listaDeRegistros,registroLinea_destroy);
+//	list_destroy(select_listaDeRegistros);
 }
 
 
@@ -28,7 +27,7 @@ void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, 
 	}
 	else {
 //		if(hay_datos_a_dumpear())dumpear();//aca en lugar de if , se reemplaza con un semaforo , pues dumpear() es una seccion critica, con un mutex, solo hay un proceso dumpeo
-		puts("insert_2() insertando datos");
+//		puts("insert_2() insertando datos");
 		insertarEnMemtable( nombre_de_tabla, key , value,timestamp);
 	}
 }
@@ -96,14 +95,14 @@ void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const cha
 //		puts("insertarEnMemtable() creando un nuevo insert para insertar");
 //		mostrar_insert(insertDeMemtableConTablaCorrespondiente);
 	}
-	//lista de registros nula
+//	printf("insertarEnMemtable() insert encontrado,tabla %s y particiones %d\n",insertDeMemtableConTablaCorrespondiente->nombreDeLaTabla,insertDeMemtableConTablaCorrespondiente->cantParticiones);
 	if(insertDeMemtableConTablaCorrespondiente->registros==NULL)perror("insertarEnMemtable() error al aniadir registro");
 	list_add((insertDeMemtableConTablaCorrespondiente->registros),unRegistroAInsertar);
-
+	printf("insertarEnMemtable() %s -> %lu;%d;%s\n",nombre_de_tabla,unRegistroAInsertar->timestamp,unRegistroAInsertar->key,unRegistroAInsertar->value);
 }
 Insert* buscarTablaEnLaMemtable(const char * tabla){
 	bool existeTablaEnLaMemtable(Insert *unInsert) {//simulo aplicacion parcial
-		return string_equals_ignore_case(unInsert->nombreDeLaTabla,tabla);//strcmp() ,string_equals_ignore_case(unInsert->nombreDeLaTabla, tabla);
+		return strcmp(tabla,unInsert->nombreDeLaTabla)==0;//strcmp() ,string_equals_ignore_case(unInsert->nombreDeLaTabla, tabla);
 	}
 	return list_find(memtable,existeTablaEnLaMemtable);// // le puse (void*) por que en los tests lo manejan asi
 }
@@ -159,16 +158,19 @@ void drop(const char* nombre_de_tabla){
 	list_iterate(listaDeParticiones,borrarBloqueSegunParticion);
 	list_destroy(listaDeParticiones);
 }
-t_list*  buscarRegistrosEnMemtable(const char* tabla,uint16_t key){
-	bool buscarTablaDeInsert(Insert* unInsert){
+t_list*  filtrarRegistrosEnLaMemtable(const char* tabla,uint16_t key){//ok
+	bool my_buscarTablaDeInsert(Insert* unInsert){
 		return string_equals_ignore_case(unInsert->nombreDeLaTabla,tabla);//strcmp(unInsert->nombreDeLaTabla,tabla)==0;
 	}
-	Insert* insert_conListaDeRegistrosDeTabla=list_find(memtable,buscarTablaDeInsert);
+	Insert* insert_conListaDeRegistrosDeTabla=list_find(memtable,my_buscarTablaDeInsert);
+	printf("filtrarRegistrosEnLaMemtable() tabla %s y particiones temporales %d \n",insert_conListaDeRegistrosDeTabla->nombreDeLaTabla,insert_conListaDeRegistrosDeTabla->cantParticionesTemporales);
 	bool buscarRegistroConKeyDado(RegistroLinea* unRegistro){
 		return unRegistro->key==key;
 	}
-	t_list* listaDeRegistrosDeLaMismaKey=list_filter(insert_conListaDeRegistrosDeTabla->registros,buscarRegistroConKeyDado);
-	return listaDeRegistrosDeLaMismaKey;
+//	t_list* listaDeRegistrosDeLaMismaKey=list_create();
+	//t_list* listaDeRegistrosDeLaMismaKey=;
+//	list_iterate(listaDeRegistrosDeLaMismaKey,registroLinea_mostrar);//ok
+	return list_filter(insert_conListaDeRegistrosDeTabla->registros,buscarRegistroConKeyDado);
 }
 unsigned long long lfs_timestamp(){
 	return (unsigned long long)time(NULL);
@@ -227,7 +229,7 @@ void crearParticion(const char* pathDeParticion,int size, t_list* bloquesObtenid
 //	}
 //	list_iterate(bloques,my_set_bloques);
 }
-size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros){
+size_t tamanioDeListaDeRegistros(t_list* listaDeRegistros){//ok
 	size_t  size_de_particion =0;
 	void sumarSize(RegistroLinea* unRegistro){
 		 size_de_particion+=longitudDeRegistroAlFileSystem(unRegistro);
@@ -496,8 +498,8 @@ void mostrar_insert(const Insert* unInsert){//ok
 		}
 		list_iterate(unInsert->registros,registroLinea_mostrar);
 }
-void select_mostrar_lista_de_registros(const t_list* listaDeRegistros,const char* tabla){//ok
-	printf("SELECT mostrarListaDeRegistros() de tabla %s  \n", tabla);
+void select_mostrar_lista_de_registros(const t_list* listaDeRegistros,const char* tabla, unsigned int key ){//ok
+	printf("SELECT mostrarListaDeRegistros() de tabla %s y key %d  \n", tabla,key);
 	list_iterate(listaDeRegistros,registroLinea_mostrar);
 }
 void registroLinea_mostrar(RegistroLinea* unRegistro){

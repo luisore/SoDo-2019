@@ -86,10 +86,10 @@ void lfs_describe2(const char* nombre_de_tabla);
 unsigned long long lfs_timestamp();
 //auxiliares
 
-void select_mostrar_lista_de_registros(const t_list* listaDeRegistros,const char* tabla);
+void select_mostrar_lista_de_registros(const t_list* listaDeRegistros,const char* tabla,unsigned int key);
 void registroLinea_mostrar(RegistroLinea* unRegistro);
 //revuelve lista del tipo RegistroLinea
-t_list*  buscarRegistrosEnMemtable(const char* tabla,uint16_t key);
+t_list*  filtrarRegistrosEnLaMemtable(const char* tabla,uint16_t key);
 //devuelve una lista del tipo de RegistroLinea
 t_list* buscarRegistrosEnParticiones(const char* tabla,uint16_t key);
 //el timestamp es opcional

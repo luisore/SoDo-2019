@@ -38,14 +38,19 @@ int main(void) {
 	insert_1("tableA",10,"esto es basura5");
 	insert_1("tableA",10,"esto es basura6");
 	insert_1("tableA",10,"esto es basura7");
+	insert_1("tableA",11,"esto es basura7");
 
-	list_iterate(((Insert*)(list_get(memtable,0)))->registros,registroLinea_mostrar);
+	select1("tableA",10);
+	select1("tableA",11);
+
+	puts("---------");
+
+//	list_iterate(((Insert*)(list_get(memtable,0)))->registros,registroLinea_mostrar);
 	lfs_log_info("Mostrando  memtable ");//\n");
 	memtable_mostrar();
 	lfs_log_info("dump");
 	dumpear();
 	memtable_mostrar();
-	select1("tableA",10);
 
 	log_destroy(lfs_logger);
 	list_destroy(memtable);

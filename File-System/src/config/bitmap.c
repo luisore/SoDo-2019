@@ -69,7 +69,7 @@ unsigned int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 		perror("cantidad insuficiente de espacio o bloques ");
 	}
 	setear_bloque_ocupado_en_posicion(bloque_i);
-	printf("getBloqueLibre_int()-> bloque libre = %d\n",bloque_i);
+//	printf("getBloqueLibre_int()-> bloque libre = %d\n",bloque_i);
 	return bloque_i;
 }
 //char* bloquesToString(const char* pathFile){//ok

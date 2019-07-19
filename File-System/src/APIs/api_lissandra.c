@@ -378,15 +378,17 @@ void escribirRegistrosABloquesFS_v2(const t_list* listaDeBloques,const t_list* l
 				if(longitud_restante_para_escribir_en_bloque<=0)break;
 				RegistroLinea* unRegistro=list_get(listaDeRegistros,registro_actual);
 				char* registro_para_escribir=registroLineaAString(unRegistro);
+
+				//si se pasa de tamanio de bloque, recortar
+				if(strlen(registro_para_escribir)>longitud_restante_para_escribir_en_bloque){
+									registroRestanteAEscribir=string_substring_from(registro_para_escribir,longitud_restante_para_escribir_en_bloque);
+				//					puts(registroRestanteAEscribir);
+									registro_actual--;
+								}
 				printf("my_ocuparBloqueConRegistros() registro a escribir \"%s\" y cantidad de caracteres file %d  \n",registro_para_escribir,ftell(bloqueActual));
 				fprintf(bloqueActual,registro_para_escribir);
 				registro_actual++;
-				//si se pasa de tamanio de bloque, recortar
-				if(strlen(registro_para_escribir)>longitud_restante_para_escribir_en_bloque){
-					registroRestanteAEscribir=string_substring_from(registro_para_escribir,longitud_restante_para_escribir_en_bloque);
-//					puts(registroRestanteAEscribir);
-					registro_actual--;
-				}
+
 				if(longitud_restante_para_escribir_en_bloque>=strlen(registro_para_escribir))registroRestanteAEscribir=NULL;
 //				free(registro_para_escribir);
 		}

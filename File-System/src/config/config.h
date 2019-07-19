@@ -10,8 +10,11 @@
 #define LEN_MAXIMO 100
 #include <commons/config.h>
 #include <commons/log.h>
-
-t_log * lfs_log ; // variable del archivo de loggeo de hitos
+#include <stdio.h>
+#include <stdlib.h>
+#include <commons/string.h>
+#include <stdarg.h>
+t_log * lfs_logger ; // variable del archivo de loggeo de hitos
 
 //typedef struct {
 //	unsigned int tamanioBloque,cantidadDeBloques;
@@ -36,6 +39,11 @@ void config_cargar(const char* dir_config);//cargar configuracion desde un archi
 
 void imprimir_configuracion();//imprime la configuracion en pantalla
 
+//void lfs_logger(const char* message, ...);
+void lfs_log_info(const char* message, ...);
+
+void lfs_log_error(const char* message, ...);
+void lfs_log_warning(const char* message, ...);
 
 
 #endif /* CONFIG_CONFIG_H_ */

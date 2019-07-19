@@ -114,7 +114,8 @@ void dumpear();// lo que hay en la memtable, bajar a las particiones .tmp
 void memtable_reboot();
 void insert_destroy(Insert* unInsert);
 void registroLinea_destroy(RegistroLinea* unRegistro);
-void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInsert,const t_list* listaDeRegistros);
+//el insert contiene el nombre de la tabla y la lista de registros
+void insertarListaDeRegistrosDeTablaANuevaParticionTemporal(const Insert* unInsert);
 
 //lista del tipo Bloque_LFS
 t_list* calcularBloquesNecesarios(size_t size_);
@@ -124,15 +125,18 @@ t_list* calcularBloquesNecesarios(size_t size_);
 void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_list* bloques);
 
 
-size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro);
+size_t longitudDeRegistroAlFileSystem(const RegistroLinea* unRegistro);
 
 //int grabarRegistroABloques(RegistroLinea* unRegistro);
 //bloques de tipo BloqueLFS, y registros del tipo RegistroLinea
-void escribirRegistrosABloquesFS(t_list* bloques,t_list* registros);
+void escribirRegistrosABloquesFS(const t_list* bloques,const t_list* registros);
+void escribirRegistrosABloquesFS_v2(const t_list* bloques,const t_list* registros);
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);
-char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal);
+char* obtenerPathDeParticionTemporal(const char* tabla,unsigned int  numeroDeParticionTemporal);
+//char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal);
 Insert* buscarTablaEnLaMemtable(const char * tabla);
+
 
 //auxiliares para imrpimir
 void printfMetadata(Metadata_Tabla* metadata, const char* nombre_de_tabla);

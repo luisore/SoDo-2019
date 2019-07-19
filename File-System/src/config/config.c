@@ -5,10 +5,6 @@
  *      Author: jhon
  */
 #include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <commons/string.h>
 void probando(){
 	puts("probando");
 }
@@ -30,7 +26,7 @@ void config_cargar(const char* dir_config){
 	cargar_configuracion_metadata();
 	cargar_configuracion_bitmap();
 	//inicio log
-	lfs_log = log_create("LFS.log", "LISSANDRA - LFS", true, LOG_LEVEL_TRACE);
+	lfs_logger = log_create("LFS.log", "LISSANDRA - LFS", true, LOG_LEVEL_TRACE);
 	puts("config_cargar() fin ");
 }
 
@@ -40,5 +36,27 @@ void imprimir_configuracion(){
 	printf("TAMANIO_VALUE = %d \n",lfs.tamanioValue);
 	printf("TIEMPO_DUMP = %d \n",lfs.tiempoDump);
 	printf("RETARDO = %d \n",lfs.retardo);
+}
+
+void lfs_log_info(const char* message, ...){
+	va_list lista;
+	va_start(lista,message);
+	log_info(lfs_logger,message,lista);
+//	log_info(lfs_log,"\n");
+	va_end(lista);
+}
+void lfs_log_error(const char* message, ...){
+	va_list lista;
+	va_start(lista,message);
+	log_error(lfs_logger,message,lista);
+//	log_error(lfs_log,"\n");
+	va_end(lista);
+}
+void lfs_log_warning(const char* message, ...){
+	va_list lista;
+	va_start(lista,message);
+	log_warning(lfs_logger,message,lista);
+//	log_warning(lfs_log,"\n");
+	va_end(lista);
 }
 

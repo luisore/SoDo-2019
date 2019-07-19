@@ -45,6 +45,7 @@ void setBloqueActuaLleno(unsigned int bloqueActual_int){//agregar un 1 al bitmap
 	bitarray_set_bit(bitarray_,bloqueActual_int);
 }
 Bloque_LFS* lfs_obtenerBloqueLibre(){
+	puts("lfs_obtenerBloqueLibre() begin ");
 	Bloque_LFS* unBloqueLibre=malloc(sizeof(Bloque_LFS));
 	unBloqueLibre->numero=getBloqueLibre_int();
 	unBloqueLibre->path=malloc(strlen(lfs.puntoDeMontaje)+strlen("/bloques/")+strlen("xxxxxx.bin"));//solo un tamanio maximo para longitud de path
@@ -52,6 +53,7 @@ Bloque_LFS* lfs_obtenerBloqueLibre(){
 	FILE* f_aux= fopen(unBloqueLibre->path,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
 	if(f_aux==NULL)perror("lfs_obtenerBloqueLibre()");
 	txt_close_file(f_aux);
+	lfs_log_info("lfs_obtenerBloqueLibre() bloque %d y path %s", unBloqueLibre->numero,unBloqueLibre->path);
 	return unBloqueLibre;
 }
 void bloque_destroy(Bloque_LFS* bloque){
@@ -59,8 +61,8 @@ void bloque_destroy(Bloque_LFS* bloque){
 //	free(bloque);
 }
 
-int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
-	int bloque_i;
+unsigned int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
+	unsigned int  bloque_i;
 	for( bloque_i =0;testear_bloque_libre_en_posicion(bloque_i);bloque_i++);//hasta un bloque lbre,OK
 
 	if(bloque_i>lfs_metadata.cantidad_bloques){

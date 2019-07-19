@@ -38,7 +38,7 @@ void cargar_configuracion_bitmap();
 
 
 //la posicion del bloque que devuelve se reserva en el bitmap
-int getBloqueLibre_int();//obtiene el proximo bloque libre ,OK
+unsigned int  getBloqueLibre_int();//obtiene el proximo bloque libre ,OK
 
 //auxiliares
 char* bloquesToString(const char* pathFile);

@@ -308,3 +308,275 @@
 
 [INFO] 15:37:36:846 LISSANDRA - LFS/(3022:3022): se cargo LFS.log 
 
+[INFO] 15:46:40:116 LISSANDRA - LFS/(3415:3415): se cargo LFS.log 
+
+[INFO] 15:46:40:116 LISSANDRA - LFS/(3415:3415): Mostra memtable
+[INFO] 15:49:39:315 LISSANDRA - LFS/(3635:3635): se cargo LFS.log 
+
+[INFO] 15:49:39:316 LISSANDRA - LFS/(3635:3635): Mostra memtable
+[INFO] 15:55:21:734 LISSANDRA - LFS/(3796:3796): se cargo LFS.log 
+
+[INFO] 15:55:21:735 LISSANDRA - LFS/(3796:3796): Mostra memtable
+[INFO] 16:09:24:899 LISSANDRA - LFS/(4301:4301): se cargo LFS.log 
+
+[INFO] 16:09:48:111 LISSANDRA - LFS/(4352:4352): se cargo LFS.log 
+
+[INFO] 16:09:48:111 LISSANDRA - LFS/(4352:4352): Mostrando  memtable
+[INFO] 17:02:06:21 LISSANDRA - LFS/(5926:5926): se cargo LFS.log 
+
+[INFO] 17:02:25:947 LISSANDRA - LFS/(5975:5975): se cargo LFS.log 
+
+[INFO] 17:02:25:947 LISSANDRA - LFS/(5975:5975): Mostrando  memtable
+[INFO] 17:04:10:659 LISSANDRA - LFS/(6063:6063): se cargo LFS.log 
+
+[INFO] 17:05:18:808 LISSANDRA - LFS/(6085:6085): se cargo LFS.log 
+
+[INFO] 17:05:24:270 LISSANDRA - LFS/(6085:6090): crear tabla 
+[INFO] 17:05:24:270 LISSANDRA - LFS/(6085:6090): ya existe la carpeta  
+[INFO] 17:05:24:272 LISSANDRA - LFS/(6085:6090): fin crear tabla  
+[INFO] 17:06:49:527 LISSANDRA - LFS/(6157:6157): se cargo LFS.log 
+
+[ERROR] 17:06:57:866 LISSANDRA - LFS/(6157:6162): linea LQL leida erronea 
+
+[INFO] 17:11:56:585 LISSANDRA - LFS/(6395:6395): se cargo LFS.log 
+
+[INFO] 17:12:36:882 LISSANDRA - LFS/(6453:6453): se cargo LFS.log 
+
+[ERROR] 17:12:39:91 LISSANDRA - LFS/(6453:6458): linea LQL leida erronea 
+
+[ERROR] 17:12:39:91 LISSANDRA - LFS/(6453:6458): 
+
+[INFO] 17:13:24:290 LISSANDRA - LFS/(6540:6540): se cargo LFS.log 
+
+[INFO] 17:14:24:107 LISSANDRA - LFS/(6617:6617): se cargo LFS.log 
+
+[INFO] 17:14:24:107 LISSANDRA - LFS/(6617:6617): Mostrando  memtable 
+
+[INFO] 17:14:58:431 LISSANDRA - LFS/(6683:6683): se cargo LFS.log 
+
+[INFO] 17:14:58:431 LISSANDRA - LFS/(6683:6683): Mostrando  memtable 
+
+[INFO] 17:19:21:402 LISSANDRA - LFS/(6834:6834): se cargo LFS.log 
+
+[INFO] 17:19:21:403 LISSANDRA - LFS/(6834:6834): Mostrando  memtable 
+
+[INFO] 17:20:11:297 LISSANDRA - LFS/(6904:6904): se cargo LFS.log 
+
+[INFO] 17:20:11:301 LISSANDRA - LFS/(6904:6904): Mostrando  memtable 
+
+[INFO] 17:20:11:304 LISSANDRA - LFS/(6904:6904): dump 
+
+[INFO] 17:21:06:490 LISSANDRA - LFS/(6977:6977): se cargo LFS.log 
+
+[INFO] 17:21:06:490 LISSANDRA - LFS/(6977:6977): Mostrando  memtable 
+
+[INFO] 17:21:06:490 LISSANDRA - LFS/(6977:6977): dump 
+
+[INFO] 17:21:31:351 LISSANDRA - LFS/(7031:7031): se cargo LFS.log 
+
+[INFO] 17:21:31:351 LISSANDRA - LFS/(7031:7031): Mostrando  memtable 
+
+[INFO] 17:21:31:357 LISSANDRA - LFS/(7031:7031): dump 
+
+[INFO] 17:22:13:58 LISSANDRA - LFS/(7090:7090): se cargo LFS.log 
+
+[INFO] 17:22:13:58 LISSANDRA - LFS/(7090:7090): Mostrando  memtable 
+
+[INFO] 17:22:13:58 LISSANDRA - LFS/(7090:7090): dump 
+
+[INFO] 17:26:32:366 LISSANDRA - LFS/(7433:7433): se cargo LFS.log 
+
+[INFO] 17:26:32:368 LISSANDRA - LFS/(7433:7433): Mostrando  memtable 
+
+[INFO] 17:26:32:369 LISSANDRA - LFS/(7433:7433): dump 
+
+[INFO] 17:26:32:369 LISSANDRA - LFS/(7433:7433): obtenerPathDeParticionTemporal() path:
+
+[INFO] 17:26:57:627 LISSANDRA - LFS/(7486:7486): se cargo LFS.log 
+
+[INFO] 17:26:57:628 LISSANDRA - LFS/(7486:7486): Mostrando  memtable 
+
+[INFO] 17:26:57:629 LISSANDRA - LFS/(7486:7486): dump 
+
+[INFO] 17:26:57:629 LISSANDRA - LFS/(7486:7486): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:19:15:595 LISSANDRA - LFS/(3288:3288): se cargo LFS.log 
+
+[INFO] 21:19:15:600 LISSANDRA - LFS/(3288:3288): Mostrando  memtable 
+
+[INFO] 21:19:15:602 LISSANDRA - LFS/(3288:3288): dump 
+
+[INFO] 21:19:15:602 LISSANDRA - LFS/(3288:3288): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:19:53:673 LISSANDRA - LFS/(3309:3309): se cargo LFS.log 
+
+[INFO] 21:19:53:674 LISSANDRA - LFS/(3309:3309): Mostrando  memtable 
+
+[INFO] 21:19:53:674 LISSANDRA - LFS/(3309:3309): dump 
+
+[INFO] 21:19:53:674 LISSANDRA - LFS/(3309:3309): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:23:51:78 LISSANDRA - LFS/(3503:3503): se cargo LFS.log 
+
+[INFO] 21:23:51:79 LISSANDRA - LFS/(3503:3503): Mostrando  memtable 
+
+[INFO] 21:23:51:79 LISSANDRA - LFS/(3503:3503): dump 
+
+[INFO] 21:23:51:79 LISSANDRA - LFS/(3503:3503): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:24:53:879 LISSANDRA - LFS/(3565:3565): se cargo LFS.log 
+
+[INFO] 21:24:53:881 LISSANDRA - LFS/(3565:3565): Mostrando  memtable 
+
+[INFO] 21:24:53:883 LISSANDRA - LFS/(3565:3565): dump 
+
+[INFO] 21:24:53:884 LISSANDRA - LFS/(3565:3565): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:44:32:957 LISSANDRA - LFS/(4570:4570): se cargo LFS.log 
+
+[INFO] 21:44:32:958 LISSANDRA - LFS/(4570:4570): Mostrando  memtable 
+
+[INFO] 21:44:32:958 LISSANDRA - LFS/(4570:4570): dump 
+
+[INFO] 21:44:32:959 LISSANDRA - LFS/(4570:4570): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:44:32:965 LISSANDRA - LFS/(4570:4570): lfs_obtenerBloqueLibre() bloque 967424352 y path lfs_obtenerBloqueLibre() bloque %d y path %s
+
+
+[INFO] 21:48:35:837 LISSANDRA - LFS/(4679:4679): se cargo LFS.log 
+
+[INFO] 21:48:35:840 LISSANDRA - LFS/(4679:4679): Mostrando  memtable 
+
+[INFO] 21:48:35:842 LISSANDRA - LFS/(4679:4679): dump 
+
+[INFO] 21:48:35:845 LISSANDRA - LFS/(4679:4679): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:48:35:847 LISSANDRA - LFS/(4679:4679): lfs_obtenerBloqueLibre() bloque -944231088 y path lfs_obtenerBloqueLibre() bloque %d y path %s
+
+
+[INFO] 21:49:47:754 LISSANDRA - LFS/(4779:4779): se cargo LFS.log 
+
+[INFO] 21:49:47:755 LISSANDRA - LFS/(4779:4779): Mostrando  memtable 
+
+[INFO] 21:49:47:755 LISSANDRA - LFS/(4779:4779): dump 
+
+[INFO] 21:49:47:755 LISSANDRA - LFS/(4779:4779): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:49:47:755 LISSANDRA - LFS/(4779:4779): lfs_obtenerBloqueLibre() bloque 205156112 y path lfs_obtenerBloqueLibre() bloque %d y path %s
+
+
+[INFO] 21:50:14:905 LISSANDRA - LFS/(4838:4838): se cargo LFS.log 
+
+[INFO] 21:50:14:906 LISSANDRA - LFS/(4838:4838): Mostrando  memtable 
+
+[INFO] 21:50:14:907 LISSANDRA - LFS/(4838:4838): dump 
+
+[INFO] 21:50:14:907 LISSANDRA - LFS/(4838:4838): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:50:14:907 LISSANDRA - LFS/(4838:4838): lfs_obtenerBloqueLibre() bloque -575026400 y path lfs_obtenerBloqueLibre() bloque %d y path %s
+
+
+[INFO] 21:54:01:637 LISSANDRA - LFS/(5031:5031): se cargo LFS.log 
+
+[INFO] 21:54:01:638 LISSANDRA - LFS/(5031:5031): Mostrando  memtable 
+
+[INFO] 21:54:01:642 LISSANDRA - LFS/(5031:5031): dump 
+
+[INFO] 21:54:01:642 LISSANDRA - LFS/(5031:5031): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:55:11:51 LISSANDRA - LFS/(5079:5079): se cargo LFS.log 
+
+[INFO] 21:55:11:51 LISSANDRA - LFS/(5079:5079): Mostrando  memtable 
+
+[INFO] 21:55:11:51 LISSANDRA - LFS/(5079:5079): dump 
+
+[INFO] 21:55:11:51 LISSANDRA - LFS/(5079:5079): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:56:01:687 LISSANDRA - LFS/(5142:5142): se cargo LFS.log 
+
+[INFO] 21:56:01:696 LISSANDRA - LFS/(5142:5142): Mostrando  memtable 
+
+[INFO] 21:56:01:700 LISSANDRA - LFS/(5142:5142): dump 
+
+[INFO] 21:56:01:700 LISSANDRA - LFS/(5142:5142): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:57:15:58 LISSANDRA - LFS/(5224:5224): se cargo LFS.log 
+
+[INFO] 21:57:15:60 LISSANDRA - LFS/(5224:5224): Mostrando  memtable 
+
+[INFO] 21:57:15:60 LISSANDRA - LFS/(5224:5224): dump 
+
+[INFO] 21:57:15:60 LISSANDRA - LFS/(5224:5224): obtenerPathDeParticionTemporal() path:
+
+[INFO] 21:59:34:944 LISSANDRA - LFS/(5328:5328): se cargo LFS.log 
+
+[INFO] 21:59:34:953 LISSANDRA - LFS/(5328:5328): Mostrando  memtable 
+
+[INFO] 21:59:34:954 LISSANDRA - LFS/(5328:5328): dump 
+
+[INFO] 21:59:34:954 LISSANDRA - LFS/(5328:5328): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:01:46:623 LISSANDRA - LFS/(5453:5453): se cargo LFS.log 
+
+[INFO] 22:01:46:642 LISSANDRA - LFS/(5453:5453): Mostrando  memtable 
+
+[INFO] 22:01:46:642 LISSANDRA - LFS/(5453:5453): dump 
+
+[INFO] 22:01:46:642 LISSANDRA - LFS/(5453:5453): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:04:06:614 LISSANDRA - LFS/(5549:5549): se cargo LFS.log 
+
+[INFO] 22:04:06:617 LISSANDRA - LFS/(5549:5549): Mostrando  memtable 
+
+[INFO] 22:04:06:620 LISSANDRA - LFS/(5549:5549): dump 
+
+[INFO] 22:04:06:620 LISSANDRA - LFS/(5549:5549): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:05:35:83 LISSANDRA - LFS/(5655:5655): se cargo LFS.log 
+
+[INFO] 22:05:35:90 LISSANDRA - LFS/(5655:5655): Mostrando  memtable 
+
+[INFO] 22:05:35:90 LISSANDRA - LFS/(5655:5655): dump 
+
+[INFO] 22:05:35:90 LISSANDRA - LFS/(5655:5655): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:06:47:466 LISSANDRA - LFS/(5745:5745): se cargo LFS.log 
+
+[INFO] 22:06:47:475 LISSANDRA - LFS/(5745:5745): Mostrando  memtable 
+
+[INFO] 22:06:47:475 LISSANDRA - LFS/(5745:5745): dump 
+
+[INFO] 22:06:47:475 LISSANDRA - LFS/(5745:5745): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:07:15:589 LISSANDRA - LFS/(5803:5803): se cargo LFS.log 
+
+[INFO] 22:07:15:595 LISSANDRA - LFS/(5803:5803): Mostrando  memtable 
+
+[INFO] 22:07:15:595 LISSANDRA - LFS/(5803:5803): dump 
+
+[INFO] 22:07:15:595 LISSANDRA - LFS/(5803:5803): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:09:36:88 LISSANDRA - LFS/(5862:5862): se cargo LFS.log 
+
+[INFO] 22:09:36:91 LISSANDRA - LFS/(5862:5862): Mostrando  memtable 
+
+[INFO] 22:09:36:91 LISSANDRA - LFS/(5862:5862): dump 
+
+[INFO] 22:09:36:91 LISSANDRA - LFS/(5862:5862): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:18:41:691 LISSANDRA - LFS/(6264:6264): se cargo LFS.log 
+
+[INFO] 22:18:41:700 LISSANDRA - LFS/(6264:6264): Mostrando  memtable 
+
+[INFO] 22:18:41:701 LISSANDRA - LFS/(6264:6264): dump 
+
+[INFO] 22:18:41:701 LISSANDRA - LFS/(6264:6264): obtenerPathDeParticionTemporal() path:
+
+[INFO] 22:19:09:432 LISSANDRA - LFS/(6277:6277): se cargo LFS.log 
+
+[INFO] 22:19:09:447 LISSANDRA - LFS/(6277:6277): Mostrando  memtable 
+
+[INFO] 22:19:09:448 LISSANDRA - LFS/(6277:6277): dump 
+
+[INFO] 22:19:09:448 LISSANDRA - LFS/(6277:6277): obtenerPathDeParticionTemporal() path:
+

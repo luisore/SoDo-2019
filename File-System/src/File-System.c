@@ -19,7 +19,7 @@ pthread_t consola,dump;//,compactador;
 int main(void) {
 	puts("... INICIA LFS ...");
 	config_cargar("LFS.config");
-	log_info(lfs_log,"se cargo LFS.log \n");
+	log_info(lfs_logger,"se cargo LFS.log \n");
 	memtable=list_create();
 
 	imprimir_configuracion();
@@ -30,7 +30,7 @@ int main(void) {
 //	lfs_consola();//por el momento funciona con el CREATE
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
-
+	mostrar_bitarray();
 	insert_1("tableA",12,"esto es basura");
 	insert_1("tableA",13,"esto es basura2");
 	insert_1("tableA",10,"esto es basura3");
@@ -38,10 +38,14 @@ int main(void) {
 	insert_1("tableA",10,"esto es basura5");
 	insert_1("tableA",10,"esto es basura6");
 	insert_1("tableA",10,"esto es basura7");
-	puts("mostrar memtable");
+	lfs_log_info("Mostrando  memtable \n");
+	memtable_mostrar();
+	lfs_log_info("dump \n");
+	dumpear();
 	memtable_mostrar();
 	select1("tableA",10);
-	log_destroy(lfs_log);
+
+	log_destroy(lfs_logger);
 	list_destroy(memtable);
 
 	puts("... FIN LFS ...");
@@ -239,12 +243,10 @@ void lfs_consola(){
 		struct_operacion* parametros_lql_leidos = parsear_linea(linea);
 		ejecutar_linea_lql(parametros_lql_leidos);
 		printf(" se leyo la  la sentencia \"%s\" LQL\n", linea);
-//		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
-//		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
-//		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
-//		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
-		if(string_contains(linea,"DUMP"))dumpear();//dumpeo, dumpaear debe de ser ejecutado cada cierto tiempo por un hilo
-		if(string_contains(linea,"MEMTABLE"))memtable_mostrar();
+
+//		if(string_contains(linea,"DUMP"))dumpear();//dumpeo, dumpaear debe de ser ejecutado cada cierto tiempo por un hilo
+//		if(string_contains(linea,"MEMTABLE"))memtable_mostrar();
+//		if(string_contains(linea,"FIN"))break;
 		free(linea);
 	}
 }
@@ -254,15 +256,19 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 	printf("ejecutar_linea_lql(), cantidad de parametros = %d\n",cantidadDeParametros);
 	switch (parametros_de_linea_lql->nombre_operacion) {
 		case API_CREATE:
-			lfs_create((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);
+			lfs_create((parametros_de_linea_lql->parametros)[0],
+					(parametros_de_linea_lql->parametros)[1],
+					(parametros_de_linea_lql->parametros)[2],
+					(parametros_de_linea_lql->parametros)[3]);
 			break;
 		case API_INSERT:
 			if(cantidadDeParametros==3)lfs_insert1((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2]);
 			else lfs_insert2((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);
 			break;
 		case API_SELECT:
-//			select1();
-//			lfs_select()
+			lfs_select1(parametros_de_linea_lql->parametros[0],
+					parametros_de_linea_lql->parametros[1],
+					parametros_de_linea_lql->parametros[2]);
 			break;
 		case API_DESCRIBE:
 			if(cantidadDeParametros==0)lfs_describe();
@@ -272,7 +278,7 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 			lfs_drop((parametros_de_linea_lql->parametros)[0]);
 			break;
 		default:
-			log_error(lfs_log,"linea LQL leida erronea \n");
+			lfs_log_error("linea LQL leida erronea \n");
 			break;
 	}
 }

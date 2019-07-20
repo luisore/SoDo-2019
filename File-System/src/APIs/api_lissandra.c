@@ -365,10 +365,12 @@ void escribirRegistrosABloquesFS_v2(const t_list* listaDeBloques,const t_list* l
 	void my_ocuparBloqueConRegistros(Bloque_LFS* unBLoque){
 		FILE* bloqueActual=fopen(unBLoque->path,"w");//txt_open_for_append(unBLoque->path);7
 		if(bloqueActual==NULL)perror("escribirRegistrosABloquesFS_v2(), no existe el path ");
+		fseek(bloqueActual,0,SEEK_SET);
 		printf("my_ocuparBloqueConRegistros() path %s\n",unBLoque->path);
-		while(registro_actual<list_size(listaDeRegistros)){
+		while(registro_actual<list_size(listaDeRegistros) && lfs_metadata.tamanio_de_bloque>ftell(bloqueActual) ){
 				if( registroRestanteAEscribir!=NULL){//si ya habia string timestamp;key;value por escribir
 					if(strlen(registroRestanteAEscribir)>0){ //strlen de NULL falla
+//						if(lfs_metadata.tamanio_de_bloque<ftell(bloqueActual))break;//goto proximo_bloque;
 						fprintf(bloqueActual,registroRestanteAEscribir);
 						printf("my_ocuparBloqueConRegistros() string a escribir \"%s\" y cantidad de caracteres file %d  \n",registroRestanteAEscribir,ftell(bloqueActual));
 						free(registroRestanteAEscribir);
@@ -377,15 +379,15 @@ void escribirRegistrosABloquesFS_v2(const t_list* listaDeBloques,const t_list* l
 					}
 				}
 				unsigned int longitud_restante_para_escribir_en_bloque=lfs_metadata.tamanio_de_bloque-ftell(bloqueActual);//cantidadDeCaracteresDeFile(unBLoque->path);
-				if(longitud_restante_para_escribir_en_bloque<=0)goto proximo_bloque;//break;
-				RegistroLinea* unRegistro=list_get(listaDeRegistros,registro_actual);
+				if(longitud_restante_para_escribir_en_bloque<=0)break;// goto proximo_bloque;//break;
+				RegistroLinea* unRegistro=(RegistroLinea*)list_get(listaDeRegistros,registro_actual);
 				char* registro_string=registroLineaAString(unRegistro);
 				char* registroAEscribir =string_substring_until(registro_string,longitud_restante_para_escribir_en_bloque); //string_substring_until(unRegistroAux,longitud_restante_para_escribir_en_bloque);
 //				registroRestanteAEscribir=string_substring_from(registro_string,longitud_restante_para_escribir_en_bloque);
 				registro_actual++;
 				registroRestanteAEscribir=NULL;
 				//si se pasa de tamanio de bloque, recortar
-				if(strlen(registroAEscribir)>longitud_restante_para_escribir_en_bloque){
+				if(strlen(registro_string)>longitud_restante_para_escribir_en_bloque){
 					registroRestanteAEscribir=string_substring_from(registro_string,longitud_restante_para_escribir_en_bloque);
 					registro_actual--;
 				}
@@ -393,8 +395,9 @@ void escribirRegistrosABloquesFS_v2(const t_list* listaDeBloques,const t_list* l
 				fprintf(bloqueActual,registroAEscribir);
 				printf("my_ocuparBloqueConRegistros() string a escribir \"%s\" y cantidad de caracteres file %d  \n",registroAEscribir,ftell(bloqueActual));
 				free(registroAEscribir);
+//				if(longitud_restante_para_escribir_en_bloque<=0)break;// goto proximo_bloque;//break;
 		}
-		proximo_bloque:;
+//		proximo_bloque:;
 		ftruncate(fileno(bloqueActual),lfs_metadata.tamanio_de_bloque);
 		txt_close_file(bloqueActual);
 //		bloqueActual=NULL;

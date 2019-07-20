@@ -23,17 +23,31 @@ void select1(const char * nombre_de_tabla, unsigned int key){//hasta ahora OK ha
 	puts("SELECT : ");
 	registroLinea_mostrar(registroConMayorTimestamp);
 }
-//t_list* obtenerRegistrosEnParticiones(const char* tabla,unsigned int key){
-//	t_list* registrosDeParticiones=obtenerListaDeParticiones(tabla);
-////	list_add_all(registrosDeParticiones,obtenerListaDeParticiones());
-//
-//	return registrosDeParticiones;
-//}
+t_list* obtenerRegistrosEnParticiones(const char* tabla,unsigned int key){
+	t_list* listaDeParticiones=obtenerParticiones(tabla);//
+//	list_add_all(registrosDeParticiones,obtenerListaDeParticiones());
+
+	t_list* listaDeListaDeRegistros=list_map(listaDeParticiones,particionToListaDeRegistros);
+	t_list* listaDeRegistros=list_create();
+	void my_juntarLista(t_list* listaDeRegistros){
+		list_add_all(listaDeRegistros,listaDeRegistros);
+	}
+	list_iterate(listaDeListaDeRegistros,my_juntarLista);
+	return listaDeRegistros;
+}
+t_list* particionToListaDeRegistros(Particion* particion){//pendiente
+	char* contenido=(char*)malloc(particion->size*sizeof(char));
+	for(int i=0;particion->bloques[i]!=NULL;i++){
+		char pathBLoqueFS = obtenerPathDelNumeroDeBloqueFS(atoi(particion->bloques[i]));
+		//file to string y luego append al char* contenido
+	}
+}
 //t_list* obtenerListaDeParticiones(const char* tabla){
 //	t_list* listaDeParticionesPath=obtenerListaDeParticiones_path(tabla);
 //	Particion* my_pathToParticion(const char* pathDeParticion){
 //		Particion* particion=(Particion*)malloc(sizeof(Particion));
-//		particion->
+//		particion->pathParticion=strdup(pathDeParticion);
+//		pathToParticion()
 //
 //	}
 //
@@ -329,7 +343,7 @@ void registroLinea_destroy(RegistroLinea* unRegistro){
 //	free(bloqueLibre_path);
 //	return posicionBloqueLibre;
 //}
-char* obtenerPathDelNumeroDeBloque(int numeroDeBloque){
+char* obtenerPathDelNumeroDeBloqueFS(int numeroDeBloque){
 	char* path_del_bloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+20);
 	sprintf(path_del_bloque,"%sBloques/%d.bin",lfs.puntoDeMontaje,numeroDeBloque);
 //	lfs_log_info("obtenerPathDelNumeroDeBloque() , path: %s\n",path_del_bloque);

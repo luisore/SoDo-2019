@@ -53,9 +53,9 @@ typedef struct{
 	unsigned int bloque,particion;
 }RegistroLinea_compactador;
 typedef struct{
-	char pathParticion[256];
 	bool esTemporal;
 	unsigned int size;
+	char *pathParticion;//[256];
 	char** bloques;
 }Particion;
 //char* aux_tabla_para_la_memtable;
@@ -131,7 +131,7 @@ size_t longitudDeRegistroAlFileSystem(const RegistroLinea* unRegistro);
 //bloques de tipo BloqueLFS, y registros del tipo RegistroLinea
 void escribirRegistrosABloquesFS_v2(const t_list* bloques,const t_list* registros);
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);
-char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);
+char* obtenerPathDelNumeroDeBloqueFS(int numeroDeBloque);
 char* obtenerPathDeParticionTemporal(const char* tabla,unsigned int  numeroDeParticionTemporal);
 
 //char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal);

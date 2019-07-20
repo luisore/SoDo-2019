@@ -195,14 +195,15 @@ void compactar(const char* nombreDeTabla){
 }
 t_list* obtenerParticiones(const char* nombreDeTabla){//ok
 	t_list* listaDeParticiones_path = obtenerListaDeParticiones_path(nombreDeTabla);
-	Particion* pathToParticion(char* pathDeParticion){
+	Particion* pathToParticion(const char* pathDeParticion){
 		Particion* unaParticion=(Particion*)malloc(sizeof(Particion));
 		t_config* config = config_create(pathDeParticion);
 		unaParticion->esTemporal=false;
 		if(string_ends_with(pathDeParticion,".tmp") || string_ends_with(pathDeParticion,".tmpc"))unaParticion->esTemporal=true;
 		unaParticion->bloques=config_get_array_value(config,"block");
 		unaParticion->size=config_get_int_value(config,"size");
-		strcpy(unaParticion->pathParticion,pathDeParticion);
+//		strcpy(unaParticion->pathParticion,pathDeParticion);
+		unaParticion->pathParticion=strdup(pathDeParticion);
 //		memcpy(unaParticion->pathParticion,pathDeParticion,strlen(pathDeParticion)*sizeof(char));
 		config_destroy(config);
 		return unaParticion;

@@ -86,6 +86,11 @@ void lfs_describe2(const char* nombre_de_tabla);
 unsigned long long lfs_timestamp();
 //auxiliares
 
+t_list* obtenerRegistrosEnParticiones(const char* tabla,unsigned int key);
+t_list* particionToListaDeRegistros(Particion* particion);
+t_list* particionStringToRegistro(const char* contenido);
+RegistroLinea* stringToRegistro(const char* registro_);
+
 void select_mostrar_lista_de_registros(const t_list* listaDeRegistros,const char* tabla,unsigned int key);
 void registroLinea_mostrar(RegistroLinea* unRegistro);
 //revuelve lista del tipo RegistroLinea

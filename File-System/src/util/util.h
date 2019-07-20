@@ -29,9 +29,11 @@ int cantidadDeCaracteres_file(FILE* bloque);
 int cantidadDeCaracteres_path(char* path );//ok
 bool quedaContenidoParaMapear(char* contenido);
 
-char* str_concat( const  char* from,const char* add);//devuelve algo malloqueado,OK,guarda
-char* str_concat_v2(const char* from,const char* add);//ok
-void mostrarCaracteres(const char* string);
+//char* str_concat( const  char* from,const char* add);//devuelve algo malloqueado,OK,guarda
+//char* str_concat_v2(const char* from,const char* add);//ok
+
+char* fileToString(const char* path);
+//void mostrarCaracteres(const char* string);
 
 char* intToString( int n);//OK,se puede borrar el printf
 

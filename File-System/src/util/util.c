@@ -66,13 +66,13 @@ char*  str_concat_v2(const char* from,const char* add){//ok
 	strcat(s,add);
 	return s;
 }
-void mostrarCaracteres(const char* string){
-
-	printf("%d de len de %s \n ",strlen(string), string);
-	for(int i =0;i<strlen(string);i++){
-		printf("pos i = %d y char = %c \n", i,string[i]);
-	}
-}
+//void mostrarCaracteres(const char* string){
+//
+//	printf("%d de len de %s \n ",strlen(string), string);
+//	for(int i =0;i<strlen(string);i++){
+//		printf("pos i = %d y char = %c \n", i,string[i]);
+//	}
+//}
 
 
 char* intToString( int n){//OK, atoa y atoi ya existen igual
@@ -84,6 +84,16 @@ char* intToString( int n){//OK, atoa y atoi ya existen igual
 	char* aux = malloc(5);
 	sprintf(aux,"%d",n);
 	return aux;
+}
+char* fileToString(const char* path){
+	FILE* file = fopen(path,"r+");
+	fseek(file,0,SEEK_END);
+	unsigned int len_=ftell(file);
+	char* contenido=malloc(len_);
+	fseek(file,0,SEEK_CUR);
+	fread(contenido,len_,1,file);
+	fclose(file);
+	return contenido;
 }
 //off_t cantidadDeCaracteresDeFile(const char* pathFile){
 ////	off_t cantidad=0;

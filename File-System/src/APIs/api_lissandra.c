@@ -11,48 +11,79 @@ void select1(const char * nombre_de_tabla, unsigned int key){//hasta ahora OK ha
 	if (!yaExisteTabla(nombre_de_tabla))perror("SELECT no existe tabla ");
 //	Metadata_Tabla* unaMetadata=obtenerMetadata(nombre_de_tabla);
 	t_list* select_listaDeRegistros=filtrarRegistrosEnLaMemtable(nombre_de_tabla,key);
-//	select_mostrar_lista_de_registros(select_listaDeRegistros,nombre_de_tabla,key);
-//	list_iterate(select_listaDeRegistros,registroLinea_destroy);
-//	list_destroy(select_listaDeRegistros);
 //	t_list* select_listaDeRegistrosDeParticiones=obtenerRegistrosEnParticiones(nombre_de_tabla,key);
 	bool my_maximo_timestamp(RegistroLinea* unRegistro,RegistroLinea* otroRegistro){//ok
 		return unRegistro->timestamp<otroRegistro->timestamp;
 	}
+//	list_add_all(select_listaDeRegistros,select_listaDeRegistrosDeParticiones);
 	list_sort(select_listaDeRegistros,my_maximo_timestamp);
 	RegistroLinea* registroConMayorTimestamp = (RegistroLinea*)list_get(select_listaDeRegistros,0);
 	puts("SELECT : ");
 	registroLinea_mostrar(registroConMayorTimestamp);
+	list_iterate(select_listaDeRegistros,registroLinea_destroy);
+	list_destroy(select_listaDeRegistros);
 }
 t_list* obtenerRegistrosEnParticiones(const char* tabla,unsigned int key){
-	t_list* listaDeParticiones=obtenerParticiones(tabla);//
-//	list_add_all(registrosDeParticiones,obtenerListaDeParticiones());
-
+	t_list* listaDeParticiones=obtenerParticiones(tabla);
 	t_list* listaDeListaDeRegistros=list_map(listaDeParticiones,particionToListaDeRegistros);
+	void particionDestroy(Particion* p){
+		free(p->pathParticion);
+	}
+	list_iterate(listaDeParticiones,particionDestroy);
+	list_destroy(listaDeParticiones);
+
 	t_list* listaDeRegistros=list_create();
-	void my_juntarLista(t_list* listaDeRegistros){
-		list_add_all(listaDeRegistros,listaDeRegistros);
+	void my_juntarLista(void* listaDeRegistros_){
+		if(listaDeRegistros_==NULL)return ;
+		t_list* listaDeRegistros__=(t_list*)listaDeRegistros_;
+		list_add_all(listaDeRegistros,listaDeRegistros_);
 	}
 	list_iterate(listaDeListaDeRegistros,my_juntarLista);
-	return listaDeRegistros;
+	bool buscarRegistroConKeyDado(RegistroLinea* unRegistro){
+			return unRegistro->key==key;
+	}
+	t_list* listaFiltrada=list_filter(listaDeRegistros,buscarRegistroConKeyDado);
+	list_iterate(listaDeRegistros,registroLinea_destroy);
+	list_destroy(listaDeRegistros);
+	return listaFiltrada;
 }
 t_list* particionToListaDeRegistros(Particion* particion){//pendiente
-	char* contenido=(char*)malloc(particion->size*sizeof(char));
+	if(particion->size==0)return NULL;
+	char* contenido_de_particion=(char*)malloc(particion->size);//*sizeof(char));
+//	memset(contenido_de_particion,0,particion->size);
 	for(int i=0;particion->bloques[i]!=NULL;i++){
-		char pathBLoqueFS = obtenerPathDelNumeroDeBloqueFS(atoi(particion->bloques[i]));
+		char* pathBLoqueFS = obtenerPathDelNumeroDeBloqueFS(atoi(particion->bloques[i]));
 		//file to string y luego append al char* contenido
+		char* contenidoDeBloque=fileToString(pathBLoqueFS);
+		strcpy(contenido_de_particion,contenidoDeBloque);
+		free(pathBLoqueFS);
+		free(contenidoDeBloque);
+	}
+	t_list* listaDeRegistro=particionStringToRegistro(contenido_de_particion);
+	return listaDeRegistro;
+}
+t_list* particionStringToRegistro(const char* contenido){
+	t_list* lista_r=list_create();
+	char** registros_=string_split(contenido,"\n");
+	for(int i=0;registros_[i]!=NULL;i++){
+		RegistroLinea* registroLinea=stringToRegistro(registros_);
+		if(registroLinea!=NULL)list_add(lista_r,registroLinea);
+		free(registros_);
+		printf("particionStringToRegistro(),registro obtenido \"%lu;%d;%s\"\n",registroLinea->timestamp,registroLinea->key,registroLinea->value);
+	}
+	return lista_r;
+}
+RegistroLinea* stringToRegistro(const char* registro_){
+	if(strlen(registro_)<3){
+		return NULL;
+	}
+	else {
+		RegistroLinea* registroLinea = (RegistroLinea*)(malloc(sizeof(RegistroLinea)));
+		registroLinea->value=(char*)malloc(lfs.tamanioValue);
+		sscanf(registro_,"%lu;%d;%s",registroLinea->timestamp,registroLinea->key,registroLinea->value);
+		return registroLinea;
 	}
 }
-//t_list* obtenerListaDeParticiones(const char* tabla){
-//	t_list* listaDeParticionesPath=obtenerListaDeParticiones_path(tabla);
-//	Particion* my_pathToParticion(const char* pathDeParticion){
-//		Particion* particion=(Particion*)malloc(sizeof(Particion));
-//		particion->pathParticion=strdup(pathDeParticion);
-//		pathToParticion()
-//
-//	}
-//
-//}
-
 void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value){
 	insert_2(nombre_de_tabla,key,value,lfs_timestamp());
 }
@@ -203,9 +234,6 @@ t_list*  filtrarRegistrosEnLaMemtable(const char* tabla,uint16_t key){//ok
 	bool buscarRegistroConKeyDado(RegistroLinea* unRegistro){
 		return unRegistro->key==key;
 	}
-//	t_list* listaDeRegistrosDeLaMismaKey=list_create();
-	//t_list* listaDeRegistrosDeLaMismaKey=;
-//	list_iterate(listaDeRegistrosDeLaMismaKey,registroLinea_mostrar);//ok
 	return list_filter(insert_conListaDeRegistrosDeTabla->registros,buscarRegistroConKeyDado);
 }
 unsigned long long lfs_timestamp(){
@@ -346,7 +374,7 @@ void registroLinea_destroy(RegistroLinea* unRegistro){
 char* obtenerPathDelNumeroDeBloqueFS(int numeroDeBloque){
 	char* path_del_bloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+20);
 	sprintf(path_del_bloque,"%sBloques/%d.bin",lfs.puntoDeMontaje,numeroDeBloque);
-//	lfs_log_info("obtenerPathDelNumeroDeBloque() , path: %s\n",path_del_bloque);
+	printf("obtenerPathDelNumeroDeBloque() , path: %s\n",path_del_bloque);
 	return path_del_bloque;
 }
 

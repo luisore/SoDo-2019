@@ -30,7 +30,7 @@ int main(void) {
 //	lfs_consola();//por el momento funciona con el CREATE
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
-	mostrar_bitarray();
+//	mostrar_bitarray();
 	insert_1("tableA",12,"esto es basura");
 	insert_1("tableA",13,"esto es basura2");
 	insert_1("tableA",10,"esto es basura3");

@@ -11,11 +11,33 @@ void select1(const char * nombre_de_tabla, unsigned int key){//hasta ahora OK ha
 	if (!yaExisteTabla(nombre_de_tabla))perror("SELECT no existe tabla ");
 //	Metadata_Tabla* unaMetadata=obtenerMetadata(nombre_de_tabla);
 	t_list* select_listaDeRegistros=filtrarRegistrosEnLaMemtable(nombre_de_tabla,key);
-	select_mostrar_lista_de_registros(select_listaDeRegistros,nombre_de_tabla,key);
+//	select_mostrar_lista_de_registros(select_listaDeRegistros,nombre_de_tabla,key);
 //	list_iterate(select_listaDeRegistros,registroLinea_destroy);
 //	list_destroy(select_listaDeRegistros);
+//	t_list* select_listaDeRegistrosDeParticiones=obtenerRegistrosEnParticiones(nombre_de_tabla,key);
+	bool my_maximo_timestamp(RegistroLinea* unRegistro,RegistroLinea* otroRegistro){//ok
+		return unRegistro->timestamp<otroRegistro->timestamp;
+	}
+	list_sort(select_listaDeRegistros,my_maximo_timestamp);
+	RegistroLinea* registroConMayorTimestamp = (RegistroLinea*)list_get(select_listaDeRegistros,0);
+	puts("SELECT : ");
+	registroLinea_mostrar(registroConMayorTimestamp);
 }
-
+//t_list* obtenerRegistrosEnParticiones(const char* tabla,unsigned int key){
+//	t_list* registrosDeParticiones=obtenerListaDeParticiones(tabla);
+////	list_add_all(registrosDeParticiones,obtenerListaDeParticiones());
+//
+//	return registrosDeParticiones;
+//}
+//t_list* obtenerListaDeParticiones(const char* tabla){
+//	t_list* listaDeParticionesPath=obtenerListaDeParticiones_path(tabla);
+//	Particion* my_pathToParticion(const char* pathDeParticion){
+//		Particion* particion=(Particion*)malloc(sizeof(Particion));
+//		particion->
+//
+//	}
+//
+//}
 
 void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value){
 	insert_2(nombre_de_tabla,key,value,lfs_timestamp());
@@ -193,20 +215,20 @@ t_list* calcularBloquesNecesarios(size_t size_de_particion){//ok
 	t_list* bloques = list_create();
 	int cantidadDeBloques=size_de_particion/lfs_metadata.tamanio_de_bloque;
 	if(size_de_particion%lfs_metadata.tamanio_de_bloque!=0)cantidadDeBloques++;
-	printf("calcularBloquesNecesarios() cantidad de bloques=%d, con SIZE de particion %d y tamanio bloque %d\n",cantidadDeBloques,size_de_particion,lfs_metadata.tamanio_de_bloque);
+//	printf("calcularBloquesNecesarios() cantidad de bloques=%d, con SIZE de particion %d y tamanio bloque %d\n",cantidadDeBloques,size_de_particion,lfs_metadata.tamanio_de_bloque);
 	for(int i=0;i<cantidadDeBloques;i++){
 		Bloque_LFS* unBloque=lfs_obtenerBloqueLibre();
 		list_add(bloques,unBloque);
 //		printf("-----Bloque libre %d,path %s\n",unBloque->numero,unBloque->path);
 	}
 
-	void bloquesLFS_mostrar(Bloque_LFS* bloque){
-		printf("	bloque FS numero:%d y path %s\n",bloque->numero,bloque->path);
-	}
+//	void bloquesLFS_mostrar(Bloque_LFS* bloque){
+//		printf("	bloque FS numero:%d y path %s\n",bloque->numero,bloque->path);
+//	}
 	if(list_is_empty(bloques))perror("calcularBloquesNecesarios(), no hay bloques ");
-	puts("calcularBloquesNecesarios() mostrando bloques calculados ");
-	list_iterate(bloques,bloquesLFS_mostrar);
-	puts("fin calcular bloques necesarios");
+//	puts("calcularBloquesNecesarios() mostrando bloques calculados ");
+//	list_iterate(bloques,bloquesLFS_mostrar);
+//	puts("fin calcular bloques necesarios");
 	return bloques;
 }
 void crearParticion(const char* pathDeParticion,int size, t_list* bloquesObtenidos){
@@ -310,56 +332,11 @@ void registroLinea_destroy(RegistroLinea* unRegistro){
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque){
 	char* path_del_bloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Bloques")+20);
 	sprintf(path_del_bloque,"%sBloques/%d.bin",lfs.puntoDeMontaje,numeroDeBloque);
-	lfs_log_info("obtenerPathDelNumeroDeBloque() , path: %s\n",path_del_bloque);
+//	lfs_log_info("obtenerPathDelNumeroDeBloque() , path: %s\n",path_del_bloque);
 	return path_del_bloque;
 }
 
-//void escribirRegistrosABloquesFS(const t_list* listaDeBloques ,const t_list* listaDeRegistros){
-//	FILE* bloque_actual;
-//	char* registroRestante=NULL;
-//	for(int bloque_i=0, registro_i=0;bloque_i<list_size(listaDeBloques);bloque_i++){
-//		Bloque_LFS* bloque = list_get(listaDeBloques,bloque_i);
-//		bloque_actual=txt_open_for_append(bloque->path);
-//		while(registro_i<list_size(listaDeRegistros)){
-//			RegistroLinea* unRegistro = list_get(listaDeRegistros,registro_i);
-//			//si hay contenido restante , entonces
-//			if( registroRestante!=NULL){
-//						fprintf(bloque_actual,registroRestante);
-//						free(registroRestante);
-//						registroRestante=NULL;//para que no tire error en free()
-//			}
-//			char* registroAEscribir =registroLineaAString(unRegistro);
-//			int longitudRestanteParaEscribir=lfs_metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloque_actual);
-//			//si no hay espacio en bloque
-//			if(longitudRestanteParaEscribir<=0){//ok
-//				lfs_log_error("escribirRegistroABLoque(), longitud negativa o no hay espacio en bloque");
-//				registroRestante=registroAEscribir;
-////				goto alSiguienteBloque;
-//				break;
-//			}
-//			//si el registro %lu;%d;s es mayor que el espacio disponible,hay que recortar el string  registro
-//			if( !strlen(registroAEscribir)<=longitudRestanteParaEscribir){
-//				registroRestante=string_substring_from(registroAEscribir,longitudRestanteParaEscribir);
-//				char* primeros_caracteres_a_escribir=malloc(sizeof(char)*longitudRestanteParaEscribir);
-//				strncpy(primeros_caracteres_a_escribir,registroAEscribir,longitudRestanteParaEscribir);
-//				fprintf(bloque_actual,primeros_caracteres_a_escribir);
-//				free(primeros_caracteres_a_escribir);
-////				goto alSiguienteBloque;
-//				break;
-//			}
-//			fprintf(bloque_actual,registroAEscribir);
-//			free(registroRestante);
-//			free(registroAEscribir);
-//			registroRestante=NULL;
-//			registroAEscribir=NULL;
-//			registro_i++;
-//		}
-////		alSiguienteBloque:;
-//		txt_close_file(bloque);
-//	}
-//	free(registroRestante);
-//}
-void escribirRegistrosABloquesFS_v2(const t_list* listaDeBloques,const t_list* listaDeRegistros){
+void escribirRegistrosABloquesFS_v2(const t_list* listaDeBloques,const t_list* listaDeRegistros){//ok
 	unsigned int registro_actual=0;
 	char* registroRestanteAEscribir=NULL;
 	void my_ocuparBloqueConRegistros(Bloque_LFS* unBLoque){

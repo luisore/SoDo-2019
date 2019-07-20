@@ -128,9 +128,7 @@ void crearParticionTemporalConRegistros(const char* pathDeParticion,int size,t_l
 
 size_t longitudDeRegistroAlFileSystem(const RegistroLinea* unRegistro);
 
-//int grabarRegistroABloques(RegistroLinea* unRegistro);
 //bloques de tipo BloqueLFS, y registros del tipo RegistroLinea
-//void escribirRegistrosABloquesFS(const t_list* bloques,const t_list* registros);
 void escribirRegistrosABloquesFS_v2(const t_list* bloques,const t_list* registros);
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);

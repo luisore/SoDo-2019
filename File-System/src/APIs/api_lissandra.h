@@ -109,7 +109,9 @@ void crearParticiones(const char* tabla, unsigned int numeroDeParticiones);
 void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long long timestamp);
 bool hay_datos_a_dumpear();
 bool laMemtableTieneContenido();
-void dumpear();// lo que hay en la memtable, bajar a las particiones .tmp
+
+// lo que hay en la memtable, bajar a las particiones .tmp
+void dumpear();
 //el insert contiene el nombre de la tabla
 void memtable_reboot();
 void insert_destroy(Insert* unInsert);
@@ -128,7 +130,7 @@ size_t longitudDeRegistroAlFileSystem(const RegistroLinea* unRegistro);
 
 //int grabarRegistroABloques(RegistroLinea* unRegistro);
 //bloques de tipo BloqueLFS, y registros del tipo RegistroLinea
-void escribirRegistrosABloquesFS(const t_list* bloques,const t_list* registros);
+//void escribirRegistrosABloquesFS(const t_list* bloques,const t_list* registros);
 void escribirRegistrosABloquesFS_v2(const t_list* bloques,const t_list* registros);
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);

@@ -19,6 +19,7 @@
 
 #include <commons/string.h>
 #include <commons/collections/list.h>
+#include "../File-System.h"
 
 #define loop while(1)
 #define minimo(unNum,otroNum)  ((unNum>otroNum)?otroNum:unNum)

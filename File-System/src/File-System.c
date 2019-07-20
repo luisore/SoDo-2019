@@ -31,6 +31,7 @@ int main(void) {
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
 //	mostrar_bitarray();
+
 	insert_1("tableA",12,"esto es basura");
 	insert_1("tableA",13,"esto es basura2");
 	insert_1("tableA",10,"esto es basura3");
@@ -39,7 +40,8 @@ int main(void) {
 	insert_1("tableA",10,"esto es basura6");
 	insert_1("tableA",10,"esto es basura7");
 	insert_1("tableA",11,"esto es basura7");
-
+	puts("fileToString()");
+	puts(fileToString("src/punto_de_montaje_FS_LISSANDRA_ejemplo/Bloques/1.bin"));
 	select1("tableA",10);
 	select1("tableA",11);
 

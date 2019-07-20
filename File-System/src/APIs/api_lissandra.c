@@ -20,8 +20,8 @@ void select1(const char * nombre_de_tabla, unsigned int key){//hasta ahora OK ha
 	RegistroLinea* registroConMayorTimestamp = (RegistroLinea*)list_get(select_listaDeRegistros,0);
 	puts("SELECT : ");
 	registroLinea_mostrar(registroConMayorTimestamp);
-	list_iterate(select_listaDeRegistros,registroLinea_destroy);
-	list_destroy(select_listaDeRegistros);
+//	list_iterate(select_listaDeRegistros,registroLinea_destroy);
+//	list_destroy(select_listaDeRegistros);
 }
 t_list* obtenerRegistrosEnParticiones(const char* tabla,unsigned int key){
 	t_list* listaDeParticiones=obtenerParticiones(tabla);

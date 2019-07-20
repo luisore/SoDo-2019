@@ -85,13 +85,14 @@ char* intToString( int n){//OK, atoa y atoi ya existen igual
 	sprintf(aux,"%d",n);
 	return aux;
 }
-char* fileToString(const char* path){
+char* fileToString(const char* path){//ok , para los bloques de FS
 	FILE* file = fopen(path,"r+");
-	fseek(file,0,SEEK_END);
-	unsigned int len_=ftell(file);
-	char* contenido=malloc(len_);
-	fseek(file,0,SEEK_CUR);
-	fread(contenido,len_,1,file);
+	if(file==NULL)perror("fileToString() path erroneo");
+//	fseek(file,0,SEEK_END);
+//	unsigned int len_=ftell(file);
+	char* contenido=malloc(lfs_metadata.tamanio_de_bloque);
+//	fseek(file,0,SEEK_CUR);
+	fread(contenido,lfs_metadata.tamanio_de_bloque,1,file);
 	fclose(file);
 	return contenido;
 }

@@ -16,7 +16,7 @@ int main(void) {
 	log_Memoria = log_create("Memoria.log","Memoria",false,LOG_LEVEL_INFO);
 
 	char *archivo;
-	archivo="src/config_memoria.cfg";
+	archivo="config_memoria.cfg";
 
 	directorio_actual();
 	if(validarArchivoConfig(archivo)<0)
@@ -170,34 +170,40 @@ void pool(){
 		//Espero a que el kernel o alguna otra memoria me mande una peticion
 
 		while(1){
-			bytesRecibidos=recv(conexion_fd,&tipo_operacion,sizeof(int),0);
-			if(bytesRecibidos<=0){
+
+			//bytesRecibidos=recv(conexion_fd,&tipo_operacion,sizeof(int),0);
+			int *operacion;
+			operacion = recibirYDeserializarEntero(conexion_fd);
+			if(operacion==NULL){
 				//log_error(log_memoria,"Error al recibir la operacion del DAM");
 				exit(1);
 			}
-			//log_info(log_memoria,"Peticion recibida del Kernel/Memoria, procesando....");
+			log_info(log_Memoria,"Peticion recibida del Kernel/Memoria, procesando....");
 
 
-			switch (tipo_operacion){
+			switch (*operacion){
 				case SELECT:
 				{
-					struct_select* select = recibirYDeserializar(conexion_fd,tipo_operacion);
+					struct_select* select = recibirYDeserializar(conexion_fd,*operacion);
 
+					printf("select %s:",select->nombreTabla);
 				    int resultado=existeTablaEnTablaDeSegmento(select->nombreTabla,lista_segmento);
 					if(resultado<0){
-								//Mandar msj a file system
+						puts("Recibi select");
+						int resultado = SELECT_RESULTADO;
+						serializarYEnviarEntero(conexion_fd, &resultado);
+						//Mandar msj a file system
 					}
 					else{
 
-						int resultado = SELECT_RESULTADO;
-						serializarYEnviarEntero(conexion_fd, &resultado);
+
 					}
 
 					break;
 				}
 				case INSERT:
 				{
-					struct_insert* insert = recibirYDeserializar(conexion_fd,tipo_operacion);
+					struct_insert* insert = recibirYDeserializar(conexion_fd,*operacion);
 
 					int resultado=agregarDatOaTabla(insert->nombreTabla,marcos,modificado,10,lista_segmento,cantidad_de_Paginas);
 					if(resultado<0){
@@ -206,20 +212,22 @@ void pool(){
 							//volver a agregar
 							resultado=agregarDatOaTabla(insert->nombreTabla,marcos,modificado,10,lista_segmento,cantidad_de_Paginas);
 					}
+					printf("select %s:",insert->nombreTabla);
+					log_info(log_Memoria,"INSERT recibido....");
 					//guardar en marco
 					//guardarEnMemoria(memoria,resultado,valor,operacion);
-					resultado = INSERT_TERMINADO;
-					serializarYEnviarEntero(conexion_fd, &resultado);
+					//resultado = INSERT_TERMINADO;
+					//serializarYEnviarEntero(conexion_fd, &resultado);
 					break;
 				}
 				case DROP:
 				{
-					struct_tabla* drop = recibirYDeserializar(conexion_fd,tipo_operacion);
+					struct_tabla* drop = recibirYDeserializar(conexion_fd,*operacion);
 					break;
 				}
 				case CREATE:
 				{
-					struct_create* create = recibirYDeserializar(conexion_fd,tipo_operacion);
+					struct_create* create = recibirYDeserializar(conexion_fd,*operacion);
 					break;
 				}
 				case PEDIR_GOSSIPING:

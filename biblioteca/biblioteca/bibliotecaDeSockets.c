@@ -185,9 +185,9 @@ void serializarYEnviar(int socket, int tipoDePaquete, void* package){
 			for(int i=0 ; i<((struct_journal_tabla*)package)->cantidad;i++ ){
 				struct_insert *insert =list_get (((struct_journal_tabla*)package)->lista,i);
 				serializarYEnviarString(socket,insert->nombreTabla);
-				serializarYEnviarUint16(socket,insert->key);
+				serializarYEnviarUint16(socket,&insert->key);
 				serializarYEnviarString(socket,insert->valor);
-				serializarYEnviarUnsignedLong(socket,insert->timestats);
+				serializarYEnviarUnsignedLong(socket,&insert->timestats);
 			}
 			return;
 		}
@@ -303,9 +303,11 @@ void* recibirYDeserializar(int socket,int tipo){
 		valor_tamanio *valor = malloc(sizeof(valor_tamanio));
 		valor->valor = *recibirYDeserializarEntero(socket);
 		return valor;
+
 	}
 	case SELECT:
 	{
+		printf("algo");
 		struct_select* select = malloc(sizeof(struct_select));
 		select->nombreTabla = recibirYDeserializarString(socket);
 		select->key =*recibirYDeserializarEntero(socket);

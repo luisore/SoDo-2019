@@ -78,6 +78,8 @@ typedef struct {
 	t_list *lista;
 } struct_journal_tabla;
 
+
+
 typedef struct {
 	uint16_t key;
 	char *valor;

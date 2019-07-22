@@ -99,18 +99,116 @@ void recibir_conexion(){
 	LFS_FD=aceptarConexion(FileSystem_fd);
 }
 void crear_estructuras(){
-
+	cargar_metadata();
+	//Creacion de punto de motnaje
+	printf("montaje: %s \n",lfs.puntoDeMontaje);
 	if(mkdir(lfs.puntoDeMontaje, S_IRWXU) == -1){
 		log_error(logger, "punto de montaje ya creado" );
 	}
 
-	char *tables =  malloc (sizeof(lfs.puntoDeMontaje)+ strlen("Tables/"));
+	//Creacion de directorio Tablas
+	printf("montaje: %s \n",lfs.puntoDeMontaje);
+	char *tables =  malloc (strlen(lfs.puntoDeMontaje)+ strlen("Tables/"));
 	strcpy(tables,lfs.puntoDeMontaje);
 	strcat(tables,"Tables/");
+
 	if(mkdir(tables, S_IRWXU) == -1){
-			log_error(logger, "punto de montaje ya creado" );
+			log_error(logger, "directorio tablas ya creado" );
+
 	}
+	else{
+		//free(tables);
+	}
+
+
+	//Creacion de directorio bloques
+	char *bloques =  malloc (strlen(lfs.puntoDeMontaje)+ strlen("Bloques/"));
+	strcpy(bloques,lfs.puntoDeMontaje);
+	strcat(bloques,"Bloques/");
+
+	if(mkdir(bloques, S_IRWXU) == -1){
+		log_error(logger, "path bloques ya creado" );
+	}
+	creacionDeBloques();
+
+/*
+	//Creacion de directorio Bitmap
+	if(mkdir(bloques, S_IRWXU) == -1){
+			log_error(logger, "path bloques ya creado" );
+	}
+	else{
+		creacionDeBloques();
+		//creacionArchivoBitmap();
+	}
+*/
 }
+
+void cargar_metadata(){
+
+	char *direccionArchivoMedata=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("Tables") +strlen("/Metadata/Metadata.bin"));;
+	strcpy(direccionArchivoMedata,lfs.puntoDeMontaje);
+	string_append(&direccionArchivoMedata,"Tables");
+	string_append(&direccionArchivoMedata,"/Metadata/Metadata.bin");
+	printf("direccionArchivoMedata %s \n",direccionArchivoMedata);
+	if (validarArchivoConfig(direccionArchivoMedata)<0){
+		//log_error(log_lfs,"No se encontro en el file system el archivo metadata");
+	}
+
+	leerMetaData();
+}
+
+int leerMetaData(){
+	char *direccionArchivoMedata=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) +  strlen("Tables") +strlen("/Metadata/Metadata.bin"));;
+	//direccionArchivoMedata = config_MDJ.mount_point;
+	strcpy(direccionArchivoMedata,lfs.puntoDeMontaje);
+	string_append(&direccionArchivoMedata,"Tables");
+	string_append(&direccionArchivoMedata,"/Metadata/Metadata.bin");
+	t_config *archivo_MetaData;
+	archivo_MetaData=config_create(direccionArchivoMedata);
+	lfsmetadata.cantidadDeBloques=config_get_int_value(archivo_MetaData,"BLOCKS");
+    lfsmetadata.magicNumber=string_duplicate(config_get_string_value(archivo_MetaData,"MAGIC_NUMBER"));
+	lfsmetadata.tamanioBloque=config_get_int_value(archivo_MetaData,"BLOCK_SIZE");
+	free(direccionArchivoMedata);
+	config_destroy(archivo_MetaData);
+	return 0;
+}
+
+
+void creacionDeBloques(){
+
+	log_error(logger, "creacion bloques" );
+	printf("bloque path: %s:",lfs.puntoDeMontaje);
+	char* path_bloque=malloc(strlen(lfs.puntoDeMontaje)+strlen("Bloques/"));
+	strcpy(path_bloque,lfs.puntoDeMontaje);
+	strcat(path_bloque,"Bloques/");
+
+
+
+	for (int numeroDeBloque = 0; numeroDeBloque < lfsmetadata.cantidadDeBloques; numeroDeBloque++) {
+		//sprintf(path_bloque,"/%d.bin",numeroDeBloque);
+		char *bloque=string_itoa(numeroDeBloque);
+		char *numberBloque = malloc (strlen(path_bloque)+strlen(bloque)+strlen(".bin"));
+		//strcpy(numberBloque,"\"");
+		strcpy(numberBloque,path_bloque);
+		strcat(numberBloque,bloque);
+		strcat(numberBloque,".bin");
+		//strcat(numberBloque,"\"");
+		printf("path %s:\n",numberBloque);
+		FILE* particion = fopen(numberBloque,"w");
+		fclose(particion);
+	}
+	free(path_bloque);
+}
+
+char *path_bitmap(){
+	char *direccionArchivoBitMap=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("/Metadata/Bitmap.bin"));
+	strcpy(direccionArchivoBitMap,lfs.puntoDeMontaje);
+	string_append(&direccionArchivoBitMap,"/Metadata/Bitmap.bin");
+	//puts(direccionArchivoBitMap);
+	return direccionArchivoBitMap;
+
+}
+
 
 //int main(void) {
 //	void iterator(char* value)

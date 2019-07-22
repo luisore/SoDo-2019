@@ -13,10 +13,12 @@
 
 t_log * logger ; // variable del archivo de loggeo de hitos
 
-//typedef struct {
-//	unsigned int tamanioBloque,cantidadDeBloques;
-//	char magicNumber[3];
-//}Metadata_LFS;
+typedef struct {
+	unsigned int tamanioBloque,cantidadDeBloques;
+	char* magicNumber;
+}Metadata_LFS;
+
+Metadata_LFS lfsmetadata;
 //typedef struct {
 //	unsigned int  cantidadDeBytesOcupado;
 //}Bitmap;
@@ -28,6 +30,7 @@ typedef struct {
 //	 Metadata_LFS metadata;
 //	 Bitmap bitmap;
 }LFS;
+
 LFS lfs;//variable global que contiene los valores de LFS.config
 
 void probando();

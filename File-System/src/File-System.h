@@ -30,6 +30,10 @@
 void recibir_conexion();
 void crear_estructuras();
 int FileSystem_fd;
+char *path_bitmap();
+void creacionDeBloques();
+int leerMetaData();
+void cargar_metadata();
 
 int  LFS_FD;
 

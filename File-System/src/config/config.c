@@ -39,3 +39,4 @@ void imprimir_configuracion(){
 	printf("RETARDO = %d \n",lfs.retardo);
 }
 
+

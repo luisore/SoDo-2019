@@ -25,6 +25,7 @@ int main(void) {
 
 	memtable=list_create();
 
+	crear_estructuras();
 	imprimir_configuracion();
 
 	pthread_create(&consola,NULL,lfs_consola,NULL);
@@ -97,6 +98,20 @@ void recibir_conexion(){
 	setearParaEscuchar(&FileSystem_fd, lfs.puertoEscucha);
 	LFS_FD=aceptarConexion(FileSystem_fd);
 }
+void crear_estructuras(){
+
+	if(mkdir(lfs.puntoDeMontaje, S_IRWXU) == -1){
+		log_error(logger, "punto de montaje ya creado" );
+	}
+
+	char *tables =  malloc (sizeof(lfs.puntoDeMontaje)+ strlen("Tables/"));
+	strcpy(tables,lfs.puntoDeMontaje);
+	strcat(tables,"Tables/");
+	if(mkdir(tables, S_IRWXU) == -1){
+			log_error(logger, "punto de montaje ya creado" );
+	}
+}
+
 //int main(void) {
 //	void iterator(char* value)
 //		{

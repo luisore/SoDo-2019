@@ -25,8 +25,10 @@
 #include <readline/history.h>
 #include "config/bitmap.h"
 #include "config/metadata.h"
+
 //funcion recibir que comunica con memoria
 void recibir_conexion();
+void crear_estructuras();
 int FileSystem_fd;
 
 int  LFS_FD;

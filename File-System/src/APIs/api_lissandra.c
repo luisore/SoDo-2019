@@ -186,8 +186,11 @@ void lfs_create(const char* nombre_de_tabla,const char* tipo_consistencia,const 
 void crearTabla(const char* nombreDeTabla){//ok
 
 	char* aux_path_de_la_tabla = malloc(strlen(nombreDeTabla)+strlen("Tables/")+strlen(lfs.puntoDeMontaje));
-	sprintf(aux_path_de_la_tabla,"%s%s%s",lfs.puntoDeMontaje,"Tables/",nombreDeTabla);
-//	mostrarCaracteres(path_aux);
+	//sprintf(aux_path_de_la_tabla,"%s%s%s",lfs.puntoDeMontaje,"Tables/",nombreDeTabla);
+	strcpy(aux_path_de_la_tabla,lfs.puntoDeMontaje);
+	strcat(aux_path_de_la_tabla,"Tables/");
+	strcat(aux_path_de_la_tabla,nombreDeTabla);
+	printf("path %s \n",aux_path_de_la_tabla);
 	printf("path de tabla %s es \"%s\" \n",nombreDeTabla,aux_path_de_la_tabla);
 
 	if(mkdir(aux_path_de_la_tabla, S_IRWXU) == -1){

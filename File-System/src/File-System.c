@@ -26,10 +26,16 @@ int main(void) {
 	memtable=list_create();
 
 	crear_estructuras();
+	leer_tablas();
 	imprimir_configuracion();
+
 
 	pthread_create(&consola,NULL,lfs_consola,NULL);
 	pthread_join(consola,NULL);
+
+
+	pthread_create(&dump,NULL,dump_proceso,NULL);
+	pthread_join(dump,NULL);
 //	lfs_consola();//por el momento funciona con el CREATE
 
 //	system("rmdir src/punto_de_montaje_FS_LISSANDRA_ejemplo/Tables/tableA");
@@ -49,6 +55,20 @@ int main(void) {
 //	Persona* encontrada=list_find(lista,buscarLaDePersona1);
 //	return encontrada;
 //}
+void dump_proceso(){
+	while(1){
+		usleep(lfs.tiempoDump*1000);
+		for(int i;i<list_size(memtable);i++){
+			Insert *insert =list_get(memtable,i);
+			for(int k=0;k<list_size(memtable);k++){
+
+				RegistroLinea *registro =list_get(insert->registros,k);
+				printf("key %d: " ,registro->key);
+				printf("value %s: " ,registro->value);
+			}
+		}
+	}
+}
 
 void lfs_consola(){
 	while(1){
@@ -70,9 +90,13 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 		case API_CREATE:
 			lfs_create((parametros_de_linea_lql->parametros)[0],(parametros_de_linea_lql->parametros)[1],(parametros_de_linea_lql->parametros)[2],(parametros_de_linea_lql->parametros)[3]);
 			break;
-		case API_INSERT:
+		case API_INSERT:{
+			struct_insert *insert;
+			insert=estructura_registro(parametros_de_linea_lql,INSERT);
+			insert_2(insert->nombreTabla,insert->key,insert->valor,insert->timestats);
 			//insert();
 			break;
+			}
 		case API_SELECT:
 //			select1();
 //			lfs_select()
@@ -184,6 +208,7 @@ void creacionDeBloques(){
 
 
 
+
 	for (int numeroDeBloque = 0; numeroDeBloque < lfsmetadata.cantidadDeBloques; numeroDeBloque++) {
 		//sprintf(path_bloque,"/%d.bin",numeroDeBloque);
 		char *bloque=string_itoa(numeroDeBloque);
@@ -209,47 +234,47 @@ char *path_bitmap(){
 
 }
 
+void leer_tablas(){
+    DIR *dip;
+    struct dirent   *dit;
+    char *path_tablas= malloc(strlen(lfs.puntoDeMontaje)+strlen("Tables/"));
+    strcpy(path_tablas,lfs.puntoDeMontaje);
+    strcat(path_tablas,"Tables/");
+    if ((dip = opendir(path_tablas)) == NULL)
+    {
+              perror("opendir");
 
-//int main(void) {
-//	void iterator(char* value)
-//		{
-//			printf("%s\n", value);
-//		}
-//
-//		logger = log_create("LFS.log", "Servidor", 1, LOG_LEVEL_DEBUG);
-//
-//		int server_fd = iniciar_servidor();
-//		log_info(logger, "Servidor listo para recibir al cliente");
-//		int cliente_fd = esperar_cliente(server_fd);
-//
-//		t_list* lista;
-////		while(1)
-////		{
-////			int cod_op = recibir_operacion(cliente_fd);
-////			switch(cod_op)
-////			{
-////			case MENSAJE:
-////				recibir_mensaje(cliente_fd);
-////				break;
-////			case PAQUETE:
-////				lista = recibir_paquete(cliente_fd);
-////				printf("Me llegaron los siguientes valores:\n");
-////				list_iterate(lista, (void*) iterator);
-////				break;
-////			case -1:
-////				log_error(logger, "el cliente se desconecto. Terminando servidor");
-////				return EXIT_FAILURE;
-////			default:
-////				log_warning(logger, "Operacion desconocida. No quieras meter la pata");
-////				break;
-////			}
-////		}
-//		char* s;
-//		while(1){
-//			 s = recibir_mensaje_v2(cliente_fd);
-//			puts(s);
-//		}
-//		free(s);
-//		return EXIT_SUCCESS;
-//}
+    }
 
+    printf("Verificando si hay tablas ya cargadas\n");
+
+    while((dit = readdir(dip)) != NULL){
+        if((strcmp(dit->d_name, ".") != 0) && (strcmp(dit->d_name, "..") != 0)){
+
+        	if (dit->d_type &  DT_DIR )
+        	{
+        		if(strcmp(dit->d_name,"Metadata")){
+        			  //printf("es un directorio %s \n",dit->d_name);
+        			  log_info(logger, "directorio ya creado y agregado a la memtabla: %s",dit->d_name );
+        			  Insert *agregar_tabla = malloc(sizeof(Insert));
+        			  agregar_tabla->cantParticionesCompactacion = 0;
+        			  agregar_tabla->cantParticionesTemporales = 0;
+        			  agregar_tabla->nombreDeLaTabla = strdup(dit->d_name);
+        			  agregar_tabla->registros = list_create();
+        		}
+
+        	}
+        	//printf("%s\n", dit->d_name);
+        }
+
+    }
+            if (closedir(dip) == -1)
+            {
+                    perror("cerrado directorio");
+
+            }
+
+            printf("\ndirectorio esta ahora cerrado\n");
+
+
+}

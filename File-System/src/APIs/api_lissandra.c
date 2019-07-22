@@ -23,7 +23,7 @@ void insert_1(const char* nombre_de_tabla,unsigned int key , const char* value){
 //
 //	return ;
 }
-void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, unsigned long timestamp){
+void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, unsigned long long timestamp){
 	if(!yaExisteTabla(nombre_de_tabla)){
 		fprintf(stderr,"no exixte la tabla \"%s\" \n",nombre_de_tabla);
 	}
@@ -32,7 +32,7 @@ void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, 
 		insertarEnMemtable( nombre_de_tabla, key , value,timestamp);
 	}
 }
-void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long timestamp){//la logica  es esta, ok
+void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long long timestamp){//la logica  es esta, ok
 	Insert* unInsert = buscarTablaEnLaMemtable(nombre_de_tabla);
 	RegistroLinea* unRegistro=malloc(sizeof(RegistroLinea));
 			unRegistro->key=key;

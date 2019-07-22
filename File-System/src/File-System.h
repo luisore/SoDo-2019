@@ -25,6 +25,9 @@
 #include <readline/history.h>
 #include "config/bitmap.h"
 #include "config/metadata.h"
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
 
 //funcion recibir que comunica con memoria
 void recibir_conexion();
@@ -34,11 +37,11 @@ char *path_bitmap();
 void creacionDeBloques();
 int leerMetaData();
 void cargar_metadata();
-
+void dump_proceso();
 int  LFS_FD;
 
 void lfs_consola();
-
+void leer_tablas();
 
 
 #endif /* FILE_SYSTEM_H_ */

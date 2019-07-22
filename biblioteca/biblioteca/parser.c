@@ -38,7 +38,15 @@ struct_operacion* parsear_linea(char linea[]){
 
 		//aux[2] = "“Mi nombre es Lissandra” 1548421507"
 		//retorna ["Mi nombre es Lissandra", " 154821507", NULL]
-		char **aux2 = string_split(aux[2] + 3, "”");
+		char *split = "\"";
+		char **aux2 = string_split(aux[2] ,split );
+
+		printf("algo %s \n",aux2[0]);
+		printf("algo %s \n",aux2[1]+1);
+		printf("algo %s \n",aux[0]);
+		printf("algo %s \n",aux[1]);
+
+		printf("algo %s \n",aux[2]);
 
 		(operacion->parametros)[0] = strdup(aux[0]);
 		(operacion->parametros)[1] = strdup(aux[1]);

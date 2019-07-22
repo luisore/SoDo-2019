@@ -36,7 +36,9 @@ void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const cha
 	Insert* unInsert = buscarTablaEnLaMemtable(nombre_de_tabla);
 	RegistroLinea* unRegistro=malloc(sizeof(RegistroLinea));
 			unRegistro->key=key;
-			unRegistro->value=strdup(value);
+			printf("value largo %d: " ,strlen(value));
+			unRegistro->value=malloc(strlen(value));
+			strcpy(unRegistro->value,value);
 			unRegistro->timestamp;
 	if(unInsert==NULL){//si es igual a NULL no esta en la memtable
 		unInsert =malloc(sizeof(Insert));

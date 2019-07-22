@@ -31,10 +31,8 @@ int main(void) {
 
 
 	pthread_create(&consola,NULL,lfs_consola,NULL);
-	pthread_join(consola,NULL);
-
-
 	pthread_create(&dump,NULL,dump_proceso,NULL);
+	pthread_join(consola,NULL);
 	pthread_join(dump,NULL);
 //	lfs_consola();//por el momento funciona con el CREATE
 
@@ -55,16 +53,18 @@ int main(void) {
 //	Persona* encontrada=list_find(lista,buscarLaDePersona1);
 //	return encontrada;
 //}
+
 void dump_proceso(){
 	while(1){
 		usleep(lfs.tiempoDump*1000);
-		for(int i;i<list_size(memtable);i++){
+		log_info(logger,"iniciando proceso dump");
+		for(int i=0;i<list_size(memtable);i++){
+			printf("cantidad en la memtable %d: " ,list_size(memtable));
 			Insert *insert =list_get(memtable,i);
-			for(int k=0;k<list_size(memtable);k++){
-
+			for(int k=0;k<list_size(insert->registros);k++){
 				RegistroLinea *registro =list_get(insert->registros,k);
 				printf("key %d: " ,registro->key);
-				printf("value %s: " ,registro->value);
+				printf("value largo %d: " ,strlen(registro->value));
 			}
 		}
 	}
@@ -77,11 +77,12 @@ void lfs_consola(){
 		struct_operacion* parametros_lql_leidos = parsear_linea(linea);
 		ejecutar_linea_lql(parametros_lql_leidos);
 //
+
 		printf(" se leyo la  la sentencia \"%s\" LQL\n", linea);
-//		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
-//		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
-//		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
-//		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
+		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
+		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
+		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
+		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
 		free(linea);
 	}
 }
@@ -261,6 +262,8 @@ void leer_tablas(){
         			  agregar_tabla->cantParticionesTemporales = 0;
         			  agregar_tabla->nombreDeLaTabla = strdup(dit->d_name);
         			  agregar_tabla->registros = list_create();
+        			  list_add(memtable,agregar_tabla);
+        			  log_info(logger, "Agregado a la memtabla: %s",dit->d_name );
         		}
 
         	}

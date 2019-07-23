@@ -51,7 +51,7 @@ void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const cha
 		list_add((unInsert->registros),unRegistro);
 	}
 }
-Insert* buscarTablaEnLaMemtable(const char * tabla){
+Insert* buscarTablaEnLaMemtable(char * tabla){
 //	Insert* insertConTabla;
 	bool existeTablaEnLaMemtable(Insert *unInsert) {//simulo aplicacion parcial
 	            			return strcmp(unInsert->nombreDeLaTabla,tabla)==0;//string_equals_ignore_case(unInsert->nombreDeLaTabla, tabla);
@@ -190,16 +190,17 @@ void escribirRegistroABloque(const char * bloque_path,RegistroLinea* unRegistro)
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones){
 	return unRegistro->key % cantidad_de_particiones;
 }
-void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion ){
+void create(char* nombre_de_tabla,char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion ){
 	puts("crear tabla");
 	if(yaExisteTabla(nombre_de_tabla)){
 		puts("tabla existente");
-		crearParticiones(nombre_de_tabla,numero_de_particiones);
+		//crearParticiones(nombre_de_tabla,numero_de_particiones);
 	}
 	else{
 		crearTabla(nombre_de_tabla);
 		crearMetadata_v2(nombre_de_tabla,tipo_consistencia,numero_de_particiones,tiempo_de_compactacion);
 	    crearParticiones(nombre_de_tabla,numero_de_particiones);
+	    crearHiloCompactacion(nombre_de_tabla,numero_de_particiones,tiempo_de_compactacion);
 	}
 
 	puts("fin crear tabla");
@@ -350,8 +351,8 @@ void drop(const char* nombre_de_tabla){
 }
 
 bool  yaExisteTabla(const char* nombre_de_tabla){
-	//if exit(RES)
 
+	//if exit(RES)
 	//loggear el error (de que existe la tabla )
 	char* path = obtenerPathDeTabla(nombre_de_tabla);
 	bool yaExiste=yaExisteCarpeta(path);
@@ -370,6 +371,7 @@ void crear_directorio_para_tabla(nombre_de_tabla){
 
 }
 
+
 void crear_archivo_metadata(nombre_de_tabla,tipo_consistencia,numero_de_particiones,tiempo_de_compactacion){
 
 }
@@ -378,21 +380,65 @@ void aplicar_retardo(){
 //	usleep();
 }
 
-char archivo_path(const char rutaMontaje, const char *rutaArchivo){
+void crearHiloCompactacion(char *nombre_de_tabla,int numero_de_particiones,int tiempo_de_compactacion){
+	pthread_t hilo_compactacion;
+	struct_create *registro_create = malloc(sizeof(registro_create));
+	registro_create->nombreTabla = strdup(nombre_de_tabla);
+	registro_create->tiempoCompactacion = tiempo_de_compactacion;
+	registro_create->numeroParticiones =  numero_de_particiones;
+	pthread_create (&hilo_compactacion, NULL, compactacion, (void*)registro_create) ;
+	pthread_detach(hilo_compactacion);
+}
 
-	char  complete_path = (char ) malloc(1 + strlen(rutaMontaje) + strlen(rutaArchivo));
+void* compactacion(void *registro_create){
+
+	struct_create  *create_compactacion = (struct_create  *) registro_create;
+	log_info(logger, "Creando hilo Compactacion para Tabla:%s",create_compactacion->nombreTabla );
+	while (1){
+		usleep(create_compactacion->tiempoCompactacion*1000);
+		log_info(logger, "Iniciando compactacion de la Tabla:%s",create_compactacion->nombreTabla );
+		//agregar mutex
+
+		Insert* unInsert = buscarTablaEnLaMemtable(create_compactacion->nombreTabla);
+
+		//agregar mutex
+		if(unInsert==NULL)
+				break;
+		log_info(logger, "La tabla aun existe , procediendo con la compactacion de la Tabla: %s",create_compactacion->nombreTabla );
+		t_list *lista;
+		lista=list_create();
+		for(int i=0;i<create_compactacion->numeroParticiones;i++){
+			registroCompactacion* registro = malloc(sizeof(registroCompactacion));
+			registro->numeroParticion = i;
+			registro->numeroParticion = list_create();
+			list_add(lista,registro);
+		}
+		log_info(logger, "Compactacion Terminada de la Tabla:%s",create_compactacion->nombreTabla );
+
+		printf("cantidad de particiones %d:",list_size(lista));
+	}
+	//Ver
+	//list_destroy_and_destroy_elements();
+	return NULL;
+
+}
+
+char *archivo_path(char* rutaMontaje,char *rutaArchivo){
+
+	char*  complete_path = malloc(1 + strlen(rutaMontaje) + strlen(rutaArchivo));
     strcpy(complete_path, rutaMontaje);
     strcat(complete_path, rutaArchivo);
     return complete_path;
 }
 //
 ////--------------------------VALIDACIONES INICIO
-void validarCadenaNoVacia(const char cadena, const char mensajeError){
+/*void validarCadenaNoVacia(const char* cadena, const char* mensajeError){
 	if(string_is_empty(cadena)){
-		printf(mensajeError);
+		printf("Error de cadena%s\n",mensajeError);
 		return ;
 	}
 }
+*/
 //
 //void validarNombreTablaNoVacia(const char* nombreTabla){
 //	validarCadenaNoVacia(nombreTabla, "El nombre de la tabla no puede ser vacío");
@@ -413,47 +459,27 @@ bool yaExisteCarpeta(const char* path_tabla){
 	bool existe=false;
 	DIR *directorio = opendir(path_tabla);
 	if(directorio != NULL){
-
 		existe = true;
 		closedir(directorio);
 		return true;
-//	}
+	}
 	closedir(directorio);
 	existe = false;
 	return existe;
 }
-////--------------------------VALIDACIONES FIN
-//
-//
-////--------------------------EJECUCIONES INICIO
-
 
 void mostrarMetadata(const char* tabla){ //ok
 	//obtener metadata
 	Metadata_Tabla *unMetadata=obtenerMetadata(tabla);
-//	t_config* unConfig=config_create(path_metadata);
-//	if(unConfig==NULL){
-//		fprintf(stderr,"No Existe el archivo %s \n",path_metadata);
-//		return;
-//	}
-//	else {
-//		unMetadata.COMPACTION_TIME=config_get_int_value(unConfig,"COMPACTION_TIME");
-//		unMetadata.CONSISTENCY=strdup(config_get_string_value(unConfig,"CONSISTENCY"));
-//		unMetadata.PARTITIONS=config_get_int_value(unConfig,"PARTITIONS");
-//	}
-//	config_destroy(unConfig);
-	//mostrar
-	printf("COMPACTION_TIME = %d  \n",unMetadata->COMPACTION_TIME);
-	printf("CONSISTENCY= %s \n",unMetadata->COMPACTION_TIME);
+	printf("COMPACTION_TIME = %ul  \n",unMetadata->COMPACTION_TIME);
+	printf("CONSISTENCY= %s \n",unMetadata->CONSISTENCY);
 	printf("PARTITIONS= %d \n",unMetadata->PARTITIONS);
-
 	free(unMetadata);
 
 }
 
 
 
-}
 //void metadata_destroy(Metadata_Tabla* unaMetadata){
 //	free(unaMetadata->COMPACTION_TIME);
 //	free(unaMetadata->CONSISTENCY);

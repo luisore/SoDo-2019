@@ -28,7 +28,8 @@ int main(void) {
 	crear_estructuras();
 	leer_tablas();
 	imprimir_configuracion();
-
+	//creacionDeArchivoBitmap(path_bitmap(),lfsmetadata.cantidadDeBloques);
+	//crearBitmap();
 
 	pthread_create(&consola,NULL,lfs_consola,NULL);
 	pthread_create(&dump,NULL,dump_proceso,NULL);
@@ -54,23 +55,31 @@ int main(void) {
 //	return encontrada;
 //}
 
-void dump_proceso(){
+void *dump_proceso(){
 	while(1){
 		usleep(lfs.tiempoDump*1000);
 		log_info(logger,"iniciando proceso dump");
 		for(int i=0;i<list_size(memtable);i++){
 			printf("cantidad en la memtable %d: " ,list_size(memtable));
 			Insert *insert =list_get(memtable,i);
+				printf("tabla %s: \n" ,insert->nombreDeLaTabla);
+				printf("compactacion largo %d: \n" ,insert->cantParticionesCompactacion);
+				printf("particiones %d: \n" ,insert->cantParticionesTemporales);
+				printf("registros %d: \n" ,sizeof(insert->registros));
 			for(int k=0;k<list_size(insert->registros);k++){
 				RegistroLinea *registro =list_get(insert->registros,k);
-				printf("key %d: " ,registro->key);
-				printf("value largo %d: " ,strlen(registro->value));
+				//printf("key %d: " ,registro->key);
+				//printf("value largo %d: " ,strlen(registro->value));
+				//guardar_en_temporal(insert,registro);
+				insertarRegistrosEnParticionTemporal(insert->nombreDeLaTabla,registro, insert->cantParticionesTemporales);
+				insert->cantParticionesTemporales++;
 			}
 		}
 	}
+	return NULL;
 }
 
-void lfs_consola(){
+void *lfs_consola(){
 	while(1){
 		char* linea = readline("LFS@_consola -> ");
 
@@ -79,12 +88,13 @@ void lfs_consola(){
 //
 
 		printf(" se leyo la  la sentencia \"%s\" LQL\n", linea);
-		printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
-		printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
-		printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
-		printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
+		//printf("nombre de tabla = %s\n", (parametros_lql_leidos->parametros)[0]);
+		//printf("nombre tipo de consistencia = %s\n", (parametros_lql_leidos->parametros)[1]);
+		//printf("nombre de particiones  = %s \n", (parametros_lql_leidos->parametros)[2]);
+		//printf("tiempo de compactacion = %s \n ", (parametros_lql_leidos->parametros)[3]);
 		free(linea);
 	}
+	return NULL;
 }
 void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 	switch (parametros_de_linea_lql->nombre_operacion) {
@@ -168,17 +178,15 @@ void crear_estructuras(){
 */
 }
 
+
 void cargar_metadata(){
 
-	char *direccionArchivoMedata=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("Tables") +strlen("/Metadata/Metadata.bin"));;
-	strcpy(direccionArchivoMedata,lfs.puntoDeMontaje);
-	string_append(&direccionArchivoMedata,"Tables");
+	char *direccionArchivoMedata = path_tables();
 	string_append(&direccionArchivoMedata,"/Metadata/Metadata.bin");
 	printf("direccionArchivoMedata %s \n",direccionArchivoMedata);
 	if (validarArchivoConfig(direccionArchivoMedata)<0){
 		//log_error(log_lfs,"No se encontro en el file system el archivo metadata");
 	}
-
 	leerMetaData();
 }
 
@@ -207,9 +215,6 @@ void creacionDeBloques(){
 	strcpy(path_bloque,lfs.puntoDeMontaje);
 	strcat(path_bloque,"Bloques/");
 
-
-
-
 	for (int numeroDeBloque = 0; numeroDeBloque < lfsmetadata.cantidadDeBloques; numeroDeBloque++) {
 		//sprintf(path_bloque,"/%d.bin",numeroDeBloque);
 		char *bloque=string_itoa(numeroDeBloque);
@@ -219,7 +224,7 @@ void creacionDeBloques(){
 		strcat(numberBloque,bloque);
 		strcat(numberBloque,".bin");
 		//strcat(numberBloque,"\"");
-		printf("path %s:\n",numberBloque);
+		//printf("path %s:\n",numberBloque);
 		FILE* particion = fopen(numberBloque,"w");
 		fclose(particion);
 	}
@@ -227,9 +232,9 @@ void creacionDeBloques(){
 }
 
 char *path_bitmap(){
-	char *direccionArchivoBitMap=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("/Metadata/Bitmap.bin"));
+	char *direccionArchivoBitMap=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("Tables/Metadata/Bitmap.bin"));
 	strcpy(direccionArchivoBitMap,lfs.puntoDeMontaje);
-	string_append(&direccionArchivoBitMap,"/Metadata/Bitmap.bin");
+	string_append(&direccionArchivoBitMap,"Tables/Metadata/Bitmap.bin");
 	//puts(direccionArchivoBitMap);
 	return direccionArchivoBitMap;
 
@@ -264,6 +269,15 @@ void leer_tablas(){
         			  agregar_tabla->registros = list_create();
         			  list_add(memtable,agregar_tabla);
         			  log_info(logger, "Agregado a la memtabla: %s",dit->d_name );
+
+        			  //struct_create registro_compactacion = malloc(sizeof(struct_create));
+        			  Metadata_Tabla *unMetadata=obtenerMetadata(dit->d_name);
+        			  //registro_compactacion.nombreTabla = strdup(dit->d_name);
+        			  //registro_compactacion.numeroParticiones= unMetadata->PARTITIONS;
+					  //registro_compactacion.tiempoCompactacion =unMetadata->COMPACTION_TIME;
+					  crearHiloCompactacion(dit->d_name,unMetadata->PARTITIONS,unMetadata->COMPACTION_TIME);
+        			  //compactacion(registro_compactacion);
+        			  free(unMetadata);
         		}
 
         	}

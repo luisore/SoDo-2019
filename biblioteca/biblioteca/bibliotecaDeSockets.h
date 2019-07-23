@@ -42,9 +42,9 @@ enum resultado{
 	ERROR,
 };
 enum cosistencia{
-	SH,
-	S1,
-	S2,
+	SC,
+	EC,
+	SHC,
 };
 
 

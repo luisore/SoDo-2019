@@ -37,11 +37,12 @@ char *path_bitmap();
 void creacionDeBloques();
 int leerMetaData();
 void cargar_metadata();
-void dump_proceso();
+void *dump_proceso();
 int  LFS_FD;
 
-void lfs_consola();
+void *lfs_consola();
 void leer_tablas();
+void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql);
 
 
 #endif /* FILE_SYSTEM_H_ */

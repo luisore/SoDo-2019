@@ -30,7 +30,7 @@ typedef struct {
 
 struct_operacion* parsear_linea(char[]);
 void free_operacion(struct_operacion* operacion);
-
+int convertinAtipoConsistencia(char *tipoConsistencia);
 
 //otras
 void free_list_of_strings(char** list_of_strings);

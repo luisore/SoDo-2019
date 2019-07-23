@@ -207,4 +207,19 @@ void* estructura_registro (struct_operacion* operacion,int tipo_operacion){
 }
 
 
+int convertinAtipoConsistencia(char *tipoConsistencia){
+	if(!strncmp(tipoConsistencia, "SHC", 3)){
+		return SHC;
+	}
+	else if(!strncmp(tipoConsistencia, "EC", 3)){
+		return EC;
+	}
+	else if(!strncmp(tipoConsistencia, "SC", 3)){
+		return SC;
+	}
+	else {
+		return -1;
+	}
+}
+
 

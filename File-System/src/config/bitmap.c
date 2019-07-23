@@ -8,7 +8,54 @@
 
 
 
+
 //BITMAP begin
+
+int creacionDeArchivoBitmap(char *path,int cantidad){
+
+	printf("path bitmap %s: \n",path);
+	printf("cantidad %d: \n",cantidad);
+	int x = 0;
+    FILE *fh = fopen (path, "wb");
+    for(int i=0;i<cantidad;i++){
+        if (fh != NULL) {
+                fwrite (&x, sizeof (x), 1, fh);
+        }
+    }
+    fclose(fh);
+    return 0;
+
+}
+
+void crearBitmap(){
+	//FILE* bloque_crear;
+	//bloque_crear->_IO_buf_base
+	char *direccionArchivoBitMap ;
+	direccionArchivoBitMap = path_bitmap();
+	int bitmap = open(direccionArchivoBitMap, O_RDWR);
+	struct stat mystat;
+	//puts(bitmap);
+	if (fstat(bitmap, &mystat) < 0) {
+	    //printf("Error al establecer fstat\n");
+	    close(bitmap);
+	}
+    char *bmap ;
+	bmap = mmap(NULL, mystat.st_size, PROT_WRITE | PROT_READ, MAP_SHARED, bitmap, 0);
+
+	if (bmap == MAP_FAILED) {
+			//printf("Error al mapear a memoria: %s\n", strerror(errno));
+
+	}
+
+	bitarray = bitarray_create_with_mode(bmap, metadata.cantidad_bloques/8, MSB_FIRST);
+	size_t	cantidadDebits= bitarray_get_max_bit (bitarray);
+	for (int i=0;i<cantidadDebits;i++){
+		//printf("posicion %d valor %d:\n",i,bitarray_test_bit(bitarray,i));
+	}
+	//return bitarray;
+
+}
+
 void cargar_configuracion_bitmap(){
 	bloqueActual_int=0;
 	bitarray_=NULL;

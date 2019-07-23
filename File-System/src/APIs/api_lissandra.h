@@ -27,6 +27,7 @@
 #include <commons/txt.h>
 #include <commons/string.h>
 #include <math.h>
+#include "../../../biblioteca/biblioteca/parser.h"
 
 typedef struct {
 	int cantParticionesTemporales;
@@ -57,6 +58,7 @@ void describe1();
 void describe2(const char* nombre_de_tabla);
 void drop(const char* nombre_de_tabla);
 
+int buscarParticion(char *tabla , unsigned int key);
 //misma funcion de antes pero que solo reciben strings
 void lfs_create(const char* nombre_de_tabla,const char* tipo_consistencia,const char*  numero_de_particiones,const char* tiempo_de_compactacion );
 
@@ -71,7 +73,9 @@ typedef struct {
 
 //auxiliares
 char archivo_path(const char rutaMontaje, const char *rutaArchivo);
-
+void guardar_en_temporal(Insert *insert,RegistroLinea *registro);
+char *path_tables();
+char *path_bloques();
 void mostrarMetadata(const char* nombreTabla);
 void crearMetadata_v2(const char* pathTabla,const char* tipoConsistencia, unsigned int numeroParticiones,
 		unsigned int tiempoCompactacion);
@@ -93,7 +97,7 @@ int grabarRegistroABloques(RegistroLinea* unRegistro);
 void escribirRegistroABloque(const char * bloque_path,RegistroLinea* unRegistro);
 int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_particiones);
 char* obtenerPathDelNumeroDeBloque(int numeroDeBloque);
-char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal);
+char* obtenerPathDeParticionTemporal(int numeroDeParticionTemporal,char *tabla);
 Insert* buscarTablaEnLaMemtable(const char * tabla);
 
 #endif /* APIS_API_LISSANDRA_H_ */

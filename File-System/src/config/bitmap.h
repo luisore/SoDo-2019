@@ -13,18 +13,27 @@
 #include <commons/txt.h>
 #include <stdbool.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h> /* mmap() is defined in this header */
+#include <fcntl.h>
+#include <commons/bitarray.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include "metadata.h"
 
 
 
 //BITMAP begin
+t_bitarray *bitarray;
 char* bloqueActual_path;//=NULL;
  int bloqueActual_int;//=0;
 char* bitmap_path_directorio;
 FILE* bitmap_file;
 t_bitarray* bitarray_;
-
+void crearBitmap();
+int creacionDeArchivoBitmap(char *path,int cantidad);
 void setear_bloque_ocupado_en_posicion(off_t pos);
 bool testear_bloque_libre_en_posicion(int pos);
 //void setBloqueLleno();//agregar un 1 al bitmap.bin

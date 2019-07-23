@@ -83,48 +83,68 @@ void dumpear(){
 		}
 	}
 }
-void insertarRegistrosEnParticionTemporal(const char* tabla,  RegistroLinea* unRegistro,int cantidadDeParticionesTemporales){
-//	Metadata_Tabla* metadataDeTabla = obtenerMetadata(tabla);
-//	unsigned int particionCorrespondiente = particionSegunKey(unRegistro,metadataDeTabla->PARTITIONS);
-	char* path_de_particion_temporal=obtenerPathDeParticionTemporal(cantidadDeParticionesTemporales+1);
-	escribirAParticion(path_de_particion_temporal,unRegistro);
-	int bloqueGrabado=grabarRegistroABloques(unRegistro);
+void insertarRegistrosEnParticionTemporal(const char* tabla,  RegistroLinea* unRegistro,int cantidadDeParticiones){
+	Metadata_Tabla* metadataDeTabla = obtenerMetadata(tabla);
+	unsigned int particionCorrespondiente = particionSegunKey(unRegistro,metadataDeTabla->PARTITIONS);
+	//char* path_de_particion_temporal=obtenerPathDeParticionTemporal(particionCorrespondiente,tabla);
+	char *path_de_particion_temporal = malloc(strlen(lfs.puntoDeMontaje)+strlen("Tables/")+strlen(tabla)+strlen("/")+strlen("1")+strlen(".bin"));
+	strcpy(path_de_particion_temporal,lfs.puntoDeMontaje);
+	strcat(path_de_particion_temporal,"Tables/");
+	strcat(path_de_particion_temporal,tabla);
+	strcat(path_de_particion_temporal,"/");
+	strcat(path_de_particion_temporal,"1.bin");
+	//strcat(path_de_particion_temporal,".partition");
+	printf("particiones %s:\n",path_de_particion_temporal);
+	//strcat(path_bloque,"Bloques/");
+	t_config * unaconfig= config_create(path_de_particion_temporal);
+	int size=config_get_int_value(unaconfig,"SIZE");
+	char *actualizar = "20";
+	config_set_value(unaconfig, "SIZE",actualizar);
+	config_save(unaconfig);
+	config_destroy(unaconfig);
+
+	//escribirAParticion(path_de_particion_temporal,unRegistro);
+	//int bloqueGrabado=grabarRegistroABloques(unRegistro);
 //	free(metadataDeTabla);
 }
 void escribirAParticion(const char* path_particion,RegistroLinea* registro){
 	size_t longitud_usada=longitudDeRegistroAlFileSystem(registro);
-
-
-	t_config* config_particion = config_create(path_particion);
-	if(config_particion==NULL){//hay que crear la particion
-		FILE* part=fopen(path_particion,"w+r");
-		fprintf(part,"SIZE=  \n");
-		fprintf(part,"BLOCKS=  \n");
-		fclose(part);
+	if(validarArchivoConfig(path_particion)!=-1 ){
+		printf("existe el archivo");
 	}
-	config_set_value(config_particion,"SIZE",string_itoa(longitud_usada));
-//	config_set_value(config_particion,"BLOCKS",string_itoa(longitud_usada));//falta grabar este campo , ejemplo grabar [1,2,3,4] por ejemplo
-
-	config_destroy(config_particion);
+	else{
+		printf("no existe el archivo");
+	}
+	char *path="/home/utnso/LISSANDRA_FS/Tables/materias/Metadata.metadata";
+	t_config* particion = config_create(path_particion);
+	//config_set_value(particion,"PARTITIONS",string_itoa(longitud_usada));
+	//config_set_value(config_particion,"SPARTITIONS",string_itoa(longitud_usada));
+	config_save(particion);
+	config_destroy(particion);
 }
+//VER longitud
 size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro){
 	size_t longitud;
-	char* aux=malloc(sizeof(unRegistro->timestamp)+sizeof(unRegistro->key)+strlen(unRegistro->value)+1000);
-	sprintf(aux,"%d;%d;%s\n",unRegistro->timestamp,unRegistro->key,unRegistro->value);
-	longitud=strlen(aux);
-	free(aux);
+	longitud = sizeof(unRegistro->timestamp)+sizeof(unRegistro->key)+strlen(unRegistro->value)+3;
 	return longitud;
 }
 char* registroLineaAString(RegistroLinea* registro){
 	char* registro_string=malloc(longitudDeRegistroAlFileSystem(registro));
-	sprintf(registro_string,"%d;%d;%s\n",registro->timestamp,registro->key,registro->value);
+	//sprintf(registro_string,"%d;%d;%s\n",registro->timestamp,registro->key,registro->value);
 	return registro_string;
 }
 
-char* obtenerPathDeParticionTemporal(numeroDeParticionTemporal){
-	char* pathDeParticion=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Tables/")+40);
-	sprintf(pathDeParticion,"%sTables/%d.tmp");
-	return pathDeParticion;
+char* obtenerPathDeParticionTemporal(int particion,char *tabla){
+	char* pathDeParticionTempora=malloc(strlen(lfs.puntoDeMontaje)+strlen("/Tables/")+strlen(tabla));
+	strcpy(pathDeParticionTempora,lfs.puntoDeMontaje);
+	strcat(pathDeParticionTempora,"Tables/");
+	strcat(pathDeParticionTempora,tabla);
+	strcat(pathDeParticionTempora,"/");
+	strcat(pathDeParticionTempora,string_itoa(particion));
+	strcat(pathDeParticionTempora,".bin");
+	printf("path particion temporal %s:\n",pathDeParticionTempora);
+	//sprintf(pathDeParticion,"%sTables/%d.tmp");
+	return pathDeParticionTempora;
 }
 Metadata_Tabla* obtenerMetadata(const char* nombreTabla){
 	Metadata_Tabla *unMetadata=malloc(sizeof(Metadata_Tabla));
@@ -148,7 +168,11 @@ Metadata_Tabla* obtenerMetadata(const char* nombreTabla){
 int  grabarRegistroABloques(RegistroLinea* unRegistro){
 	int posicionBloqueLibre = getBloqueLibre_int();
 	char* bloqueLibre_path=obtenerPathDelNumeroDeBloque(posicionBloqueLibre);
-	escribirRegistroABloque(bloqueLibre_path,unRegistro);
+	//escribirRegistroABloque(bloqueLibre_path,unRegistro);
+
+	t_config *config=config_create(bloqueLibre_path);
+	int size=config_get_int_value(config,"SIZE");
+	config_destroy(config);
 	free(bloqueLibre_path);
 	return posicionBloqueLibre;
 }
@@ -169,8 +193,8 @@ int particionSegunKey(RegistroLinea* unRegistro,unsigned int cantidad_de_partici
 void create(const char* nombre_de_tabla,const char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion ){
 	puts("crear tabla");
 	if(yaExisteTabla(nombre_de_tabla)){
-
 		puts("tabla existente");
+		crearParticiones(nombre_de_tabla,numero_de_particiones);
 	}
 	else{
 		crearTabla(nombre_de_tabla);
@@ -211,11 +235,26 @@ void crearMetadata_v2(const char* tabla,const char* tipoConsistencia, unsigned i
 	sprintf(path_metadata,"%s/Metadata.metadata",aux_path);
 	free(aux_path);
 	FILE* unArchivo=fopen(path_metadata,"w+r");
-	free(path_metadata);
+	fclose(unArchivo);
+	t_config *archivo_MetaData=config_create(path_metadata);
+	//config_get_set_value(archivo_MetaData,"BLOCKS");
+	char *value ="0";
+	config_set_value(archivo_MetaData, "CONSISTENCY",tipoConsistencia);
+	config_set_value(archivo_MetaData, "PARTITIONS",string_itoa(numeroParticiones));
+	config_set_value(archivo_MetaData, "COMPACTION_TIME",string_itoa(tiempoCompactacion));
+	config_save(archivo_MetaData);
+	config_destroy(archivo_MetaData);
+	//lfsmetadata.magicNumber=string_duplicate(config_get_string_value(archivo_MetaData,"MAGIC_NUMBER"));
+	//lfsmetadata.tamanioBloque=config_get_int_value(archivo_MetaData,"BLOCK_SIZE");
+
+	/*free(path_metadata);
 	fprintf(unArchivo,"CONSISTENCY=%s \n",tipoConsistencia);
 	fprintf(unArchivo,"PARTITIONS=%d \n",numeroParticiones );
 	fprintf(unArchivo,"COMPACTION_TIME=%d ",tiempoCompactacion);
-	fclose(unArchivo);
+	*/
+
+
+
 //	CONSISTENCY=SC
 //	PARTITIONS=3
 //	COMPACTION_TIME=60000
@@ -224,16 +263,84 @@ void crearParticiones(const char* tabla, unsigned int numeroDeParticiones){
 	char* path_tabla=obtenerPathDeTabla(tabla);
 	char* path_particion=malloc(strlen(path_tabla)+15);
 	for (int numeroDeParticion = 0; numeroDeParticion < numeroDeParticiones; numeroDeParticion++) {
-		sprintf(path_particion,"%s/%d.partition",path_tabla,numeroDeParticion);
+		sprintf(path_particion,"%s/%d.bin",path_tabla,numeroDeParticion);
 		FILE* particion = fopen(path_particion,"w+r");
-		fprintf(particion,"SIZE = 0 \n");
-		fprintf(particion,"BLOCKS= [] ");
 		fclose(particion);
+		t_config *archivo = config_create(path_particion);
+		char *size=string_itoa(0);
+		config_set_value(archivo, "SIZE",size);
+		config_save(archivo);
+		config_destroy(archivo);
+		//fprintf(particion,"SIZE=0\n");
+		//fprintf(particion,"BLOCKS=[]");
+
 	}
 	free(path_tabla);
 	free(path_particion);
 }
+char *path_tables(){
+	char *direccionArchivoMedata=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("Tables") +strlen("/Metadata/Metadata.bin"));;
+	strcpy(direccionArchivoMedata,lfs.puntoDeMontaje);
+	string_append(&direccionArchivoMedata,"Tables");
+	return direccionArchivoMedata;
+}
 
+char *path_bloques(){
+	char *direccionArchivoMedata=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("Bloques/"));;
+	strcpy(direccionArchivoMedata,lfs.puntoDeMontaje);
+	string_append(&direccionArchivoMedata,"Bloques/");
+	return direccionArchivoMedata;
+}
+
+
+void guardar_en_temporal(Insert *insert,RegistroLinea *registro){
+	char *path_tabla_particion = path_tables();
+	string_append(&path_tabla_particion,"/");
+	string_append(&path_tabla_particion,insert->nombreDeLaTabla);
+	string_append(&path_tabla_particion,"/");
+	string_append(&path_tabla_particion,"0.partition");
+
+	printf("path para guardar en particio %s:\n",path_tabla_particion);
+
+	char *path_tabla_bloque = path_bloques();
+	string_append(&path_tabla_bloque,"0.bin");
+
+	printf("path para guardar en bloque %s:\n",path_tabla_bloque);
+
+
+	char *guardar = malloc(sizeof(registro->timestamp)+strlen(";")+sizeof(registro->key)+strlen(";")+sizeof(registro->timestamp));
+	int offset=0;
+	//offset += sizeof(registro->timestamp);
+	//offset += strlen(registro->value);
+	//memcpy(guardar,registro->value,strlen(registro->value));
+	offset = offset + strlen(";");
+	memcpy(guardar+offset,";",strlen(";"));
+	//offset += sizeof(registro->key);
+	//memcpy(guardar+offset,&registro->key,of(registro->key));
+	offset =offset + strlen(";");
+	memcpy(guardar+offset,";",strlen(";"));
+
+	offset =offset +  sizeof(registro->value)+1;
+	//registro->value[strlen(registro->value)]='\0';
+	memcpy(guardar+offset,registro->value,strlen(registro->value));
+	offset =offset + strlen("\n");
+	memcpy(guardar+offset,"\n",strlen("\n"));
+
+	FILE* particion = fopen(path_tabla_bloque,"wr");
+	fwrite(guardar , 1 , sizeof(guardar) , particion );
+	//fwrite(particion,guardar);
+	int numero_particion  = buscarParticion(insert->nombreDeLaTabla,registro->key);
+
+	fclose(particion);
+}
+
+int buscarParticion(char *tabla , unsigned int key)
+{
+	Metadata_Tabla* tabla_metadata =obtenerMetadata(tabla);
+	int particion ;
+	particion = key % tabla_metadata->PARTITIONS;
+	return particion;
+}
 
 
 void describe1();
@@ -343,6 +450,7 @@ void mostrarMetadata(const char* tabla){ //ok
 	free(unMetadata);
 
 }
+
 
 
 }

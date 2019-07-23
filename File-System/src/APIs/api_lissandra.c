@@ -278,6 +278,14 @@ void crearParticiones(const char* tabla, unsigned int numeroDeParticiones){
 	}
 	free(path_tabla);
 	free(path_particion);
+	pthread_mutex_lock (&mMemtable);
+	Insert *agregar_tabla = malloc(sizeof(Insert));
+	agregar_tabla->cantParticionesCompactacion = 0;
+	agregar_tabla->cantParticionesTemporales = 0;
+	agregar_tabla->nombreDeLaTabla = strdup(tabla);
+	agregar_tabla->registros = list_create();
+	list_add(memtable,agregar_tabla);
+	pthread_mutex_unlock (&mMemtable);
 }
 char *path_tables(){
 	char *direccionArchivoMedata=(char *) malloc(1 + strlen(lfs.puntoDeMontaje) + strlen("Tables") +strlen("/Metadata/Metadata.bin"));;
@@ -346,8 +354,32 @@ int buscarParticion(char *tabla , unsigned int key)
 
 void describe1();
 void describe2(const char* nombre_de_tabla);
-void drop(const char* nombre_de_tabla){
+void drop(char* nombre_de_tabla){
 
+	Insert* unInsert = buscarTablaEnLaMemtable(nombre_de_tabla);
+	if(unInsert==NULL){
+		log_error(logger,"no existe la tabla");
+		return;
+	}
+
+	bool _eliminarElemento(Insert* insert) {
+	                    return string_equals_ignore_case(insert->nombreDeLaTabla, unInsert->nombreDeLaTabla);
+	}
+
+	Insert* remover =list_remove_by_condition(memtable, (void*) _eliminarElemento);
+	free(remover);
+
+	pthread_mutex_lock (&mMemtable);
+	for(int i=0;i<list_size(memtable);i++){
+		Insert* valor_eliminar =list_get(memtable,i);
+		if(!strcmp(valor_eliminar->nombreDeLaTabla,unInsert->nombreDeLaTabla)){
+			list_remove(memtable, i);
+			free(valor_eliminar);
+		}
+	}
+	log_info(logger,"ya no existe en la memtable");
+	printf("cantidad memtable %d\n",list_size(memtable));
+	pthread_mutex_unlock (&mMemtable);
 }
 
 bool  yaExisteTabla(const char* nombre_de_tabla){
@@ -382,12 +414,14 @@ void aplicar_retardo(){
 
 void crearHiloCompactacion(char *nombre_de_tabla,int numero_de_particiones,int tiempo_de_compactacion){
 	pthread_t hilo_compactacion;
-	struct_create *registro_create = malloc(sizeof(registro_create));
+	struct_create *registro_create = malloc(sizeof(struct_create));
 	registro_create->nombreTabla = strdup(nombre_de_tabla);
 	registro_create->tiempoCompactacion = tiempo_de_compactacion;
 	registro_create->numeroParticiones =  numero_de_particiones;
+
 	pthread_create (&hilo_compactacion, NULL, compactacion, (void*)registro_create) ;
 	pthread_detach(hilo_compactacion);
+
 }
 
 void* compactacion(void *registro_create){
@@ -415,10 +449,11 @@ void* compactacion(void *registro_create){
 		}
 		log_info(logger, "Compactacion Terminada de la Tabla:%s",create_compactacion->nombreTabla );
 
-		printf("cantidad de particiones %d:",list_size(lista));
+		printf("cantidad de particiones %d de la tabla: %s \n:",list_size(lista),unInsert->nombreDeLaTabla);
 	}
-	//Ver
-	//list_destroy_and_destroy_elements();
+	log_error(logger, "La tabla %s ya no existe",create_compactacion->nombreTabla );
+	//free(create_compactacion->nombreTabla);
+	free(create_compactacion);
 	return NULL;
 
 }

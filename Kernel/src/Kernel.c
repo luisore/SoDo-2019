@@ -14,6 +14,8 @@ int main(void) {
 	/*inicio las colas de metricas*/
 	metricas_iniciar_colas();
 
+
+
 	/* Creo el hilo consola */
 	pthread_t thread_consola;
 	if (pthread_create(&thread_consola, NULL, (void*) consola_iniciar, NULL)) {
@@ -185,16 +187,17 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 
 		serializarYEnviar(memoria_fd,SELECT,crear_select(nro_key,(operacion->parametros)[0]));
 
-
+		log_info(kernel_log,"SELECT enviado ");
 
 
 		int* resultado = recibirYDeserializarEntero(memoria_fd);
 
 		struct_insert* select_resultado;
+
 		switch (*resultado) {
 			case SELECT_RESULTADO:
-				select_resultado = recibirYDeserializar(memoria_fd,SELECT_RESULTADO);
-
+				//select_resultado = recibirYDeserializar(memoria_fd,SELECT_RESULTADO);
+				log_info(kernel_log,"Select en: ");
 				break;
 			default:
 				break;
@@ -229,7 +232,9 @@ bool kernel_ejecutar(struct_operacion* operacion) {
 		memoria = criterio_obtener_memoria((operacion->parametros)[1],	metadata->CONSISTENCY);
 
 
+		serializarYEnviar(memoria,INSERT,estructura_registro(operacion,INSERT));
 
+		log_info(kernel_log,"SELECT enviado ");
 
 
 		//agrego la estadistica criterio y operacion

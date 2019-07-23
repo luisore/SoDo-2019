@@ -30,6 +30,7 @@
 #include <math.h>
 #include "../../../biblioteca/biblioteca/parser.h"
 
+pthread_mutex_t mMemtable;
 
 typedef struct {
 	int cantParticionesTemporales;
@@ -61,7 +62,7 @@ void insert_2(const char* nombre_de_tabla,unsigned int key , const char* value, 
 void create(char* nombre_de_tabla,char* tipo_consistencia,unsigned int numero_de_particiones,unsigned int tiempo_de_compactacion );
 void describe1();
 void describe2(const char* nombre_de_tabla);
-void drop(const char* nombre_de_tabla);
+void drop(char* nombre_de_tabla);
 
 int buscarParticion(char *tabla , unsigned int key);
 //misma funcion de antes pero que solo reciben strings

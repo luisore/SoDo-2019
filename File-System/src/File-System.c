@@ -15,6 +15,7 @@
 pthread_t consola,dump;//,compactador;
 
 int main(void) {
+	pthread_mutex_init (&mMemtable, NULL);
 	puts("... INICIA LFS ...");
 
 	//inicio log
@@ -58,7 +59,9 @@ int main(void) {
 void *dump_proceso(){
 	while(1){
 		usleep(lfs.tiempoDump*1000);
+		/*
 		log_info(logger,"iniciando proceso dump");
+		pthread_mutex_lock (&mMemtable);
 		for(int i=0;i<list_size(memtable);i++){
 			printf("cantidad en la memtable %d: " ,list_size(memtable));
 			Insert *insert =list_get(memtable,i);
@@ -75,6 +78,8 @@ void *dump_proceso(){
 				insert->cantParticionesTemporales++;
 			}
 		}
+		pthread_mutex_unlock (&mMemtable);
+		*/
 	}
 	return NULL;
 }
@@ -116,9 +121,12 @@ void ejecutar_linea_lql(struct_operacion* parametros_de_linea_lql){
 //			describe1();
 //			describe2();
 			break;
-		case API_DROP:
-//			drop();
+		case API_DROP:{
+			log_info(logger, "borrarando tabla :%s",(parametros_de_linea_lql->parametros)[0]);
+			drop((parametros_de_linea_lql->parametros)[0]);
 			break;
+		}
+
 		default:
 			log_error(logger,"linea LQL leida erronea \n");
 			break;
@@ -260,7 +268,7 @@ void leer_tablas(){
         	if (dit->d_type &  DT_DIR )
         	{
         		if(strcmp(dit->d_name,"Metadata")){
-        			  //printf("es un directorio %s \n",dit->d_name);
+        			  printf("es un directorio %s \n",dit->d_name);
         			  log_info(logger, "directorio ya creado y agregado a la memtabla: %s",dit->d_name );
         			  Insert *agregar_tabla = malloc(sizeof(Insert));
         			  agregar_tabla->cantParticionesCompactacion = 0;
@@ -270,14 +278,16 @@ void leer_tablas(){
         			  list_add(memtable,agregar_tabla);
         			  log_info(logger, "Agregado a la memtabla: %s",dit->d_name );
 
-        			  //struct_create registro_compactacion = malloc(sizeof(struct_create));
+        			  struct_create *registro_compactacion = malloc(sizeof(struct_create));
         			  Metadata_Tabla *unMetadata=obtenerMetadata(dit->d_name);
-        			  //registro_compactacion.nombreTabla = strdup(dit->d_name);
-        			  //registro_compactacion.numeroParticiones= unMetadata->PARTITIONS;
-					  //registro_compactacion.tiempoCompactacion =unMetadata->COMPACTION_TIME;
+        			  registro_compactacion->nombreTabla = strdup(dit->d_name);
+        			  registro_compactacion->numeroParticiones= unMetadata->PARTITIONS;
+					  registro_compactacion->tiempoCompactacion =unMetadata->COMPACTION_TIME;
+
 					  crearHiloCompactacion(dit->d_name,unMetadata->PARTITIONS,unMetadata->COMPACTION_TIME);
         			  //compactacion(registro_compactacion);
-        			  free(unMetadata);
+        			  //free(unMetadata);
+
         		}
 
         	}

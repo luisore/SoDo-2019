@@ -16,6 +16,7 @@ pthread_t consola,dump;//,compactador;
 
 int main(void) {
 	pthread_mutex_init (&mMemtable, NULL);
+	pthread_mutex_init (&mEjecucion, NULL);
 	puts("... INICIA LFS ...");
 
 	//inicio log
@@ -25,6 +26,7 @@ int main(void) {
 	log_info(logger,"se cargo LFS.log \n");
 
 	memtable=list_create();
+	lista_ejecucion = list_create();
 
 	crear_estructuras();
 	leer_tablas();
@@ -59,7 +61,6 @@ int main(void) {
 void *dump_proceso(){
 	while(1){
 		usleep(lfs.tiempoDump*1000);
-		/*
 		log_info(logger,"iniciando proceso dump");
 		pthread_mutex_lock (&mMemtable);
 		for(int i=0;i<list_size(memtable);i++){
@@ -78,8 +79,9 @@ void *dump_proceso(){
 				insert->cantParticionesTemporales++;
 			}
 		}
+		log_info(logger,"Terminado proceso Dump");
 		pthread_mutex_unlock (&mMemtable);
-		*/
+
 	}
 	return NULL;
 }
@@ -269,13 +271,17 @@ void leer_tablas(){
         	{
         		if(strcmp(dit->d_name,"Metadata")){
         			  printf("es un directorio %s \n",dit->d_name);
+        			  crear_estructura_ejecucion(dit->d_name);
         			  log_info(logger, "directorio ya creado y agregado a la memtabla: %s",dit->d_name );
         			  Insert *agregar_tabla = malloc(sizeof(Insert));
         			  agregar_tabla->cantParticionesCompactacion = 0;
         			  agregar_tabla->cantParticionesTemporales = 0;
         			  agregar_tabla->nombreDeLaTabla = strdup(dit->d_name);
         			  agregar_tabla->registros = list_create();
+        			  pthread_mutex_lock (&mMemtable);
         			  list_add(memtable,agregar_tabla);
+        			  pthread_mutex_unlock (&mMemtable);
+
         			  log_info(logger, "Agregado a la memtabla: %s",dit->d_name );
 
         			  struct_create *registro_compactacion = malloc(sizeof(struct_create));
@@ -283,7 +289,6 @@ void leer_tablas(){
         			  registro_compactacion->nombreTabla = strdup(dit->d_name);
         			  registro_compactacion->numeroParticiones= unMetadata->PARTITIONS;
 					  registro_compactacion->tiempoCompactacion =unMetadata->COMPACTION_TIME;
-
 					  crearHiloCompactacion(dit->d_name,unMetadata->PARTITIONS,unMetadata->COMPACTION_TIME);
         			  //compactacion(registro_compactacion);
         			  //free(unMetadata);

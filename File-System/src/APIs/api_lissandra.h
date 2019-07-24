@@ -31,6 +31,7 @@
 #include "../../../biblioteca/biblioteca/parser.h"
 
 pthread_mutex_t mMemtable;
+pthread_mutex_t mEjecucion;
 
 typedef struct {
 	int cantParticionesTemporales;
@@ -50,7 +51,13 @@ typedef struct {
 		t_list* lista_registro_compactacion;
 }registroCompactacion;
 
-t_list * memtable;//lista del tipo Insert , el select chequea esto tambien
+typedef struct {
+		char* nombre_tabla;
+		pthread_mutex_t mtabla;
+}ejecucion;
+
+t_list * memtable; //lista del tipo Insert , el select chequea esto tambien
+t_list *lista_ejecucion ;
 
 //char* aux_tabla_para_la_memtable;
 
@@ -63,12 +70,12 @@ void create(char* nombre_de_tabla,char* tipo_consistencia,unsigned int numero_de
 void describe1();
 void describe2(const char* nombre_de_tabla);
 void drop(char* nombre_de_tabla);
-
+void borrar_estructura(char *nombreTabla);
 int buscarParticion(char *tabla , unsigned int key);
 //misma funcion de antes pero que solo reciben strings
 void lfs_create(const char* nombre_de_tabla,const char* tipo_consistencia,const char*  numero_de_particiones,const char* tiempo_de_compactacion );
 
-
+void crear_estructura_ejecucion(char *nombreTabla);
 bool yaExisteTabla(const char* nombre_de_tabla);
 void *compactacion(void *registro_create);
 void crearHiloCompactacion(char *nombre_de_tabla,int numero_de_particiones,int tiempo_de_compactacion);

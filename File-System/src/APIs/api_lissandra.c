@@ -355,10 +355,11 @@ int buscarParticion(char *tabla , unsigned int key)
 void describe1();
 void describe2(const char* nombre_de_tabla);
 void drop(char* nombre_de_tabla){
-
+	pthread_mutex_lock (&mMemtable);
 	Insert* unInsert = buscarTablaEnLaMemtable(nombre_de_tabla);
 	if(unInsert==NULL){
 		log_error(logger,"no existe la tabla");
+		pthread_mutex_unlock (&mMemtable);
 		return;
 	}
 
@@ -368,7 +369,26 @@ void drop(char* nombre_de_tabla){
 
 	Insert* remover =list_remove_by_condition(memtable, (void*) _eliminarElemento);
 	free(remover);
+	pthread_mutex_unlock(&mMemtable);
 
+	bool condicion_busqueda(ejecucion*	ejecutar) {
+	                    return string_equals_ignore_case(ejecutar->nombre_tabla, nombre_de_tabla);
+	}
+
+	pthread_mutex_lock (&mEjecucion);
+	ejecucion*	ejecutar=list_find(lista_ejecucion,condicion_busqueda);
+	if(ejecutar ==NULL){
+		printf("hay un grave porblema:\n");
+	}
+	log_info(logger, "se esta ejecutando tabla: %s",ejecutar->nombre_tabla );
+
+	pthread_mutex_lock (&ejecutar->mtabla);
+	log_info(logger, "Iniciando borrado de estructura  de Directorios para tabla: %s",ejecutar->nombre_tabla );
+	pthread_mutex_unlock (&ejecutar->mtabla);
+
+	pthread_mutex_unlock(&mEjecucion);
+
+	/*
 	pthread_mutex_lock (&mMemtable);
 	for(int i=0;i<list_size(memtable);i++){
 		Insert* valor_eliminar =list_get(memtable,i);
@@ -377,6 +397,7 @@ void drop(char* nombre_de_tabla){
 			free(valor_eliminar);
 		}
 	}
+	*/
 	log_info(logger,"ya no existe en la memtable");
 	printf("cantidad memtable %d\n",list_size(memtable));
 	pthread_mutex_unlock (&mMemtable);
@@ -432,12 +453,15 @@ void* compactacion(void *registro_create){
 		usleep(create_compactacion->tiempoCompactacion*1000);
 		log_info(logger, "Iniciando compactacion de la Tabla:%s",create_compactacion->nombreTabla );
 		//agregar mutex
-
+		pthread_mutex_lock (&mMemtable);
 		Insert* unInsert = buscarTablaEnLaMemtable(create_compactacion->nombreTabla);
 
 		//agregar mutex
-		if(unInsert==NULL)
-				break;
+		if(unInsert==NULL){
+			pthread_mutex_unlock (&mMemtable);
+			break;
+		}
+		pthread_mutex_unlock (&mMemtable);
 		log_info(logger, "La tabla aun existe , procediendo con la compactacion de la Tabla: %s",create_compactacion->nombreTabla );
 		t_list *lista;
 		lista=list_create();
@@ -450,11 +474,30 @@ void* compactacion(void *registro_create){
 		log_info(logger, "Compactacion Terminada de la Tabla:%s",create_compactacion->nombreTabla );
 
 		printf("cantidad de particiones %d de la tabla: %s \n:",list_size(lista),unInsert->nombreDeLaTabla);
+
 	}
 	log_error(logger, "La tabla %s ya no existe",create_compactacion->nombreTabla );
-	//free(create_compactacion->nombreTabla);
+	free(create_compactacion->nombreTabla);
 	free(create_compactacion);
 	return NULL;
+
+}
+
+void borrar_estructura(char *nombreTabla){
+
+}
+
+void crear_estructura_ejecucion(char *nombreTabla){
+
+	pthread_mutex_lock (&mEjecucion);
+	//char * tabla = string_duplicate(nombreTabla);
+	ejecucion *ejecutar = malloc(sizeof(ejecucion));
+	ejecutar->nombre_tabla = string_duplicate(nombreTabla);
+	pthread_mutex_init (&ejecutar->mtabla, NULL);
+
+	list_add(lista_ejecucion,ejecutar);
+	printf("cantidad de elementos: %d \n:",list_size(lista_ejecucion));
+	pthread_mutex_unlock (&mEjecucion);
 
 }
 

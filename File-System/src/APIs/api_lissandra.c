@@ -355,6 +355,7 @@ void describe1();
 void describe2(const char* nombre_de_tabla);
 void drop(char* nombre_de_tabla){
 	pthread_mutex_lock (&mMemtable);
+	//Busca el elemento
 	Insert* unInsert = buscarTablaEnLaMemtable(nombre_de_tabla);
 	if(unInsert==NULL){
 		log_error(logger,"no existe la tabla");
@@ -365,15 +366,26 @@ void drop(char* nombre_de_tabla){
 	bool _eliminarElemento(Insert* insert) {
 	                    return string_equals_ignore_case(insert->nombreDeLaTabla, unInsert->nombreDeLaTabla);
 	}
+	void _eliminarRegistro(RegistroLinea* registro) {
+		               free(registro->value);
+		               free(registro);
+	}
 
+	//Elimina de la memtable
 	Insert* remover =list_remove_by_condition(memtable, (void*) _eliminarElemento);
+	log_info(logger,"Eliminar de la Memtable: %s",remover->nombreDeLaTabla);
+	log_error(logger,"Eliminar de la Memtable: %d",list_size(remover->registros));
+	list_destroy_and_destroy_elements(remover->registros, (void*)_eliminarRegistro);
 	free(remover);
+
+
 	pthread_mutex_unlock(&mMemtable);
 
 	bool condicion_busqueda(ejecucion*	ejecutar) {
 	                    return string_equals_ignore_case(ejecutar->nombre_tabla, nombre_de_tabla);
 	}
 
+	//Busco los mutex de la tabla
 	pthread_mutex_lock (&mEjecucion);
 	ejecucion*	ejecutar=list_find(lista_ejecucion,condicion_busqueda);
 	if(ejecutar ==NULL){
@@ -381,23 +393,16 @@ void drop(char* nombre_de_tabla){
 	}
 	log_info(logger, "se esta ejecutando tabla: %s",ejecutar->nombre_tabla );
 
+	//Inicio de borrado de estructuras
 	pthread_mutex_lock (&ejecutar->mtabla);
 	log_info(logger, "Iniciando borrado de estructura  de Directorios para tabla: %s",ejecutar->nombre_tabla );
+	borrar_estructura(ejecutar->nombre_tabla);
 	pthread_mutex_unlock (&ejecutar->mtabla);
 
 	pthread_mutex_unlock(&mEjecucion);
 
-	/*
-	pthread_mutex_lock (&mMemtable);
-	for(int i=0;i<list_size(memtable);i++){
-		Insert* valor_eliminar =list_get(memtable,i);
-		if(!strcmp(valor_eliminar->nombreDeLaTabla,unInsert->nombreDeLaTabla)){
-			list_remove(memtable, i);
-			free(valor_eliminar);
-		}
-	}
-	*/
-	log_info(logger,"ya no existe en la memtable");
+
+
 	printf("cantidad memtable %d\n",list_size(memtable));
 	pthread_mutex_unlock (&mMemtable);
 }
@@ -497,13 +502,81 @@ char *path_particiones(char *nombreTabla,int particion){
 }
 void borrar_estructura(char *nombreTabla){
 	Metadata_Tabla *unaMetadata = obtenerMetadata(nombreTabla);
+	char *pathDeTabla =path_tables();
+	DIR *dip;
+    struct dirent   *dit;
+    printf("\n xxxxxxxxxxxTablaxxxxxxxxx: %s\n",pathDeTabla);
+    string_append(&pathDeTabla,"/");
+    string_append(&pathDeTabla,nombreTabla);
+    printf("\n xxxxxxxxxxxTablaxxxxxxxxx: %s\n",pathDeTabla);
+    if ((dip = opendir(pathDeTabla)) == NULL)
+    {
+              perror("opendir");
 
+    }
+
+    printf("Verificando si hay tablas ya cargadas\n");
+
+    while((dit = readdir(dip)) != NULL){
+    	if((strcmp(dit->d_name, ".") != 0) && (strcmp(dit->d_name, "..") != 0) && (strcmp(dit->d_name, "Metadata.metadata") != 0) ){
+    				 log_info(logger,"nombre",dit->d_name);
+    				 printf("nombre del archivo: %s",dit->d_name);
+    				 printf("\n Path: %s\n",dit->d_name);
+    				 switch (dit->d_type) {
+    				  case DT_DIR:{
+    					  log_error(logger,"Es un directorio");
+    					  log_info(logger,"Es un directorio",dit->d_name);
+    					  break;
+    					  //return;
+    				  }
+    				  case DT_REG:{
+    					  log_error(logger,"Es un archivo");
+    					  log_info(logger,"Es un archivo",dit->d_name);
+    					  char *path_bloque = strdup(pathDeTabla);
+    					  string_append(&path_bloque,"/");
+    					  string_append(&path_bloque,dit->d_name);
+    					  liberar_bloque(path_bloque);
+    					  break;
+    					  //return;
+    				  }
+
+    				 }
+    	        	if (dit->d_type  == DT_REG )
+    	        	{
+    	        		log_error(logger,"Borrar los siguientes archivos");
+    	        	}
+    	 }
+    }
+
+    if (closedir(dip) == -1)
+    {
+            perror("cerrado directorio");
+
+    }
+
+
+    /*
 	int cantidad_particiones = unaMetadata->PARTITIONS;
 	for(int i=0;i<cantidad_particiones;i++){
 		char * path = path_particiones(nombreTabla,i);
 		free(path);
 	}
+	*/
 }
+
+void liberar_bloque(char *path_bloque){
+	t_config * unaconfig= config_create(path_bloque);
+	char **estructura_bloque = config_get_array_value(unaconfig,"BLOCKS");
+	int cantidadDeBloquesALiberar = cantidadDeBloques(estructura_bloque);
+	for(int i=0;i<cantidadDeBloquesALiberar;i++){
+		int numeroBloque =atoi(estructura_bloque[i]);
+		log_info(logger,"iniciado liberacion de bloque; %d",numeroBloque);
+		//liberarDelBitmap
+		//Borrar contenido
+	}
+	config_destroy(unaconfig);
+}
+
 
 void crear_estructura_ejecucion(char *nombreTabla){
 

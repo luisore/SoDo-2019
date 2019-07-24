@@ -79,7 +79,7 @@ void crear_estructura_ejecucion(char *nombreTabla);
 bool yaExisteTabla(const char* nombre_de_tabla);
 void *compactacion(void *registro_create);
 void crearHiloCompactacion(char *nombre_de_tabla,int numero_de_particiones,int tiempo_de_compactacion);
-
+void liberar_bloque(char *path_bloque);
 typedef struct {
 	char CONSISTENCY[3];//=SC
 	unsigned int PARTITIONS;//=3

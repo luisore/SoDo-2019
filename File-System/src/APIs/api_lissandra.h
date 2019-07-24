@@ -100,10 +100,12 @@ void crearTabla(const char* nombreDeTabla);//ok
 bool yaExisteCarpeta(const char* path_tabla);
 char*  obtenerPathDeTabla(const char* nombre_de_tabla);
 void crearParticiones(const char* tabla, unsigned int numeroDeParticiones);
-
+char *path_particiones(char *nombreTabla,int particion);
 void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const char* value,unsigned long long timestamp);
 bool hay_datos_a_dumpear();
+int cantidadDeBloquesNecesario(int espacioAgrabar);
 bool laMemtableTieneContenido();
+int cantidadDeBloques (char **bloque);
 void dumpear();// lo que hay en la memtable, bajar a las particiones .tmp
 void insertarRegistrosEnParticionTemporal(const char* tabla,  RegistroLinea* unRegistro,int cantidadDeParticionesTemporales);
 size_t longitudDeRegistroAlFileSystem(RegistroLinea* unRegistro);

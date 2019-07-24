@@ -70,14 +70,51 @@ void *dump_proceso(){
 				printf("compactacion largo %d: \n" ,insert->cantParticionesCompactacion);
 				printf("particiones %d: \n" ,insert->cantParticionesTemporales);
 				printf("registros %d: \n" ,sizeof(insert->registros));
-			for(int k=0;k<list_size(insert->registros);k++){
-				RegistroLinea *registro =list_get(insert->registros,k);
-				//printf("key %d: " ,registro->key);
-				//printf("value largo %d: " ,strlen(registro->value));
-				//guardar_en_temporal(insert,registro);
-				insertarRegistrosEnParticionTemporal(insert->nombreDeLaTabla,registro, insert->cantParticionesTemporales);
+			if(list_size(insert->registros)>0){
+				char *grabar;
+				for(int k=0;k<list_size(insert->registros);k++){
+
+						RegistroLinea *registro =list_get(insert->registros,k);
+						if(k==0){
+							grabar=malloc(strlen(string_itoa(registro->timestamp)));
+							strcpy(grabar,string_itoa(registro->timestamp));
+						}
+						else{
+							string_append(&grabar,string_itoa(registro->timestamp));
+						}
+						string_append(&grabar,";");
+						string_append(&grabar,string_itoa(registro->key));
+						string_append(&grabar,";");
+						string_append(&grabar,registro->value);
+						string_append(&grabar,"\n");
+						//printf("key %d: " ,registro->key);
+				     	//printf("value largo %d: " ,strlen(registro->value));
+						//guardar_en_temporal(insert,registro);
+						//insertarRegistrosEnParticionTemporal(insert->nombreDeLaTabla,registro, insert->cantParticionesTemporales);
+						char *test = "/home/utnso/prueba.txt";
+
+
+
+						FILE *f = fopen(test, "w");
+						if (f == NULL)
+						{
+						    printf("Error opening file!\n");
+						    exit(1);
+						}
+						fprintf(f, "%s", grabar);
+						fclose(f);
+
+
+
+
+
+						printf("\n realizando archivo de prueba:\n");
+
+				}
+				free(grabar);
 				insert->cantParticionesTemporales++;
 			}
+
 		}
 		log_info(logger,"Terminado proceso Dump");
 		pthread_mutex_unlock (&mMemtable);

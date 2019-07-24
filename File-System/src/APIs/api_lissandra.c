@@ -39,7 +39,7 @@ void insertarEnMemtable(const char* nombre_de_tabla,unsigned int key , const cha
 			printf("value largo %d: " ,strlen(value));
 			unRegistro->value=malloc(strlen(value));
 			strcpy(unRegistro->value,value);
-			unRegistro->timestamp;
+			unRegistro->timestamp=timestamp;
 	if(unInsert==NULL){//si es igual a NULL no esta en la memtable
 		unInsert =malloc(sizeof(Insert));
 		unInsert->nombreDeLaTabla=strdup(nombre_de_tabla);
@@ -86,18 +86,15 @@ void dumpear(){
 void insertarRegistrosEnParticionTemporal(const char* tabla,  RegistroLinea* unRegistro,int cantidadDeParticiones){
 	Metadata_Tabla* metadataDeTabla = obtenerMetadata(tabla);
 	unsigned int particionCorrespondiente = particionSegunKey(unRegistro,metadataDeTabla->PARTITIONS);
-	//char* path_de_particion_temporal=obtenerPathDeParticionTemporal(particionCorrespondiente,tabla);
-	char *path_de_particion_temporal = malloc(strlen(lfs.puntoDeMontaje)+strlen("Tables/")+strlen(tabla)+strlen("/")+strlen("1")+strlen(".bin"));
-	strcpy(path_de_particion_temporal,lfs.puntoDeMontaje);
-	strcat(path_de_particion_temporal,"Tables/");
-	strcat(path_de_particion_temporal,tabla);
-	strcat(path_de_particion_temporal,"/");
-	strcat(path_de_particion_temporal,"1.bin");
-	//strcat(path_de_particion_temporal,".partition");
-	printf("particiones %s:\n",path_de_particion_temporal);
-	//strcat(path_bloque,"Bloques/");
+	char* path_de_particion_temporal=path_particiones(tabla,particionCorrespondiente);
+	printf("particiones de la key %s:\n",path_de_particion_temporal);
+
 	t_config * unaconfig= config_create(path_de_particion_temporal);
 	int size=config_get_int_value(unaconfig,"SIZE");
+	int cantidadDeBloquesDelaParticion = cantidadDeBloques(config_get_array_value(unaconfig,"BLOCKS"));
+	printf("cantidad de bloques %d:\n",cantidadDeBloquesDelaParticion);
+
+	//int cantidadDeBloquesNecesariosParaGrabar=cantidadDeBloquesNecesario();
 	char *actualizar = "20";
 	config_set_value(unaconfig, "SIZE",actualizar);
 	config_save(unaconfig);
@@ -270,10 +267,12 @@ void crearParticiones(const char* tabla, unsigned int numeroDeParticiones){
 		t_config *archivo = config_create(path_particion);
 		char *size=string_itoa(0);
 		config_set_value(archivo, "SIZE",size);
+		char *vacio = "[]";
+		config_set_value(archivo, "BLOCKS",vacio);
 		config_save(archivo);
 		config_destroy(archivo);
 		//fprintf(particion,"SIZE=0\n");
-		//fprintf(particion,"BLOCKS=[]");
+
 
 	}
 	free(path_tabla);
@@ -469,6 +468,9 @@ void* compactacion(void *registro_create){
 			registroCompactacion* registro = malloc(sizeof(registroCompactacion));
 			registro->numeroParticion = i;
 			registro->numeroParticion = list_create();
+			char * pathDeparticion = path_particiones(create_compactacion->nombreTabla,i);
+			printf("particiones %s:\n",pathDeparticion);
+			free(pathDeparticion);
 			list_add(lista,registro);
 		}
 		log_info(logger, "Compactacion Terminada de la Tabla:%s",create_compactacion->nombreTabla );
@@ -477,14 +479,30 @@ void* compactacion(void *registro_create){
 
 	}
 	log_error(logger, "La tabla %s ya no existe",create_compactacion->nombreTabla );
-	free(create_compactacion->nombreTabla);
+	//free(create_compactacion->nombreTabla);
 	free(create_compactacion);
 	return NULL;
 
 }
 
+char *path_particiones(char *nombreTabla,int particion){
+	char *path = malloc(strlen(lfs.puntoDeMontaje));
+	strcpy(path,lfs.puntoDeMontaje);
+	string_append(&path,"Tables/");
+	string_append(&path,nombreTabla);
+	string_append(&path,"/");
+	string_append(&path,string_itoa(particion));
+	string_append(&path,".bin");
+	return path;
+}
 void borrar_estructura(char *nombreTabla){
+	Metadata_Tabla *unaMetadata = obtenerMetadata(nombreTabla);
 
+	int cantidad_particiones = unaMetadata->PARTITIONS;
+	for(int i=0;i<cantidad_particiones;i++){
+		char * path = path_particiones(nombreTabla,i);
+		free(path);
+	}
 }
 
 void crear_estructura_ejecucion(char *nombreTabla){
@@ -557,6 +575,21 @@ void mostrarMetadata(const char* tabla){ //ok
 }
 
 
+int cantidadDeBloques (char **bloque){
+	int i=0;
+	while (bloque[i]!=0){
+		i++;
+	}
+	return i;
+}
+
+int cantidadDeBloquesNecesario(int espacioAgrabar){
+	int i=1;
+	while (i*lfs.tamanioValue<espacioAgrabar){
+		i++;
+	}
+	return i;
+}
 
 //void metadata_destroy(Metadata_Tabla* unaMetadata){
 //	free(unaMetadata->COMPACTION_TIME);
